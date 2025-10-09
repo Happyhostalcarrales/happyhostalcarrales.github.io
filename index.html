@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Hostal Carrales Control Horario</title>
+    <!-- Carga de Tailwind CSS para el diseño de lujo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carga de la librería XLSX para exportar a Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        /* Estilos personalizados para la tipografía y transiciones */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        /* Estilo para el toggle Activo/Inactivo */
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #0d9488; /* teal-600 */
+        }
+        .toggle-checkbox:checked + .toggle-label::after {
+            transform: translateX(1.5rem);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Contenedor Principal de la Aplicación -->
+    <div id="app-container" class="min-h-screen">
+        <!-- El contenido se inyectará aquí por JavaScript -->
+        <div class="flex items-center justify-center min-h-screen bg-gray-100">
+            <div class="text-center p-6 bg-white rounded-xl shadow-lg">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500 mx-auto mb-3"></div>
+                <p class="text-lg text-gray-700">Iniciando aplicación y autenticación...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals (Ocultos inicialmente) -->
+    <div id="modals-container">
+        <!-- Modal de Edición de Fichaje -->
+        <div id="edit-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 z-50 hidden items-center justify-center p-4"></div>
+        <!-- Modal de Confirmación de Eliminación -->
+        <div id="delete-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 z-50 hidden items-center justify-center p-4"></div>
+        <!-- Modal de Exportación a Excel -->
+        <div id="export-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 z-50 hidden items-center justify-center p-4"></div>
+        <!-- Modal de Detalles/Creación de Empleado -->
+        <div id="employee-details-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 z-50 hidden items-center justify-center p-4"></div>
+        <!-- Nuevo Modal: Cambio de PIN Admin -->
+        <div id="admin-pin-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 z-50 hidden items-center justify-center p-4"></div>
+    </div>
+    
+    <!-- Mensaje de Estado Global -->
+    <div id="status-message" class="fixed top-0 left-1/2 transform -translate-x-1/2 mt-4 z-50 p-3 bg-teal-600 text-white rounded-lg shadow-xl text-sm transition-all duration-300 hidden"></div>
+
+
+    <script type="module">
+        // Importaciones de Firebase (requeridas)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, query, onSnapshot, doc, addDoc, updateDoc, deleteDoc, serverTimestamp, setLogLevel, getDocs, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- CONSTANTES Y CONFIGURACIÓN ---
+        
+        // Variables globales del entorno
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'time-tracker-v1';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Códigos de Acceso (ADMIN_PIN se actualiza en tiempo real si se cambia)
+        let ADMIN_PIN = '1234'; 
+        const EXPORT_PASSWORD = '0971'; 
+
+        // Nombres de Vistas
+        const GUEST_VIEW = 'GUEST';
+        const ADMIN_VIEW = 'ADMIN';
+        const EMPLOYEE_VIEW = 'EMPLOYEE';
+
+        // Nombre de la Aplicación
+        const APP_NAME = "Happy Hostal Carrales Control Horario"; 
+
+        // Datos Iniciales de Empleados (para la inicialización de Firestore)
+        const INITIAL_MOCK_EMPLOYEES = {
+            '1234': { pin: '1234', name: 'Administrador', lastName: 'Sistema', documentId: '00000000A', avatarUrl: '', isActive: true }, 
+            '5678': { pin: '5678', name: 'Juan', lastName: 'Pérez García', documentId: '45123456B', avatarUrl: '', isActive: true },
+            '9012': { pin: '9012', name: 'Ana', lastName: 'López Ruiz', documentId: '78901234C', avatarUrl: '', isActive: true },
+            '3456': { pin: '3456', name: 'Carlos', lastName: 'Martín Sanz', documentId: '11223344D', avatarUrl: '', isActive: true },
+            '7777': { pin: '7777', name: 'Laura', lastName: 'Gómez Vidal', documentId: '99887766E', avatarUrl: '', isActive: true },
+        };
+        
+        const VOICE_CONFIG_CHEERFUL = {
+            voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } }
+        };
+
+        // --- ESTADO GLOBAL ---
+        let app, db, auth; 
+        let firebaseUserId = null;
+        let isAuthReady = false;
+        let appUserType = GUEST_VIEW;
+        let currentEmployeePin = null;
+        let adminViewMode = 'timeEntries'; // 'timeEntries' or 'employees'
+        let timeEntries = [];
+        let employees = [];
+        let statusTimeout;
+
+
+        // --- UTILIDADES ---
+
+        const showStatus = (message, isError = false) => {
+            const statusEl = document.getElementById('status-message');
+            statusEl.textContent = message;
+            statusEl.classList.remove('hidden', 'bg-red-600', 'bg-teal-600');
+            statusEl.classList.add(isError ? 'bg-red-600' : 'bg-teal-600', 'block');
+
+            clearTimeout(statusTimeout);
+            statusTimeout = setTimeout(() => {
+                statusEl.classList.remove('block');
+                statusEl.classList.add('hidden');
+            }, 4000);
+        };
+        
+        const formatTimestamp = (timestamp) => {
+            if (!timestamp) return 'N/A';
+            // Asegurarse de que el objeto es un Timestamp o una Fecha válida
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            if (isNaN(date)) return 'Inválido'; // Manejar fechas inválidas
+            return date.toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'medium' });
+        };
+
+        const formatDateForInput = (timestamp) => {
+            if (!timestamp) return '';
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            const yyyy = date.getFullYear();
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            const hh = String(date.getHours()).padStart(2, '0');
+            const min = String(date.getMinutes()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+        };
+
+        const calculateDuration = (start, end) => {
+            if (!start || !end) return 'En curso';
+            const startDate = start.toDate ? start.toDate() : new Date(start);
+            const endDate = end.toDate ? end.toDate() : new Date(end);
+            const diffMs = endDate - startDate;
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            return `${diffHours}h ${diffMinutes}m`;
+        };
+        
+        const getInitials = (name, lastName) => {
+            const firstInitial = name ? name[0] : '';
+            const lastInitial = lastName ? lastName[0] : '';
+            return (firstInitial + lastInitial).toUpperCase();
+        };
+
+        const getAvatarStyle = (name, lastName) => {
+            const initials = getInitials(name, lastName);
+            // Simple hash function to generate a consistent color
+            const hash = (name + lastName).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            const colors = ['#2dd4bf', '#06b6d4', '#6366f1', '#f59e0b', '#ef4444'];
+            const color = colors[hash % colors.length];
+            return `background-color: ${color}; color: #ffffff;`;
+        };
+
+        // Geolocalización (para el cumplimiento normativo)
+        const getLocation = () => new Promise((resolve) => {
+            if (!navigator.geolocation) {
+                resolve(null);
+                return;
+            }
+            const options = { enableHighAccuracy: false, timeout: 5000, maximumAge: 0 };
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    resolve({
+                        lat: position.coords.latitude.toFixed(6),
+                        lon: position.coords.longitude.toFixed(6),
+                    });
+                },
+                (error) => {
+                    console.warn(`ERROR GEOLOCATION(${error.code}): ${error.message}`);
+                    resolve(null);
+                },
+                options
+            );
+        });
+
+        // TTS Utilities (stub)
+        const generateAndPlayTTS = async (text, speechConfig) => { 
+            console.log("TTS: " + text);
+        };
+
+
+        // --- FIREBASE INICIALIZACIÓN ---
+        const initializeFirebase = async () => {
+            if (Object.keys(firebaseConfig).length === 0) {
+                console.error("Firebase config is missing.");
+                return;
+            }
+
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                setLogLevel('debug'); 
+
+                const signIn = async () => {
+                    try {
+                        if (initialAuthToken) {
+                            await signInWithCustomToken(auth, initialAuthToken);
+                        } else {
+                            await signInAnonymously(auth);
+                            
+                            // Poblar la colección de empleados si está vacía
+                            const employeesRef = collection(db, 'artifacts', appId, 'public', 'data', 'employees');
+                            const snapshot = await getDocs(employeesRef);
+                            if (snapshot.empty) {
+                                const setPromises = Object.values(INITIAL_MOCK_EMPLOYEES).map(employee => {
+                                    const docRef = doc(employeesRef, employee.pin);
+                                    return setDoc(docRef, employee);
+                                });
+                                await Promise.all(setPromises);
+                            } else {
+                                // FIX: Obtener el PIN actual del Administrador si existe
+                                const adminDoc = employees.find(d => d.name === 'Administrador');
+                                if(adminDoc) {
+                                    ADMIN_PIN = adminDoc.id;
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.error("Firebase sign-in error:", error);
+                        await signInAnonymously(auth); // Fallback
+                    }
+                };
+                
+                await signIn();
+                
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        firebaseUserId = user.uid;
+                        isAuthReady = true;
+                        startDataListeners();
+                        renderApp();
+                    } else {
+                        firebaseUserId = null;
+                        isAuthReady = true; 
+                        renderApp();
+                    }
+                });
+
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+            }
+        };
+
+        const startDataListeners = () => {
+            // Listener de Registros de Fichaje
+            const entriesCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'timeEntries');
+            onSnapshot(query(entriesCollectionRef), (snapshot) => {
+                // FIX: Usar el operador || 0 para ordenar y asegurar la comparación de números
+                timeEntries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => (b.clockIn?.toDate?.()?.getTime() || 0) - (a.clockIn?.toDate?.()?.getTime() || 0));
+                renderApp(); // Redibuja la vista tras actualizar datos
+            }, (error) => {
+                console.error("Error fetching time entries:", error);
+                showStatus('Error al cargar fichajes: ' + error.message, true);
+            });
+
+            // Listener de Empleados
+            const employeesCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'employees');
+            onSnapshot(query(employeesCollectionRef), (snapshot) => {
+                employees = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => (a.name + a.lastName).localeCompare(b.name + b.lastName));
+                
+                // FIX: Recargar el PIN del administrador por si ha sido modificado
+                const adminDoc = employees.find(d => d.name === 'Administrador');
+                if(adminDoc) {
+                    ADMIN_PIN = adminDoc.id;
+                }
+                
+                renderApp(); // Redibuja la vista tras actualizar datos
+            }, (error) => {
+                console.error("Error fetching employee details:", error);
+                showStatus('Error al cargar empleados: ' + error.message, true);
+            });
+        };
+
+        // --- MANEJADORES DE VISTAS Y ESTADO ---
+
+        const setView = (newView, pin = null) => {
+            appUserType = newView;
+            currentEmployeePin = pin;
+            adminViewMode = 'timeEntries'; // Reset admin view on switch
+            renderApp();
+        };
+        
+        // Exponer globalmente para uso en botones
+        window.logout = () => setView(GUEST_VIEW);
+        
+        // --- LOGICA DE FICHAJE (EMPLEADO) ---
+        // Exponer globalmente para uso en botones
+        window.handleClock = async (type) => {
+            if (!db || !currentEmployeePin) {
+                showStatus('Error de acceso. Código no válido.', true);
+                return;
+            }
+
+            showStatus('Procesando fichaje y obteniendo ubicación...');
+
+            try {
+                const location = await getLocation(); 
+                const lastEntry = timeEntries.find(e => e.userId === currentEmployeePin && !e.clockOut);
+
+                if (type === 'IN') {
+                    const entriesRef = collection(db, 'artifacts', appId, 'public', 'data', 'timeEntries');
+                    await addDoc(entriesRef, {
+                        userId: currentEmployeePin,
+                        clockIn: serverTimestamp(),
+                        clockInLocation: location,
+                        clockOut: null, 
+                        clockOutLocation: null,
+                        createdAt: serverTimestamp(),
+                        modifiedBy: null,
+                    });
+                    showStatus(`¡Fichaje de entrada registrado para ${currentEmployeePin}!`);
+                    generateAndPlayTTS("Fichaje de entrada exitoso.");
+
+                } else if (type === 'OUT' && lastEntry) {
+                    const entryRef = doc(db, 'artifacts', appId, 'public', 'data', 'timeEntries', lastEntry.id);
+                    await updateDoc(entryRef, {
+                        clockOut: serverTimestamp(),
+                        clockOutLocation: location,
+                    });
+                    showStatus(`¡Fichaje de salida registrado para ${currentEmployeePin}!`);
+                    generateAndPlayTTS("Fichaje de salida exitoso. ");
+                }
+            } catch (error) {
+                console.error(`Error al fichar ${type}:`, error);
+                showStatus(`Error al registrar el fichaje. (${error.message})`, true);
+            }
+        };
+
+        // --- LÓGICA DE ACCESO (PIN) ---
+        const handleAccess = (pin, setError) => {
+            if (pin.length !== 4) return;
+
+            setError('');
+            
+            const employeeInfo = employees.find(e => e.pin === pin); 
+
+            if (pin === ADMIN_PIN) {
+                setView(ADMIN_VIEW);
+                showStatus('Acceso de Administrador concedido.');
+            } else if (employeeInfo) {
+                if (employeeInfo.isActive) { 
+                    setView(EMPLOYEE_VIEW, pin);
+                    showStatus(`¡Fichaje listo para ${employeeInfo.name}!`);
+                } else {
+                    setError('Tu cuenta de empleado ha sido desactivada. Contacta al administrador.');
+                }
+            } else {
+                setError('Código no reconocido.');
+            }
+        };
+
+        // --- LÓGICA DE ADMINISTRACIÓN ---
+
+        // NEW: Lógica de Cambio de PIN de Administrador
+        const handleChangeAdminPin = async (oldPin, newPin, setError) => {
+            setError('');
+            if (oldPin !== ADMIN_PIN) {
+                setError('El PIN actual es incorrecto.');
+                return;
+            }
+            if (newPin.length !== 4) {
+                setError('El nuevo PIN debe tener 4 dígitos.');
+                return;
+            }
+            if (newPin === ADMIN_PIN) {
+                setError('El nuevo PIN debe ser diferente al actual.');
+                return;
+            }
+            
+            const employeeRef = collection(db, 'artifacts', appId, 'public', 'data', 'employees');
+            const newDocRef = doc(employeeRef, newPin);
+            const oldDocRef = doc(employeeRef, oldPin);
+            
+            try {
+                // 1. Verificar si el nuevo PIN ya está en uso por otro empleado
+                const newDocSnap = await getDoc(newDocRef);
+                if (newDocSnap.exists()) {
+                    setError(`El PIN '${newPin}' ya está asignado.`);
+                    return;
+                }
+
+                // 2. Obtener los datos del administrador
+                const adminDataSnap = await getDoc(oldDocRef);
+                if (!adminDataSnap.exists()) {
+                    setError('Error: Registro de administrador no encontrado.');
+                    return;
+                }
+                const adminData = adminDataSnap.data();
+
+                // 3. Crear el nuevo documento con el nuevo PIN
+                await setDoc(newDocRef, { ...adminData, pin: newPin });
+
+                // 4. Eliminar el documento antiguo
+                await deleteDoc(oldDocRef);
+                
+                // 5. Actualizar estado local y global
+                ADMIN_PIN = newPin; 
+                showStatus(`¡El PIN de administrador ha sido cambiado a ${newPin}! Por favor, reinicie la sesión.`);
+                document.getElementById('admin-pin-modal').classList.add('hidden');
+                setView(GUEST_VIEW); // Obligar a iniciar sesión con el nuevo PIN
+                
+            } catch (error) {
+                console.error('Error al cambiar el PIN del administrador:', error);
+                setError(`Error de base de datos: ${error.message}`);
+            }
+        };
+
+
+        // Función de Exportación a Excel
+        const generateExcelReport = (password) => {
+             // Reimplementación de la función de exportación (asumiendo XLSX global)
+            if (password !== EXPORT_PASSWORD) {
+                throw new Error('Contraseña de exportación incorrecta.');
+            }
+            
+            if (typeof XLSX === 'undefined') {
+                throw new Error('La librería XLSX no está cargada.');
+            }
+
+            const employeeMap = employees.reduce((map, emp) => {
+                map[emp.pin] = emp;
+                return map;
+            }, {});
+
+            const worksheetData = timeEntries.map(entry => {
+                const employeeInfo = employeeMap[entry.userId] || { name: 'Desconocido', lastName: 'N/A', documentId: 'N/A' };
+                
+                return {
+                    ID_Registro: entry.id,
+                    'CÓDIGO_EMPLEADO_(PIN)': entry.userId, 
+                    Nombre: employeeInfo.name, 
+                    Apellido: employeeInfo.lastName, 
+                    'Documento_ID': employeeInfo.documentId, 
+                    Entrada: formatTimestamp(entry.clockIn),
+                    Salida: entry.clockOut ? formatTimestamp(entry.clockOut) : 'Aún trabajando',
+                    Duración: calculateDuration(entry.clockIn, entry.clockOut),
+                    'Entrada_Lat': entry.clockInLocation?.lat || 'N/A',
+                    'Entrada_Lon': entry.clockInLocation?.lon || 'N/A',
+                    'Salida_Lat': entry.clockOutLocation?.lat || 'N/A',
+                    'Salida_Lon': entry.clockOutLocation?.lon || 'N/A',
+                    Fecha_Creación: entry.createdAt ? formatTimestamp(entry.createdAt) : 'N/A',
+                    Modificado_Por: entry.modifiedBy || 'N/A',
+                };
+            });
+
+            const ws = XLSX.utils.json_to_sheet(worksheetData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Informe Horario");
+            
+            XLSX.writeFile(wb, "Informe_Control_Horario.xlsx");
+        };
+
+        // Lógica de Modificación de Empleados
+        const saveEmployeeDetails = async (pin, form, isNew) => {
+            // FIX: Validar el PIN y otros campos obligatorios
+            if (!db || pin.length !== 4 || !form.name || !form.lastName) {
+                showStatus('Error: PIN, nombre y apellido son obligatorios.', true);
+                return;
+            }
+
+            showStatus(isNew ? 'Creando nuevo empleado...' : 'Guardando detalles...');
+            try {
+                const employeeRef = doc(db, 'artifacts', appId, 'public', 'data', 'employees', pin);
+                
+                if (isNew) {
+                    const existingDoc = await getDoc(employeeRef);
+                    if (existingDoc.exists()) {
+                        throw new Error(`El PIN '${pin}' ya está en uso. Por favor, elige otro.`);
+                    }
+                }
+                
+                // Si estamos editando, y el PIN es diferente (debería ser imposible si el campo está disabled), se manejaría con una migración, pero aquí solo actualizamos.
+                await setDoc(employeeRef, {
+                    pin: pin, 
+                    name: form.name,
+                    lastName: form.lastName,
+                    documentId: form.documentId,
+                    avatarUrl: form.avatarUrl,
+                    isActive: form.isActive, 
+                });
+
+                showStatus(isNew ? `¡Nuevo empleado ${form.name} creado!` : `Detalles de ${form.name} actualizados con éxito.`);
+                document.getElementById('employee-details-modal').classList.add('hidden');
+                renderApp();
+            } catch (error) {
+                console.error('Error al modificar/crear empleado:', error);
+                showStatus(`Error al guardar: ${error.message}`, true);
+            }
+        };
+
+        // Lógica de Modificación de Fichajes
+        const saveEditEntry = async (entryId, form) => {
+            if (!db || !entryId) return;
+
+            showStatus('Guardando modificaciones de fichaje...');
+            try {
+                const entryRef = doc(db, 'artifacts', appId, 'public', 'data', 'timeEntries', entryId);
+                
+                // NOTA IMPORTANTE: Se eliminan las marcas de auditoría (modifiedAt/modifiedBy) para cumplir con el requisito del administrador, aunque esto no cumpla estrictamente con la normativa de auditoría.
+                await updateDoc(entryRef, {
+                    userId: form.userId,
+                    clockIn: form.clockIn ? new Date(form.clockIn) : null, 
+                    clockOut: form.clockOut ? new Date(form.clockOut) : null,
+                    // Se eliminan los campos modifiedAt y modifiedBy para que no aparezca el tag "Editado".
+                    // modifiedAt: serverTimestamp(),
+                    // modifiedBy: auth.currentUser?.uid || 'Admin_Manual', 
+                });
+
+                showStatus('Registro de fichaje modificado con éxito.');
+                document.getElementById('edit-modal').classList.add('hidden');
+                renderApp();
+            } catch (error) {
+                console.error('Error al modificar registro:', error);
+                showStatus(`Error al modificar registro: ${error.message}`, true);
+            }
+        };
+
+        // Lógica de Eliminación de Fichajes
+        const deleteEntry = async (entryId) => {
+            if (!db || !entryId) return;
+
+            showStatus('Eliminando registro...');
+            try {
+                const entryRef = doc(db, 'artifacts', appId, 'public', 'data', 'timeEntries', entryId);
+                await deleteDoc(entryRef);
+                showStatus('Registro eliminado con éxito.');
+                document.getElementById('delete-modal').classList.add('hidden');
+                renderApp();
+            } catch (error) {
+                console.error('Error al eliminar registro:', error);
+                showStatus(`Error al eliminar registro: ${error.message}`, true);
+            }
+        };
+
+        // --- RENDERIZADO DE MODALES (USANDO ID LOOKUP) ---
+
+        // FIX: Exponer globalmente las funciones de modales para que los event listeners puedan llamarlas.
+        window.renderEditModal = (entryId) => {
+            const entry = timeEntries.find(e => e.id === entryId);
+            if (!entry) {
+                showStatus('Error: Registro no encontrado.', true);
+                return;
+            }
+
+            const form = {
+                id: entry.id,
+                userId: entry.userId,
+                clockIn: entry.clockIn ? formatDateForInput(entry.clockIn) : '',
+                clockOut: entry.clockOut ? formatDateForInput(entry.clockOut) : '',
+            };
+
+            const modalContent = `
+                <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 transform transition-all scale-100">
+                    <h2 class="text-2xl font-bold text-teal-700 mb-4">Editar Registro de Horario</h2>
+                    <p class="mb-4 text-sm text-gray-600">ID de Registro: ${entry.id}</p>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">ID Empleado (PIN)</label>
+                            <input type="text" id="edit-userId" value="${form.userId}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-teal-500 focus:border-teal-500" placeholder="ID del Empleado"/>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Fichaje Entrada</label>
+                            <input type="datetime-local" id="edit-clockIn" value="${form.clockIn}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-teal-500 focus:border-teal-500"/>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Fichaje Salida</label>
+                            <input type="datetime-local" id="edit-clockOut" value="${form.clockOut}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-teal-500 focus:border-teal-500"/>
+                            <p class="text-xs text-gray-500 mt-1">Dejar en blanco si está 'En curso'.</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button id="cancel-edit-btn" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition">Cancelar</button>
+                        <button id="save-edit-btn" class="px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition shadow-lg">Guardar Cambios</button>
+                    </div>
+                </div>
+            `;
+            const modalEl = document.getElementById('edit-modal');
+            modalEl.innerHTML = modalContent;
+            modalEl.classList.remove('hidden');
+            modalEl.classList.add('flex');
+
+            document.getElementById('cancel-edit-btn').addEventListener('click', () => modalEl.classList.add('hidden'));
+            document.getElementById('save-edit-btn').addEventListener('click', () => {
+                const newForm = {
+                    userId: document.getElementById('edit-userId').value,
+                    clockIn: document.getElementById('edit-clockIn').value,
+                    clockOut: document.getElementById('edit-clockOut').value,
+                };
+                saveEditEntry(entry.id, newForm);
+            });
+        };
+
+        window.renderDeleteModal = (entryId) => {
+            const modalContent = `
+                <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 transform transition-all scale-100">
+                    <h2 class="text-2xl font-bold text-red-700 mb-4">Confirmar Eliminación</h2>
+                    <p class="text-gray-600 mb-6">
+                        ¿Estás seguro de que deseas eliminar permanentemente el registro con ID: <code class="bg-gray-100 p-1 rounded text-xs">${entryId}</code>? Esta acción no se puede deshacer.
+                    </p>
+                    <div class="flex justify-end space-x-3">
+                        <button id="cancel-delete-btn" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition">Cancelar</button>
+                        <button id="confirm-delete-btn" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition shadow-lg">Eliminar Permanentemente</button>
+                    </div>
+                </div>
+            `;
+            const modalEl = document.getElementById('delete-modal');
+            modalEl.innerHTML = modalContent;
+            modalEl.classList.remove('hidden');
+            modalEl.classList.add('flex');
+            
+            document.getElementById('cancel-delete-btn').addEventListener('click', () => modalEl.classList.add('hidden'));
+            document.getElementById('confirm-delete-btn').addEventListener('click', () => deleteEntry(entryId));
+        };
+        
+        window.renderExportModal = () => {
+            let error = '';
+            
+            const handleExportSubmit = () => {
+                const password = document.getElementById('export-password').value;
+                document.getElementById('export-error').textContent = '';
+                try {
+                    generateExcelReport(password);
+                    document.getElementById('export-modal').classList.add('hidden');
+                } catch (e) {
+                    error = e.message;
+                    document.getElementById('export-error').textContent = error;
+                }
+            };
+            
+            const modalContent = `
+                <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 transform transition-all scale-100">
+                    <h2 class="text-2xl font-bold text-red-700 mb-4">Exportar Informe Excel</h2>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Para cumplir con la seguridad, debe introducir la contraseña de exportación (\`${EXPORT_PASSWORD}\`).
+                    </p>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña de Exportación</label>
+                            <input type="password" id="export-password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" placeholder="Contraseña: ${EXPORT_PASSWORD}"/>
+                            <p id="export-error" class="mt-2 text-sm text-red-600 font-semibold">${error}</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button id="cancel-export-btn" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition">Cancelar</button>
+                        <button id="confirm-export-btn" class="px-4 py-2 text-sm font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition shadow-lg">Exportar y Descargar</button>
+                    </div>
+                </div>
+            `;
+            const modalEl = document.getElementById('export-modal');
+            modalEl.innerHTML = modalContent;
+            modalEl.classList.remove('hidden');
+            modalEl.classList.add('flex');
+
+            document.getElementById('cancel-export-btn').addEventListener('click', () => modalEl.classList.add('hidden'));
+            document.getElementById('confirm-export-btn').addEventListener('click', handleExportSubmit);
+        };
+
+        window.renderEmployeeDetailsModal = (employeePin = null) => {
+            const employee = employeePin ? employees.find(e => e.pin === employeePin) : null;
+            const isNew = employee === null;
+            
+            let form = isNew ? { pin: '', name: '', lastName: '', documentId: '', avatarUrl: '', isActive: true } : { ...employee, avatarUrl: employee.avatarUrl || '' };
+            
+            const modalTitle = isNew ? "Añadir Nuevo Empleado" : "Editar Detalles del Empleado";
+            
+            // Función robusta para recolectar datos del DOM justo antes de guardar
+            const collectFormData = () => {
+                 return {
+                    pin: document.getElementById('emp-pin').value,
+                    name: document.getElementById('emp-name').value,
+                    lastName: document.getElementById('emp-lastName').value,
+                    documentId: document.getElementById('emp-documentId').value,
+                    avatarUrl: document.getElementById('emp-avatarUrl').value,
+                    isActive: document.getElementById('emp-isActive').checked,
+                };
+            };
+            
+            // Esta función se usará solo para actualizar la vista previa de avatar/iniciales si es necesario.
+            const updatePreview = () => {
+                const currentForm = collectFormData();
+                const displayPin = isNew ? currentForm.pin : employeePin; 
+                
+                const initials = getInitials(currentForm.name, currentForm.lastName);
+                const avatarStyle = getAvatarStyle(currentForm.name, currentForm.lastName);
+
+                const avatarHtml = currentForm.avatarUrl ? `
+                    <img src="${currentForm.avatarUrl}" alt="${currentForm.name} Avatar" class="w-16 h-16 rounded-full object-cover mr-4 shadow-md border-2 border-teal-400" onerror="this.onerror=null;this.src='https://placehold.co/64x64/5eead4/0f766e?text=?'">
+                ` : `
+                    <div class="w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold mr-4 shadow-md" style="${avatarStyle}">
+                        ${initials}
+                    </div>
+                `;
+
+                document.getElementById('employee-avatar-container').innerHTML = avatarHtml;
+                document.getElementById('employee-name-display').textContent = `${currentForm.name} ${currentForm.lastName}`;
+                document.getElementById('employee-pin-display').textContent = `PIN: ${displayPin || 'Sin asignar'}`;
+            }
+
+            const modalContent = `
+                <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 transform transition-all scale-100">
+                    <h2 class="text-2xl font-bold text-teal-700 mb-6">${modalTitle}</h2>
+                    
+                    <div class="flex items-center mb-6">
+                        <div id="employee-avatar-container">
+                             ${form.avatarUrl ? `
+                                <img src="${form.avatarUrl}" alt="${form.name} Avatar" class="w-16 h-16 rounded-full object-cover mr-4 shadow-md border-2 border-teal-400" onerror="this.onerror=null;this.src='https://placehold.co/64x64/5eead4/0f766e?text=?'">
+                            ` : `
+                                <div class="w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold mr-4 shadow-md" style="${getAvatarStyle(form.name, form.lastName)}">
+                                    ${getInitials(form.name, form.lastName)}
+                                </div>
+                            `}
+                        </div>
+                        <div>
+                            <p id="employee-name-display" class="text-xl font-bold text-gray-800">${form.name} ${form.lastName}</p>
+                            <p id="employee-pin-display" class="text-sm text-gray-500">PIN: ${form.pin || 'Sin asignar'}</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">PIN de Empleado (4 Dígitos) <span class="text-red-500">*</span></label>
+                            <input 
+                                type="text" 
+                                id="emp-pin"
+                                value="${form.pin}"
+                                maxlength="4"
+                                ${isNew ? '' : 'disabled class="bg-gray-100"'}
+                                class="w-full p-3 border rounded-lg border-amber-400 focus:ring-amber-500"
+                                placeholder="Ej: 5678"
+                                oninput="updateEmployeeFormPreview()"
+                            />
+                            <p class="text-xs ${isNew ? 'text-amber-500' : 'text-gray-500'} mt-1">
+                                *Este será el código de fichaje único.
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                            <input type="text" id="emp-name" value="${form.name}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-teal-500 focus:border-teal-500" oninput="updateEmployeeFormPreview()"/>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
+                            <input type="text" id="emp-lastName" value="${form.lastName}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-teal-500 focus:border-teal-500" oninput="updateEmployeeFormPreview()"/>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Documento de Identidad</label>
+                            <input type="text" id="emp-documentId" value="${form.documentId}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-teal-500 focus:border-teal-500"/>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">URL de Foto/Avatar (Opcional)</label>
+                            <input type="url" id="emp-avatarUrl" value="${form.avatarUrl}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-teal-500 focus:border-teal-500" placeholder="https://ejemplo.com/foto.jpg" oninput="updateEmployeeFormPreview()"/>
+                            <p class="text-xs text-gray-500 mt-1">Si está vacío, se mostrarán las iniciales.</p>
+                        </div>
+                        
+                        <div class="flex items-center pt-4 border-t border-gray-200">
+                            <input type="checkbox" id="emp-isActive" ${form.isActive ? 'checked' : ''} class="h-4 w-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"/>
+                            <label for="emp-isActive" class="ml-2 block text-sm font-medium text-gray-900">
+                                Empleado Activo (Puede fichar)
+                            </label>
+                            <p class="text-xs text-gray-500 ml-auto">
+                                Desactiva para bloquear el acceso.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button id="cancel-employee-btn" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition">Cancelar</button>
+                        <button id="save-employee-btn" class="px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition shadow-lg">
+                            ${isNew ? 'Crear Empleado' : 'Guardar Detalles'}
+                        </button>
+                    </div>
+                </div>
+            `;
+            const modalEl = document.getElementById('employee-details-modal');
+            modalEl.innerHTML = modalContent;
+            modalEl.classList.remove('hidden');
+            modalEl.classList.add('flex');
+
+            // Exponer la función de actualización de preview
+            window.updateEmployeeFormPreview = updatePreview; 
+
+            document.getElementById('cancel-employee-btn').addEventListener('click', () => modalEl.classList.add('hidden'));
+
+            document.getElementById('save-employee-btn').addEventListener('click', () => {
+                const newForm = collectFormData();
+                const pinToSave = isNew ? newForm.pin : employeePin;
+                saveEmployeeDetails(pinToSave, newForm, isNew);
+            });
+        };
+
+        window.renderAdminPinModal = () => {
+            let error = '';
+
+            const handlePinChangeSubmit = () => {
+                const oldPin = document.getElementById('old-admin-pin').value;
+                const newPin = document.getElementById('new-admin-pin').value;
+                
+                if (newPin.length !== 4) {
+                     document.getElementById('pin-error').textContent = 'El nuevo PIN debe tener 4 dígitos.';
+                     return;
+                }
+                
+                // Llamar a la lógica de cambio de PIN (exponiendo un manejador de errores)
+                handleChangeAdminPin(oldPin, newPin, (err) => {
+                    document.getElementById('pin-error').textContent = err;
+                });
+            };
+
+            const modalContent = `
+                <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 transform transition-all scale-100">
+                    <h2 class="text-2xl font-bold text-teal-700 mb-4">Cambiar Código PIN de Administrador</h2>
+                    <p class="mb-4 text-sm text-gray-600">
+                        Tu PIN actual es: <code class="bg-amber-100 p-1 rounded text-xs">${ADMIN_PIN}</code>. Necesitarás el PIN actual para confirmar y el nuevo para acceder la próxima vez.
+                    </p>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">PIN Actual</label>
+                            <input type="password" id="old-admin-pin" maxlength="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-teal-500 focus:border-teal-500" placeholder="Introduce PIN actual"/>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nuevo PIN (4 dígitos)</label>
+                            <input type="password" id="new-admin-pin" maxlength="4" class="w-full p-3 border border-amber-400 rounded-lg focus:ring-amber-500 focus:border-amber-500" placeholder="Introduce nuevo PIN"/>
+                            <p id="pin-error" class="mt-2 text-sm text-red-600 font-semibold">${error}</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button id="cancel-pin-btn" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition">Cancelar</button>
+                        <button id="change-pin-btn" class="px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition shadow-lg">Confirmar Cambio de PIN</button>
+                    </div>
+                </div>
+            `;
+            const modalEl = document.getElementById('admin-pin-modal');
+            modalEl.innerHTML = modalContent;
+            modalEl.classList.remove('hidden');
+            modalEl.classList.add('flex');
+
+            document.getElementById('cancel-pin-btn').addEventListener('click', () => modalEl.classList.add('hidden'));
+            document.getElementById('change-pin-btn').addEventListener('click', handlePinChangeSubmit);
+        };
+
+
+        // --- RENDERIZADO DE VISTAS ---
+
+        const renderAccessScreen = () => {
+            let pin = '';
+            let error = '';
+
+            const render = () => {
+                const content = `
+                    <div class="flex flex-col items-center justify-center min-h-screen p-4 bg-slate-100">
+                        <h1 class="text-5xl font-extrabold text-teal-800 text-center mb-2">${APP_NAME}</h1>
+                        <h2 class="text-xl font-semibold text-amber-600 mb-10">Terminal de Acceso de Empleados</h2>
+                        <div class="flex flex-col items-center justify-center p-8 bg-white rounded-3xl shadow-2xl shadow-teal-300/50 w-full max-w-sm">
+                            <h2 class="text-xl font-bold text-gray-700 mb-6">Introduce tu Código de 4 Dígitos</h2>
+                            
+                            <div class="flex space-x-2 mb-8 h-8">
+                                ${Array(4).fill(0).map((_, index) => `
+                                    <div class="w-6 h-6 rounded-full border-2 transition-all duration-150 ${pin.length > index ? 'bg-amber-500 border-amber-600' : 'border-gray-300'}"></div>
+                                `).join('')}
+                            </div>
+
+                            ${error ? `<p class="text-red-600 mb-4 font-semibold">${error}</p>` : ''}
+
+                            <div class="grid grid-cols-3 gap-3 w-full max-w-xs">
+                                ${[['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9'], ['C', '0', '←']].flat().map(key => `
+                                    <button data-key="${key}" class="keypad-btn py-4 rounded-xl text-xl font-bold transition transform active:scale-95 shadow-md ${key === 'C' ? 'bg-red-100 text-red-600 hover:bg-red-200' : key === '←' ? 'bg-teal-100 text-teal-600 hover:bg-teal-200' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}">
+                                        ${key}
+                                    </button>
+                                `).join('')}
+                            </div>
+
+                            <button id="access-btn" class="mt-6 w-full py-3 text-lg font-bold text-white rounded-xl transition shadow-lg ${pin.length === 4 ? 'bg-teal-600 hover:bg-teal-700 transform hover:scale-[1.01] shadow-teal-500/50' : 'bg-teal-300 cursor-not-allowed'}" ${pin.length !== 4 ? 'disabled' : ''}>
+                                Acceder / Fichar
+                            </button>
+                        </div>
+                        <p class="mt-6 text-sm text-gray-500 text-center">
+                            *Usa el código <b>${ADMIN_PIN}</b> para el acceso de Administrador.<br/>
+                            *Códigos de prueba de empleado: <b>5678, 9012, 3456, 7777</b>.
+                        </p>
+                    </div>
+                `;
+                document.getElementById('app-container').innerHTML = content;
+                
+                // Binding de Eventos Imperativo para la pantalla de Acceso
+                document.querySelectorAll('.keypad-btn').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const key = button.getAttribute('data-key');
+                        if (key === 'C') {
+                            pin = '';
+                        } else if (key === '←') {
+                            pin = pin.slice(0, -1);
+                        } else if (/\d/.test(key) && pin.length < 4) {
+                            pin += key;
+                        }
+                        error = '';
+                        render();
+                    });
+                });
+
+                document.getElementById('access-btn').addEventListener('click', () => {
+                    handleAccess(pin, (err) => {
+                        error = err;
+                        render();
+                    });
+                });
+            };
+
+            render();
+        };
+
+        const renderEmployeeView = () => {
+            const employee = employees.find(e => e.pin === currentEmployeePin) || { name: 'Usuario', lastName: 'Desconocido' };
+            const lastEntry = timeEntries.find(e => e.userId === currentEmployeePin && !e.clockOut);
+            const isClockedIn = !!lastEntry;
+
+            const timeSinceClockIn = (function() {
+                // FIX: Garantizar que clockIn existe y es un objeto Timestamp válido antes de llamar a toDate().
+                if (!isClockedIn || !lastEntry || !lastEntry.clockIn || typeof lastEntry.clockIn.toDate !== 'function') return null;
+                const now = new Date();
+                const clockInTime = lastEntry.clockIn.toDate();
+                return calculateDuration(clockInTime, now);
+            })();
+
+            const initials = getInitials(employee.name, employee.lastName);
+            
+            // Renderizado de la vista de Empleado
+            const content = `
+                <div class="flex flex-col items-center justify-center min-h-screen p-4 bg-slate-100">
+                    <div class="w-full max-w-sm text-center">
+                        <div class="flex justify-between items-center w-full mb-4">
+                            <h1 class="text-3xl font-extrabold text-teal-800">Fichaje</h1>
+                            <button id="logout-btn" class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 shadow-md">Salir</button>
+                        </div>
+                        
+                        <div class="flex flex-col items-center mb-6">
+                            ${employee.avatarUrl ? `
+                                <img src="${employee.avatarUrl}" alt="${employee.name} Avatar" class="w-20 h-20 rounded-full object-cover mb-3 shadow-lg border-4 border-amber-400" onerror="this.onerror=null;this.src='https://placehold.co/80x80/5eead4/0f766e?text=?'">
+                            ` : `
+                                <div class="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold mb-3 shadow-lg" style="${getAvatarStyle(employee.name, employee.lastName)}">
+                                    ${initials}
+                                </div>
+                            `}
+                            <p class="text-2xl font-extrabold text-amber-600 mb-1">
+                                ¡Hola, ${employee.name}!
+                            </p>
+                            <p class="text-sm text-gray-600">
+                                Código Empleado: <code class="bg-amber-100 p-1 rounded text-xs">${currentEmployeePin}</code>
+                            </p>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-2xl shadow-2xl border-b-4 border-teal-500">
+                            ${isClockedIn ? `
+                                <p class="text-xl text-gray-700 mb-2 font-medium">¡Estás Trabajando!</p>
+                                <p class="text-sm text-gray-500 mb-4">
+                                    Entrada: <span class="font-semibold text-teal-600">${formatTimestamp(lastEntry.clockIn)}</span>
+                                </p>
+                                <p class="text-2xl font-bold text-green-600 mb-6">
+                                    Tiempo transcurrido: <span id="time-since-clock-in">${timeSinceClockIn}</span>
+                                </p>
+                                
+                                <button id="clock-out-btn" class="w-full py-5 text-3xl font-extrabold text-white bg-red-600 rounded-xl shadow-xl hover:bg-red-700 transition transform hover:scale-[1.02] active:scale-[0.98] shadow-red-500/50">
+                                    FICHAR SALIDA
+                                </button>
+                                <p class="text-xs text-gray-500 mt-4">
+                                    Se registrará tu hora de salida y tu ubicación actual (cumplimiento obligatorio).
+                                </p>
+                            ` : `
+                                <p class="text-xl text-gray-700 mb-6 font-medium">¡Bienvenido! Toca para empezar.</p>
+                                <button id="clock-in-btn" class="w-full py-5 text-3xl font-extrabold text-white bg-teal-600 rounded-xl shadow-xl hover:bg-teal-700 transition transform hover:scale-[1.02] active:scale-[0.98] shadow-teal-500/50">
+                                    FICHAR ENTRADA
+                                </button>
+                                <p class="text-xs text-gray-500 mt-4">
+                                    Se registrará tu hora de entrada y tu ubicación actual (cumplimiento obligatorio).
+                                </p>
+                            `}
+                        </div>
+                        
+                        <div class="mt-8">
+                            <h3 class="text-lg font-semibold text-gray-700 mb-3">Tu Último Historial (Acceso Obligatorio)</h3>
+                            <div class="space-y-2 max-h-40 overflow-y-auto">
+                                ${timeEntries
+                                    .filter(e => e.userId === currentEmployeePin)
+                                    .slice(0, 5)
+                                    .map(entry => `
+                                    <div class="text-left p-3 bg-white rounded-lg shadow-sm text-sm border-l-4 border-teal-300">
+                                        <p class="font-medium text-gray-800">
+                                            <span class="text-green-600">IN:</span> ${formatTimestamp(entry.clockIn)} - Duración: ${calculateDuration(entry.clockIn, entry.clockOut)}
+                                        </p>
+                                        <p class="text-gray-600">
+                                            <span class="text-red-600">OUT:</span> ${entry.clockOut ? formatTimestamp(entry.clockOut) : 'En curso'}
+                                        </p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('app-container').innerHTML = content;
+
+            // Binding de Eventos Imperativo para la vista de Empleado
+            document.getElementById('logout-btn').addEventListener('click', window.logout);
+            if (isClockedIn) {
+                document.getElementById('clock-out-btn').addEventListener('click', () => window.handleClock('OUT'));
+            } else {
+                document.getElementById('clock-in-btn').addEventListener('click', () => window.handleClock('IN'));
+            }
+        };
+
+        const renderAdminView = () => {
+            const employeeMap = employees.reduce((map, emp) => { map[emp.pin] = emp; return map; }, {});
+            
+            const renderTimeEntriesList = () => {
+                let tableRows = '';
+                timeEntries.forEach(entry => {
+                    const employee = employeeMap[entry.userId] || { name: 'Desconocido', lastName: 'N/A', documentId: 'N/A' };
+                    // const isModified = !!entry.modifiedBy; // <<< Lógica eliminada
+                    const locationText = entry.clockInLocation ? `${entry.clockInLocation.lat}, ${entry.clockInLocation.lon}` : 'Ubicación no registrada';
+
+                    tableRows += `
+                        <tr class="${entry.clockOut ? 'hover:bg-gray-50' : 'bg-amber-50 hover:bg-amber-100'}">
+                            <td class="px-4 py-4 whitespace-nowrap text-sm font-bold text-teal-900 truncate max-w-xs">${entry.userId}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
+                                ${employee.name}
+                                <!-- ${/* isModified ? `<span class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-800" title="Modificado por: ${entry.modifiedBy}">Editado</span>` : */ ''} -->
+                            </td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">${formatTimestamp(entry.clockIn)}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm font-semibold" style="color: ${entry.clockOut ? '#10B981' : '#D97706'}">
+                                ${entry.clockOut ? formatTimestamp(entry.clockOut) : 'EN CURSO...'}
+                            </td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-700">${calculateDuration(entry.clockIn, entry.clockOut)}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-xs text-gray-500 max-w-[150px] overflow-hidden truncate" title="${locationText}">
+                                ${locationText}
+                            </td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                                <button data-id="${entry.id}" class="edit-entry-btn text-teal-600 hover:text-teal-900 mr-3">Editar</button>
+                                <button data-id="${entry.id}" class="delete-entry-btn text-red-600 hover:text-red-900">Eliminar</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                const containerId = 'time-entries-list-container';
+                const htmlContent = `
+                    <div id="${containerId}">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-semibold text-teal-700">Registros de Fichajes (${timeEntries.length})</h2>
+                            <button id="export-excel-btn" class="flex items-center px-4 py-2 bg-amber-600 text-white font-bold rounded-lg shadow-md hover:bg-amber-700 transition-colors">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                Exportar a Excel
+                            </button>
+                        </div>
+                        ${timeEntries.length === 0 ? `
+                            <div class="text-center p-8 bg-teal-50 rounded-xl border border-teal-200 text-teal-700">No hay registros de fichajes aún.</div>
+                        ` : `
+                            <div class="overflow-x-auto bg-white shadow-xl rounded-xl">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-teal-100">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-teal-800 uppercase tracking-wider">CÓDIGO</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-teal-800 uppercase tracking-wider">NOMBRE</th> 
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-teal-800 uppercase tracking-wider">Entrada</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-teal-800 uppercase tracking-wider">Salida</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-teal-800 uppercase tracking-wider">Duración</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-teal-800 uppercase tracking-wider">Ubicación</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-teal-800 uppercase tracking-wider">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        ${tableRows}
+                                    </tbody>
+                                </table>
+                            </div>
+                        `}
+                    </div>
+                `;
+                return htmlContent;
+            };
+
+            const renderEmployeeList = () => {
+                let tableRows = '';
+                employees.forEach(employee => {
+                    const initials = getInitials(employee.name, employee.lastName);
+                    tableRows += `
+                        <tr class="${employee.isActive ? 'hover:bg-gray-50' : 'bg-gray-100 opacity-60 hover:bg-gray-200'}">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                ${employee.isActive ? '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Activo</span>' : '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Inactivo</span>'}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-teal-900">${employee.pin}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                <div class="flex items-center">
+                                    ${employee.avatarUrl ? `<img src="${employee.avatarUrl}" alt="Avatar" class="w-8 h-8 rounded-full object-cover mr-3" onerror="this.onerror=null;this.src='https://placehold.co/32x32/5eead4/0f766e?text=?'">` : `<div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold mr-3" style="${getAvatarStyle(employee.name, employee.lastName)}">${initials}</div>`}
+                                    ${employee.name} ${employee.lastName}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${employee.documentId}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <button data-pin="${employee.pin}" class="edit-employee-btn text-amber-600 hover:text-amber-800">Editar Detalles</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                const containerId = 'employee-list-container';
+                const htmlContent = `
+                    <div id="${containerId}">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-semibold text-teal-700">Gestión de Empleados (${employees.length})</h2>
+                            <button id="add-employee-btn" class="flex items-center px-4 py-2 bg-teal-600 text-white font-bold rounded-lg shadow-md hover:bg-teal-700 transition-colors">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                Añadir Nuevo Empleado
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto bg-white shadow-xl rounded-xl">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-teal-100">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-teal-800 uppercase tracking-wider">ESTADO</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-teal-800 uppercase tracking-wider">PIN</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-teal-800 uppercase tracking-wider">NOMBRE COMPLETO</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-teal-800 uppercase tracking-wider">DOCUMENTO ID</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-teal-800 uppercase tracking-wider">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    ${tableRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                return htmlContent;
+            };
+
+            const content = `
+                <div class="p-4 sm:p-8 bg-slate-50 min-h-screen">
+                    <div class="flex justify-between items-center mb-4 border-b pb-3 border-teal-200">
+                        <h1 class="text-3xl font-extrabold text-teal-800">${APP_NAME}</h1>
+                        <div class="flex items-center space-x-3">
+                             <button id="change-pin-admin-btn" class="px-3 py-1 text-xs bg-amber-100 text-amber-800 rounded-lg hover:bg-amber-200 shadow-md transition">
+                                Cambiar PIN Admin
+                            </button>
+                            <button id="logout-admin-btn" class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 shadow-md">Cerrar Sesión Admin</button>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-6">Rol: Administrador | PIN Actual: <code class="bg-amber-100 p-1 rounded text-xs">${ADMIN_PIN}</code></p>
+                    
+                    <div class="flex space-x-2 border-b border-gray-200 mb-6">
+                        <button id="mode-entries-btn" class="py-2 px-4 font-semibold transition-colors ${adminViewMode === 'timeEntries' ? 'text-teal-700 border-b-2 border-teal-700' : 'text-gray-500 hover:text-gray-700'}">
+                            Control de Fichajes
+                        </button>
+                        <button id="mode-employees-btn" class="py-2 px-4 font-semibold transition-colors ${adminViewMode === 'employees' ? 'text-teal-700 border-b-2 border-teal-700' : 'text-gray-500 hover:text-gray-700'}">
+                            Gestión de Empleados
+                        </button>
+                    </div>
+                    
+                    <div id="admin-content">
+                        ${adminViewMode === 'timeEntries' ? renderTimeEntriesList() : renderEmployeeList()}
+                    </div>
+                </div>
+            `;
+            document.getElementById('app-container').innerHTML = content;
+            
+            // --- BINDING DE EVENTOS IMPERATIVO PARA EL PANEL DE ADMIN ---
+            
+            // Botones de Cabecera
+            document.getElementById('logout-admin-btn').addEventListener('click', window.logout);
+            document.getElementById('change-pin-admin-btn').addEventListener('click', window.renderAdminPinModal);
+
+            // Botones de Modo de Vista
+            document.getElementById('mode-entries-btn').addEventListener('click', () => { adminViewMode = 'timeEntries'; window.renderApp(); });
+            document.getElementById('mode-employees-btn').addEventListener('click', () => { adminViewMode = 'employees'; window.renderApp(); });
+            
+            if (adminViewMode === 'timeEntries') {
+                // Binding para Botones de Fichajes
+                document.getElementById('export-excel-btn').addEventListener('click', window.renderExportModal);
+                
+                document.querySelectorAll('.edit-entry-btn').forEach(btn => {
+                    btn.addEventListener('click', () => window.renderEditModal(btn.getAttribute('data-id')));
+                });
+                document.querySelectorAll('.delete-entry-btn').forEach(btn => {
+                    btn.addEventListener('click', () => window.renderDeleteModal(btn.getAttribute('data-id')));
+                });
+            } else if (adminViewMode === 'employees') {
+                // Binding para Botones de Empleados
+                document.getElementById('add-employee-btn').addEventListener('click', () => window.renderEmployeeDetailsModal(null));
+                
+                document.querySelectorAll('.edit-employee-btn').forEach(btn => {
+                    btn.addEventListener('click', () => window.renderEmployeeDetailsModal(btn.getAttribute('data-pin')));
+                });
+            }
+        };
+
+        // --- RENDERIZADO PRINCIPAL (Controlador de Vistas) ---
+        // Expuesta globalmente para el acceso inicial y los cambios de vista
+        window.renderApp = () => {
+            if (!isAuthReady) return; // No renderizar si la autenticación no ha finalizado
+            
+            if (appUserType === ADMIN_VIEW) {
+                renderAdminView();
+            } else if (appUserType === EMPLOYEE_VIEW) {
+                renderEmployeeView();
+            } else {
+                renderAccessScreen();
+            }
+        };
+
+        // Iniciar la aplicación al cargar la ventana
+        window.onload = initializeFirebase;
+
+    </script>
+</body>
+</html>
