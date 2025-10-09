@@ -64,14 +64,14 @@
         
         // Variables globales del entorno
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'time-tracker-v1';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {const firebaseConfig = {
+        const firebaseConfig = {
   apiKey: "AIzaSyCBrdnvHWjO2wUGxuQs0ZKuW9su7yJiIMI",
   authDomain: "horarios-hostal.firebaseapp.com",
   projectId: "horarios-hostal",
   storageBucket: "horarios-hostal.firebasestorage.app",
   messagingSenderId: "110451546337",
   appId: "1:110451546337:web:153db6540a4582e374ffa0"
-};};
+};
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         // Códigos de Acceso (ADMIN_PIN se actualiza en tiempo real si se cambia)
@@ -1235,4 +1235,5 @@
     </script>
 </body>
 </html>
+
 
