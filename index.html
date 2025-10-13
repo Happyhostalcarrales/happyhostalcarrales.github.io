@@ -64,7 +64,15 @@
         
         // OBLIGATORIO: Usar variables de entorno si existen, o fallback seguro.
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'; 
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {}; 
+        const firebaseConfig = { 
+            // ** ATENCIÓN: VALORES INSERTADOS POR EL USUARIO **
+            apiKey: "AIzaSyDoJkkuwXhqoPPpX97IKRlhatF8CWnUjS0",
+            authDomain: "happyhoras-42802163-1ef59.firebaseapp.com",
+            projectId: "happyhoras-42802163-1ef59",
+            storageBucket: "happyhoras-42802163-1ef59.firebasestorage.app",
+            messagingSenderId: "553616234083",
+            appId: "1:553616234083:web:c77e59d264f6f7173e0a56"
+        };
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null; 
 
         
@@ -213,23 +221,24 @@
 
                 const signIn = async () => {
                     try {
-                        if (initialAuthToken) {
-                            await signInWithCustomToken(auth, initialAuthToken);
-                        } else {
-                            await signInAnonymously(auth);
-                        }
+                        // FORZAMOS LA AUTENTICACIÓN ANÓNIMA DIRECTAMENTE (LA MÁS ESTABLE)
+                        const userCredential = await signInAnonymously(auth);
+                        firebaseUserId = userCredential.user.uid;
+                        isAuthReady = true;
+
                     } catch (error) {
-                        console.error("Firebase sign-in error:", error);
+                        console.error("Firebase sign-in error (FATAL):", error);
                         // Mostrar error de autenticación si falla la conexión
                          document.getElementById('app-container').innerHTML = `
                             <div class="flex items-center justify-center min-h-screen p-4 bg-red-50">
                                 <div class="text-center p-8 bg-white rounded-xl shadow-2xl border-4 border-red-500">
-                                    <h1 class="text-3xl font-bold text-red-600 mb-4">¡Error de Autenticación!</h1>
+                                    <h1 class="text-3xl font-bold text-red-600 mb-4">¡Error de Autenticación Fatal!</h1>
                                     <p class="text-lg text-gray-700">La conexión falló. Detalles: ${error.message}</p>
+                                    <p class="mt-4 text-gray-600">Por favor, verifica la clave de API y que la Autenticación Anónima esté habilitada en Firebase.</p>
                                 </div>
                             </div>
                         `;
-                        return;
+                        throw error; 
                     }
                 };
                 
@@ -253,18 +262,10 @@
                     ADMIN_PIN = adminSnapshot.docs[0].id; 
                 }
                 
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        firebaseUserId = user.uid;
-                        isAuthReady = true;
-                        startDataListeners();
-                        renderApp();
-                    } else {
-                        firebaseUserId = null;
-                        isAuthReady = true; 
-                        renderApp();
-                    }
-                });
+                // Finalizamos la inicialización
+                isAuthReady = true;
+                startDataListeners();
+                renderApp();
 
             } catch (error) {
                 console.error("Firebase initialization failed:", error);
