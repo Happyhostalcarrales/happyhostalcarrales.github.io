@@ -1081,7 +1081,7 @@
         // Data Storage
         let adminCredentials = JSON.parse(localStorage.getItem('fichajemax_adminCredentials')) || {
             username: 'admin',
-            password: 'admin123'
+            password: 'Octubre2012'
         };
         
         let employees = JSON.parse(localStorage.getItem('fichajemax_employees')) || [
@@ -1135,18 +1135,18 @@
         
         let companySettings = JSON.parse(localStorage.getItem('fichajemax_companySettings')) || {
             companyName: 'Happy Hostal Carrales',
-            companyCIF: 'B12345678',
-            companyAddress: 'Calle Ejemplo, 123, 28001 Madrid',
-            companyPhone: '+34 912 345 678'
+            companyCIF: 'B09539271',
+            companyAddress: 'Calle Puente Gasset 4º 1º drch',
+            companyPhone: '947263547'
         };
 
         // Location control settings
         let locationSettings = JSON.parse(localStorage.getItem('fichajemax_locationSettings')) || {
-            enabled: false,
-            workLatitude: null,
-            workLongitude: null,
-            allowedRadius: 100,
-            workAddress: ''
+            enabled: true,
+            workLatitude: 42.341646,
+            workLongitude: -3.694808,
+            allowedRadius: 10,
+            workAddress: 'Happy Hostal Carrales - Calle Puente Gasset 4º 1º drch'
         };
 
         // Cloud sync settings - Always enabled for universal access
@@ -1155,7 +1155,7 @@
             apiKey: '$2a$10$pCa2.t7IloY35YcJyWLuWuSN5BCaLn/GX.1x9rKgieJhdMTa8Zj76',
             binId: '68f28f92d0ea881f40a88ada',
             autoSync: true,
-            syncInterval: 30000, // 30 seconds for instant sync
+            syncInterval: 2000, // 2 seconds for instant sync
             lastSync: null
         };
 
@@ -2191,12 +2191,15 @@
                             ` : ''}
                         </div>
                         
-                        <div class="flex space-x-2">
-                            <button onclick="editEmployee(${employee.id})" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm transition-colors">
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="editEmployee(${employee.id})" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-2 rounded-lg text-xs transition-colors">
                                 ✏️ Editar
                             </button>
-                            <button onclick="toggleEmployeeStatus(${employee.id})" class="flex-1 ${employee.status === 'Activo' ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} text-white px-3 py-2 rounded-lg text-sm transition-colors">
+                            <button onclick="toggleEmployeeStatus(${employee.id})" class="${employee.status === 'Activo' ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-500 hover:bg-green-600'} text-white px-2 py-2 rounded-lg text-xs transition-colors">
                                 ${employee.status === 'Activo' ? '🚫 Desactivar' : '✅ Activar'}
+                            </button>
+                            <button onclick="deleteEmployee(${employee.id})" class="bg-red-500 hover:bg-red-600 text-white px-2 py-2 rounded-lg text-xs transition-colors">
+                                🗑️ Eliminar
                             </button>
                         </div>
                     </div>
@@ -2732,6 +2735,46 @@
             }
         }
 
+        async function deleteEmployee(id) {
+            console.log('Eliminando empleado:', id);
+            const employee = employees.find(emp => emp.id === id);
+            if (!employee) return;
+            
+            const hasRecords = timeRecords.some(record => record.employeeId === id);
+            let confirmMessage = `¿Está seguro de eliminar permanentemente a ${employee.name} ${employee.lastName}?`;
+            
+            if (hasRecords) {
+                confirmMessage += '\n\n⚠️ ATENCIÓN: Este empleado tiene registros de fichaje. Al eliminarlo también se eliminarán TODOS sus registros históricos.\n\nEsta acción NO se puede deshacer.';
+            }
+            
+            if (await showConfirmDialog(confirmMessage)) {
+                // Eliminar empleado
+                const employeeIndex = employees.findIndex(emp => emp.id === id);
+                if (employeeIndex !== -1) {
+                    employees.splice(employeeIndex, 1);
+                }
+                
+                // Eliminar todos los registros del empleado
+                if (hasRecords) {
+                    const originalCount = timeRecords.length;
+                    timeRecords = timeRecords.filter(record => record.employeeId !== id);
+                    const deletedRecords = originalCount - timeRecords.length;
+                    
+                    saveTimeRecords();
+                    showNotification(`🗑️ Empleado eliminado junto con ${deletedRecords} registros`, 'success');
+                } else {
+                    showNotification('🗑️ Empleado eliminado correctamente', 'success');
+                }
+                
+                saveEmployees();
+                loadEmployees();
+                loadTimeRecords();
+                loadDashboard();
+                populateSelects();
+                updateDataStatistics();
+            }
+        }
+
         // Report Functions
         function generateReport() {
             console.log('Generando informe');
@@ -3216,9 +3259,9 @@
             // Always sync for universal access
             
             // Initial sync from cloud
-            setTimeout(() => syncFromCloud(), 2000);
+            setTimeout(() => syncFromCloud(), 1000);
             
-            // Set up periodic sync every 30 seconds for instant updates
+            // Set up periodic sync every 2 seconds for instant updates
             if (syncInterval) {
                 clearInterval(syncInterval);
             }
@@ -3230,15 +3273,15 @@
                 } else {
                     syncFromCloud();
                 }
-            }, 30000); // 30 seconds
+            }, 2000); // 2 seconds for instant sync
             
-            // Additional frequent check for new data every 10 seconds
+            // Additional frequent check for new data every 1 second
             setInterval(() => {
                 syncFromCloud();
-            }, 10000); // 10 seconds
+            }, 1000); // 1 second for ultra-fast sync
             
             updateCloudSyncStatus();
-            console.log('Cloud sync universal iniciado - Acceso desde cualquier dispositivo');
+            console.log('Cloud sync ultra-rápido iniciado - Sincronización cada 2 segundos');
         }
 
         function stopCloudSync() {
@@ -3294,10 +3337,11 @@
                     
                 statusElement.innerHTML = `
                     <div class="text-green-700">
-                        <strong>Estado:</strong> 🌐 Acceso Universal Activo<br>
+                        <strong>Estado:</strong> 🚀 Sincronización Ultra-Rápida Activa<br>
                         <strong>Última sincronización:</strong> ${lastSyncText}<br>
-                        <strong>Frecuencia:</strong> Cada 10 segundos (automático)<br>
-                        <strong>Dispositivos:</strong> Sincronización instantánea entre todos los dispositivos
+                        <strong>Frecuencia:</strong> Cada 1-2 segundos (tiempo real)<br>
+                        <strong>Dispositivos:</strong> Cambios instantáneos en móviles, tablets y ordenadores<br>
+                        <strong>Rendimiento:</strong> Optimizado para múltiples dispositivos simultáneos
                     </div>
                 `;
                 statusElement.className = 'p-3 rounded-lg bg-green-100 text-sm';
@@ -3312,9 +3356,9 @@
             document.getElementById('cloudApiKey').value = cloudSettings.apiKey || '';
             document.getElementById('cloudBinId').value = cloudSettings.binId || '';
             document.getElementById('enableAutoSync').checked = true; // Always enabled
-            document.getElementById('syncInterval').value = 0.5; // 30 seconds
+            document.getElementById('syncInterval').value = 0.03; // 2 seconds (0.03 minutes)
             
-            document.getElementById('syncIntervalValue').textContent = '0.5';
+            document.getElementById('syncIntervalValue').textContent = '0.03';
             
             updateCloudSyncStatus();
         }
@@ -3327,22 +3371,22 @@
         function saveEmployees() {
             localStorage.setItem('fichajemax_employees', JSON.stringify(employees));
             
-            // Always trigger immediate cloud sync for universal access
-            setTimeout(() => syncToCloud(), 500);
+            // Immediate cloud sync for instant universal access
+            setTimeout(() => syncToCloud(), 100);
         }
 
         function saveTimeRecords() {
             localStorage.setItem('fichajemax_timeRecords', JSON.stringify(timeRecords));
             
-            // Always trigger immediate cloud sync for universal access
-            setTimeout(() => syncToCloud(), 500);
+            // Immediate cloud sync for instant universal access
+            setTimeout(() => syncToCloud(), 100);
         }
 
         function saveCompanySettings() {
             localStorage.setItem('fichajemax_companySettings', JSON.stringify(companySettings));
             
-            // Always trigger immediate cloud sync for universal access
-            setTimeout(() => syncToCloud(), 500);
+            // Immediate cloud sync for instant universal access
+            setTimeout(() => syncToCloud(), 100);
         }
 
         function saveAdminCredentialsData() {
@@ -3593,5 +3637,5 @@
             return outMinutes - inMinutes <= 16 * 60; // Máximo 16 horas
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9906eddaf196ec95',t:'MTc2MDc3ODkwNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99078b8d753dcbc0',t:'MTc2MDc4NTM2NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
