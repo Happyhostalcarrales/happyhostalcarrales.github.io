@@ -9,7 +9,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* ... TU CSS ORIGINAL COMPLETO (Se ha mantenido) ... */
         * {
             box-sizing: border-box;
         }
@@ -537,28 +536,7 @@
         </nav>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-            <section class="bg-white p-6 rounded-2xl card-shadow mb-8">
-                <h2 class="text-2xl font-bold mb-4 text-gray-700 border-b pb-2">Estado Sincronizado del Hostal (Firebase)</h2>
-                
-                <div id="datos-hostal" class="bg-gray-100 p-4 rounded-lg text-center mb-6">
-                    <p class="text-gray-500">Cargando estado...</p>
-                </div>
-                
-                <h3 class="text-xl font-semibold mb-3 text-gray-700">Actualizar Estado (ESCRITURA)</h3>
-                
-                <div class="flex flex-col sm:flex-row gap-3">
-                    <input type="text" id="nueva-ocupacion" placeholder="Ej: 5 habitaciones ocupadas | Limpieza OK"
-                           class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 input-modern">
-                    
-                    <button onclick="guardarDatos()"
-                            class="px-6 py-3 rounded-lg font-semibold text-white transition duration-200"
-                            style="background: var(--success-gradient);">
-                        Guardar y Sincronizar
-                    </button>
-                </div>
-                <p class="text-sm text-gray-500 mt-2">Este dato se actualizará al instante en todos los navegadores y dispositivos conectados.</p>
-            </section>
+            
             <div id="dashboardTab" class="tab-content active fade-in">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div class="lg:col-span-1">
@@ -866,66 +844,51 @@
                     </div>
 
                     <div class="bg-white rounded-2xl card-shadow p-6">
-                        <h3 class="text-xl font-bold text-gray-800 mb-6">☁️ Sincronización en la Nube (JSONBin.io)</h3>
+                        <h3 class="text-xl font-bold text-gray-800 mb-6">☁️ Sincronización en la Nube (Firebase)</h3>
                         
                         <div class="space-y-4">
                             <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
                                 <h4 class="font-bold text-blue-800 mb-2">ℹ️ Información</h4>
                                 <p class="text-sm text-blue-700 mb-2">
-                                    La sincronización en la nube permite mantener sus datos seguros y accesibles desde cualquier dispositivo usando **JSONBin.io**.
+                                    **La sincronización de fichaje usa Firebase Realtime Database para la función en tiempo real.**
                                 </p>
                                 <ul class="text-xs text-blue-600 space-y-1 ml-4">
-                                    <li>• Los datos se cifran antes de enviarse a la nube</li>
-                                    <li>• Sincronización automática cada 5 minutos</li>
-                                    <li>• Backup automático de empleados y registros</li>
-                                    <li>• Acceso desde múltiples dispositivos</li>
+                                    <li>• El sistema de sincronización es **instantáneo** y guarda los datos de forma persistente.</li>
+                                    <li>• La configuración de JSONBin.io de abajo ya no tiene efecto y está deshabilitada.</li>
                                 </ul>
-                            </div>
-                            
-                            <div class="flex items-center space-x-4">
-                                <label class="flex items-center space-x-2">
-                                    <input type="checkbox" id="enableCloudSync" class="rounded">
-                                    <span class="text-sm font-semibold">Activar Sincronización en la Nube</span>
-                                </label>
                             </div>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">🔑 API Key de JSONBin.io</label>
-                                    <input type="password" id="cloudApiKey" class="input-modern w-full" placeholder="Ingrese su API Key">
-                                    <p class="text-xs text-gray-500 mt-1">Obtenga su API Key gratuita en jsonbin.io</p>
+                                    <input type="password" id="cloudApiKey" class="input-modern w-full" placeholder="Ingrese su API Key" disabled>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">🆔 Bin ID</label>
-                                    <input type="text" id="cloudBinId" class="input-modern w-full" placeholder="ID del bin de datos">
-                                    <p class="text-xs text-gray-500 mt-1">ID único de su contenedor de datos</p>
+                                    <input type="text" id="cloudBinId" class="input-modern w-full" placeholder="ID del bin de datos" disabled>
                                 </div>
                             </div>
                             
                             <div class="flex items-center space-x-4">
                                 <label class="flex items-center space-x-2">
-                                    <input type="checkbox" id="enableAutoSync" class="rounded">
-                                    <span class="text-sm font-semibold">Sincronización Automática</span>
+                                    <input type="checkbox" id="enableAutoSync" class="rounded" checked disabled>
+                                    <span class="text-sm font-semibold">Sincronización Automática (Siempre activa con Firebase)</span>
                                 </label>
                             </div>
                             
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">⏱️ Intervalo de Sincronización: <span id="syncIntervalValue">5</span> minutos</label>
-                                <input type="range" id="syncInterval" class="w-full" min="1" max="60" value="5" oninput="document.getElementById('syncIntervalValue').textContent = this.value">
-                                <div class="flex justify-between text-xs text-gray-500 mt-1">
-                                    <span>1 min (frecuente)</span>
-                                    <span>60 min (ocasional)</span>
-                                </div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">⏱️ Intervalo de Sincronización: <span id="syncIntervalValue">Tiempo Real</span></label>
+                                <input type="range" id="syncInterval" class="w-full" min="1" max="60" value="5" disabled>
                             </div>
                             
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                <button id="testCloudConnection" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors text-sm">
+                                <button id="testCloudConnection" onclick="testCloudConnection()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors text-sm">
                                     🔗 Probar Conexión
                                 </button>
-                                <button id="syncNow" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors text-sm">
-                                    ☁️ Sincronizar Ahora
+                                <button id="syncNow" onclick="syncNow()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors text-sm">
+                                    ☁️ Forzar Guardado
                                 </button>
-                                <button id="saveCloudSettings" class="btn-primary text-white px-4 py-2 rounded-lg text-sm">
+                                <button id="saveCloudSettings" class="btn-primary text-white px-4 py-2 rounded-lg text-sm" disabled>
                                     💾 Guardar Configuración
                                 </button>
                             </div>
@@ -1227,58 +1190,15 @@
         // Inicializa Firebase
         firebase.initializeApp(firebaseConfig);
 
-        // Referencias a los nodos de la base de datos
+        // Referencias a los nodos de la base de datos (Se elimina refEstadoHostal)
         const db = firebase.database();
-        const refEstadoHostal = db.ref('hostal/estado'); 
         const refEmpleados = db.ref('fichaje/employees');
         const refRegistros = db.ref('fichaje/timeRecords');
         const refConfig = db.ref('fichaje/config');
 
 
         // =========================================================================
-        // LÓGICA DE SINCRONIZACIÓN DE ESTADO DEL HOSTAL (EL APARTADO NUEVO)
-        // =========================================================================
-
-        // Función para LEER datos y SINCRONIZAR instantáneamente (ESCUCHADOR)
-        refEstadoHostal.on('value', (snapshot) => {
-            const estado = snapshot.val();
-            const divDatos = document.getElementById('datos-hostal');
-
-            if (divDatos) {
-                if (estado) {
-                    // Muestra el valor actual en el div
-                    divDatos.innerHTML = `<p class="text-xl font-bold text-purple-700">${estado}</p>
-                                          <p class="text-sm text-gray-500 mt-1">Última actualización: ${new Date().toLocaleTimeString('es-ES')}</p>`;
-                } else {
-                    divDatos.innerHTML = '<p class="text-lg text-gray-500">Aún no hay datos sincronizados. Use el botón de "Guardar" para el primer envío.</p>';
-                }
-            }
-        });
-
-        // Función para ESCRIBIR datos (Al hacer clic en el botón)
-        function guardarDatos() {
-            const nuevoEstado = document.getElementById('nueva-ocupacion').value;
-
-            if (nuevoEstado.trim() === "") {
-                UI.showNotification("⚠️ Por favor, introduce un estado o mensaje antes de guardar.", 'warning');
-                return;
-            }
-
-            // Escribe el valor en el nodo 'hostal/estado'
-            refEstadoHostal.set(nuevoEstado)
-                .then(() => {
-                    document.getElementById('nueva-ocupacion').value = '';
-                    UI.showNotification("✅ Estado guardado y sincronizado al instante.", 'success');
-                })
-                .catch((error) => {
-                    UI.showNotification("❌ Error al guardar el estado: " + error.message, 'error');
-                    console.error("Error al escribir en Firebase:", error);
-                });
-        }
-
-
-        // =========================================================================
-        // LÓGICA DE PERSISTENCIA DEL SISTEMA DE FICHAJE (AHORA USA FIREBASE)
+        // LÓGICA DE PERSISTENCIA DEL SISTEMA DE FICHAJE (USA FIREBASE)
         // =========================================================================
 
         // Application State Management
@@ -1316,9 +1236,8 @@
         
         const appState = new AppState();
         
-        // Data Storage con Firebase (se eliminan las funciones de JSONBin.io)
+        // Data Storage con Firebase 
         const DataManager = {
-            // ... (Toda la lógica de DataManager y ConfigManager se mantuvo igual) ...
             getAdminCredentials() {
                 return JSON.parse(localStorage.getItem('fichajemax_adminCredentials')) || {
                     username: 'admin',
@@ -1331,16 +1250,15 @@
             },
             
             getEmployees() {
-                // Lee la copia local, pero la actualizaremos con Firebase
                 return JSON.parse(localStorage.getItem('fichajemax_employees')) || this.getDefaultEmployees();
             },
             
             setEmployees(newEmployees) {
-                // 1. Guardar localmente para acceso instantáneo
+                // 1. Guardar localmente
                 localStorage.setItem('fichajemax_employees', JSON.stringify(newEmployees));
                 employees = newEmployees; // Actualizar la variable global
                 
-                // 2. Sincronizar con Firebase (el guardado real)
+                // 2. Sincronizar con Firebase
                 refEmpleados.set(newEmployees)
                     .catch(error => {
                         console.error("Error al sincronizar empleados en Firebase:", error);
@@ -1349,7 +1267,6 @@
             },
             
             getDefaultEmployees() {
-                // ... (Empleados por defecto) ...
                 return [
                     {
                         id: 1,
@@ -1399,16 +1316,15 @@
             },
             
             getTimeRecords() {
-                // Lee la copia local
                 return JSON.parse(localStorage.getItem('fichajemax_timeRecords')) || [];
             },
             
             setTimeRecords(newRecords) {
-                // 1. Guardar localmente para acceso instantáneo
+                // 1. Guardar localmente 
                 localStorage.setItem('fichajemax_timeRecords', JSON.stringify(newRecords));
                 timeRecords = newRecords; // Actualizar la variable global
 
-                // 2. Sincronizar con Firebase (el guardado real)
+                // 2. Sincronizar con Firebase
                 refRegistros.set(newRecords)
                     .catch(error => {
                         console.error("Error al sincronizar registros en Firebase:", error);
@@ -1442,7 +1358,6 @@
         
         // Configuration Management
         const ConfigManager = {
-            // ... (Toda la lógica de ConfigManager se mantuvo igual) ...
             getCompanySettings() {
                 return JSON.parse(localStorage.getItem('fichajemax_companySettings')) || {
                     companyName: 'Happy Hostal Carrales',
@@ -1470,13 +1385,10 @@
                 DataManager.setGlobalConfig('locationSettings', settings);
             },
             
-            // Eliminamos la dependencia de JSONBin.io para la configuración de la nube
             getCloudSettings() {
-                // Mantenemos la estructura pero solo para la visibilidad en el UI de settings
                 return { enabled: true, isFirebase: true, lastSync: new Date().toISOString() };
             },
             
-            // Esta función ya no es necesaria con Firebase, pero se deja para no romper la UI
             setCloudSettings(settings) {
                 // No hace nada
             }
@@ -1485,14 +1397,11 @@
         // Global configuration references
         let companySettings = ConfigManager.getCompanySettings();
         let locationSettings = ConfigManager.getLocationSettings();
-        let cloudSettings = ConfigManager.getCloudSettings(); // Ahora solo indica que Firebase está activo
+        let cloudSettings = ConfigManager.getCloudSettings(); 
         let adminCredentials = DataManager.getAdminCredentials();
         
-        // Eliminamos CloudSync.start() y CloudSync.syncToCloud() del código de fichaje.
-        // La sincronización ahora es automática por los "listeners" de Firebase.
-
         // =========================================================================
-        // NUEVA FUNCIÓN CLAVE: ESCUCHADORES DE FIREBASE EN TIEMPO REAL
+        // FUNCIÓN CLAVE: ESCUCHADORES DE FIREBASE EN TIEMPO REAL
         // =========================================================================
 
         function startRealtimeListeners() {
@@ -1505,7 +1414,7 @@
                     employees = firebaseEmployees;
                     localStorage.setItem('fichajemax_employees', JSON.stringify(employees));
                     console.log('✅ Empleados sincronizados desde Firebase');
-                    // Refrescar UI después de actualizar datos
+                    
                     if (currentUser) {
                         loadEmployees();
                         populateSelects();
@@ -1525,7 +1434,7 @@
                     timeRecords = firebaseRecords;
                     localStorage.setItem('fichajemax_timeRecords', JSON.stringify(timeRecords));
                     console.log('✅ Registros sincronizados desde Firebase');
-                    // Refrescar UI después de actualizar datos
+                    
                     if (currentUser) {
                         loadTimeRecords();
                         loadDashboard();
@@ -1537,11 +1446,10 @@
                 UI.updateSyncIndicator('error');
             });
 
-            // Escuchador de Configuraciones (Opcional, para que sean comunes)
+            // Escuchador de Configuraciones 
             refConfig.on('value', (snapshot) => {
                 const config = snapshot.val();
                 if (config) {
-                    // Actualizar configuraciones solo si es necesario (para evitar bucles)
                     if (JSON.stringify(config.companySettings) !== JSON.stringify(companySettings)) {
                         companySettings = config.companySettings || companySettings;
                         localStorage.setItem('fichajemax_companySettings', JSON.stringify(companySettings));
@@ -1559,7 +1467,6 @@
 
         // UI Management
         const UI = {
-            // ... (Toda la lógica de UI se mantuvo igual) ...
             updateSyncIndicator(status) {
                 const indicator = document.getElementById('syncIndicator');
                 if (!indicator) return;
@@ -1580,7 +1487,6 @@
             },
             
             showNotification(message, type = 'success') {
-                // ... (Lógica de notificación) ...
                 document.querySelectorAll('.notification').forEach(n => n.remove());
                 
                 const notification = document.createElement('div');
@@ -1593,7 +1499,6 @@
             },
             
             updateDateTime() {
-                // ... (Lógica de actualización de hora/fecha) ...
                 const now = new Date();
                 const timeString = now.toLocaleTimeString('es-ES', { 
                     hour: '2-digit', 
@@ -1634,7 +1539,7 @@
                 this.setupDateTime();
                 this.setupEventListeners();
                 this.initializeData();
-                this.setupRealtimeSync(); // Nombre de función cambiado
+                this.setupRealtimeSync(); 
                 this.setupSecurity();
                 this.setupKeyboardShortcuts();
                 
@@ -1651,8 +1556,6 @@
             }
             
             initializeData() {
-                // Si no hay datos, inicializa los por defecto. 
-                // Los listeners de Firebase los sobrescribirán si existen datos remotos.
                 if (!localStorage.getItem('fichajemax_employees')) {
                     DataManager.setEmployees(DataManager.getDefaultEmployees());
                 }
@@ -1668,7 +1571,7 @@
                 this.loadSettings();
             }
             
-            setupRealtimeSync() { // Función de inicialización de sincronización
+            setupRealtimeSync() { 
                 startRealtimeListeners();
             }
             
@@ -1699,15 +1602,12 @@
 
         // Event Listeners
         function setupEventListeners() {
-            // ... (Toda la lógica de Event Listeners se mantuvo igual) ...
             console.log('Configurando event listeners...');
             
-            // Login
             document.getElementById('adminBtn').addEventListener('click', () => selectUserType('admin'));
             document.getElementById('employeeBtn').addEventListener('click', () => selectUserType('employee'));
             document.getElementById('loginButton').addEventListener('click', handleLogin);
             
-            // Enter key for login
             document.getElementById('adminPassword').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') handleLogin();
             });
@@ -1715,21 +1615,17 @@
                 if (e.key === 'Enter') handleLogin();
             });
             
-            // Navigation
             document.querySelectorAll('.nav-tab').forEach(tab => {
                 tab.addEventListener('click', () => switchTab(tab.dataset.tab));
             });
             
-            // Clock actions
             document.getElementById('clockInBtn').addEventListener('click', () => clockAction('in'));
             document.getElementById('clockOutBtn').addEventListener('click', () => clockAction('out'));
             
-            // Employee management
             document.getElementById('addEmployeeBtn').addEventListener('click', showEmployeeModal);
             document.getElementById('saveEmployee').addEventListener('click', saveEmployee);
             document.getElementById('cancelEmployee').addEventListener('click', hideEmployeeModal);
             
-            // Working hours change handler
             document.getElementById('employeeWorkingHours').addEventListener('change', function() {
                 const customContainer = document.getElementById('customHoursContainer');
                 if (this.value === 'custom') {
@@ -1740,44 +1636,33 @@
                 }
             });
             
-            // Manual record management
             document.getElementById('addManualRecord').addEventListener('click', showManualRecordModal);
             document.getElementById('saveManualRecord').addEventListener('click', saveManualRecord);
             document.getElementById('cancelManualRecord').addEventListener('click', hideManualRecordModal);
             
-            // Edit record management
             document.getElementById('saveEditRecord').addEventListener('click', saveEditRecord);
             document.getElementById('cancelEditRecord').addEventListener('click', hideEditRecordModal);
             document.getElementById('deleteRecord').addEventListener('click', deleteRecord);
             
-            // Reports
             document.getElementById('generateReport').addEventListener('click', generateReport);
             
-            // Filters
             document.getElementById('applyFilters').addEventListener('click', applyFilters);
             
-            // Settings
             document.getElementById('saveCompanySettings').addEventListener('click', saveCompanySettingsForm);
             document.getElementById('saveAdminCredentials').addEventListener('click', saveAdminCredentialsForm);
             document.getElementById('saveLocationSettings').addEventListener('click', saveLocationSettingsForm);
-            // Estos botones de JSONBin.io ya no se usarán para la sincronización real,
-            // pero se dejan para no romper el UI
-            document.getElementById('saveCloudSettings').addEventListener('click', saveCloudSettingsForm);
             document.getElementById('testCloudConnection').addEventListener('click', testCloudConnection);
             document.getElementById('syncNow').addEventListener('click', syncNow);
             
-            // Location
             document.getElementById('getCurrentLocation').addEventListener('click', getCurrentLocationForSetup);
             document.getElementById('testDistance').addEventListener('click', testDistance);
             document.getElementById('refreshLocationBtn').addEventListener('click', refreshEmployeeLocation);
             
-            // Data management
             document.getElementById('exportAllData').addEventListener('click', exportAllData);
             document.getElementById('exportRecords').addEventListener('click', exportRecords);
             document.getElementById('importDataFile').addEventListener('change', handleImportFile);
             document.getElementById('clearAllData').addEventListener('click', clearAllData);
             
-            // Help and Logout
             document.getElementById('helpBtn').addEventListener('click', showHelpModal);
             document.getElementById('closeHelp').addEventListener('click', hideHelpModal);
             document.getElementById('logoutBtn').addEventListener('click', logout);
@@ -1787,12 +1672,10 @@
 
         // Authentication
         function selectUserType(type) {
-             // ... (Lógica de selectUserType) ...
             console.log('Seleccionando tipo de usuario:', type);
             appState.selectedUserType = type;
             selectedUserType = type;
             
-            // Update button styles
             document.querySelectorAll('.user-type-btn').forEach(btn => {
                 btn.classList.remove('border-purple-500', 'bg-purple-50');
                 btn.classList.add('border-gray-200');
@@ -1816,7 +1699,6 @@
         }
 
         function handleLogin() {
-             // ... (Lógica de handleLogin) ...
             console.log('Intentando login como:', selectedUserType);
             
             if (!selectedUserType) {
@@ -1847,7 +1729,6 @@
         }
 
         function authenticateEmployee(code) {
-             // ... (Lógica de authenticateEmployee) ...
             console.log('Autenticando empleado con código:', code);
             const employee = employees.find(emp => emp.accessCode === code && emp.status === 'Activo');
             if (employee) {
@@ -1861,7 +1742,6 @@
         }
 
         function showMainApp() {
-             // ... (Lógica de showMainApp) ...
             console.log('Mostrando aplicación principal para:', currentUser);
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
@@ -1885,7 +1765,6 @@
         }
 
         function setupEmployeeInterface() {
-             // ... (Lógica de setupEmployeeInterface) ...
             console.log('Configurando interfaz de empleado');
             document.querySelectorAll('.admin-only').forEach(element => {
                 element.style.display = 'none';
@@ -1902,7 +1781,6 @@
         }
 
         function setupAdminInterface() {
-             // ... (Lógica de setupAdminInterface) ...
             console.log('Configurando interfaz de administrador');
             document.querySelectorAll('.admin-only').forEach(element => {
                 element.style.display = 'block';
@@ -1914,17 +1792,14 @@
         }
 
         function logout() {
-             // ... (Lógica de logout) ...
             console.log('Cerrando sesión');
             currentUser = null;
             selectedUserType = null;
             stopLocationMonitoring();
-            // Ya no es necesario CloudSync.stop()
 
             document.getElementById('mainApp').classList.add('hidden');
             document.getElementById('loginScreen').classList.remove('hidden');
             
-            // Reset forms
             document.getElementById('adminPassword').value = '';
             document.getElementById('employeeCode').value = '';
             document.querySelectorAll('.user-type-btn').forEach(btn => {
@@ -1939,22 +1814,18 @@
 
         // Navigation
         function switchTab(tabName) {
-             // ... (Lógica de switchTab) ...
             console.log('Cambiando a pestaña:', tabName);
             
-            // Update navigation
             document.querySelectorAll('.nav-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
             document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
             
-            // Update content
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
             });
             document.getElementById(`${tabName}Tab`).classList.add('active');
             
-            // Load specific content
             switch(tabName) {
                 case 'employees':
                     loadEmployees();
@@ -1977,7 +1848,6 @@
 
         // Clock Functions
         function clockAction(type) {
-             // ... (Lógica de clockAction) ...
             console.log('Acción de fichaje:', type);
             
             let employeeId;
@@ -1995,7 +1865,6 @@
         }
 
         async function performClockAction(employeeId, type) {
-             // ... (Lógica de performClockAction) ...
             console.log('Realizando fichaje:', { employeeId, type });
             UI.updateSyncIndicator('syncing');
             
@@ -2006,7 +1875,6 @@
                 return;
             }
 
-            // Check location for employees only
             if (currentUser.type === 'employee' && locationSettings.enabled) {
                 const locationCheck = await checkLocationPermission();
                 if (!locationCheck.allowed) {
@@ -2074,14 +1942,13 @@
                 UI.showNotification(`🏁 Salida registrada: ${currentTime}${locationMsg}`, 'success');
             }
             
-            saveTimeRecords(); // ESTO AHORA SINCRONIZA CON FIREBASE
+            saveTimeRecords();
             loadDashboard();
             loadTimeRecords();
         }
 
         // Location Functions
         async function checkLocationPermission() {
-            // ... (Lógica de checkLocationPermission) ...
             if (!locationSettings.enabled || !locationSettings.workLatitude || !locationSettings.workLongitude) {
                 return { allowed: true, message: '' };
             }
@@ -2128,8 +1995,7 @@
         }
 
         function getCurrentPosition() {
-            // ... (Lógica de getCurrentPosition) ...
-             return new Promise((resolve, reject) => {
+            return new Promise((resolve, reject) => {
                 if (!navigator.geolocation) {
                     reject({ code: 0, message: 'Geolocalización no soportada en este dispositivo' });
                     return;
@@ -2156,7 +2022,6 @@
         }
 
         function calculateDistance(lat1, lon1, lat2, lon2) {
-            // ... (Lógica de calculateDistance) ...
             const R = 6371e3; // Earth's radius in meters
             const φ1 = lat1 * Math.PI/180;
             const φ2 = lat2 * Math.PI/180;
@@ -2172,8 +2037,7 @@
         }
 
         async function getCurrentLocationForSetup() {
-            // ... (Lógica de getCurrentLocationForSetup) ...
-             const button = document.getElementById('getCurrentLocation');
+            const button = document.getElementById('getCurrentLocation');
             const originalText = button.innerHTML;
             
             try {
@@ -2207,7 +2071,6 @@
         }
 
         async function testDistance() {
-            // ... (Lógica de testDistance) ...
             if (!locationSettings.workLatitude || !locationSettings.workLongitude) {
                 UI.showNotification('⚠️ Configure primero la ubicación del trabajo', 'warning');
                 return;
@@ -2258,7 +2121,6 @@
         }
 
         function updateLocationStatus(isWithinRange, distance) {
-             // ... (Lógica de updateLocationStatus) ...
             const statusElement = document.getElementById('locationStatus');
             if (statusElement) {
                 statusElement.classList.remove('hidden');
@@ -2273,21 +2135,19 @@
         }
 
         function saveLocationSettingsForm() {
-             // ... (Lógica de saveLocationSettingsForm) ...
             locationSettings.enabled = document.getElementById('enableLocationControl').checked;
             locationSettings.workLatitude = parseFloat(document.getElementById('workLatitude').value) || null;
             locationSettings.workLongitude = parseFloat(document.getElementById('workLongitude').value) || null;
             locationSettings.allowedRadius = parseInt(document.getElementById('allowedRadius').value) || 100;
             locationSettings.workAddress = document.getElementById('workAddress').value || '';
             
-            ConfigManager.setLocationSettings(locationSettings); // Usa la nueva función de guardar
+            ConfigManager.setLocationSettings(locationSettings); 
             UI.showNotification('📍 Configuración de ubicación guardada', 'success');
             
             updateLocationControlStatus();
         }
 
         function updateLocationControlStatus() {
-             // ... (Lógica de updateLocationControlStatus) ...
             const statusElement = document.getElementById('locationControlStatus');
             if (!statusElement) return;
             
@@ -2310,7 +2170,6 @@
         }
 
         function loadLocationSettings() {
-             // ... (Lógica de loadLocationSettings) ...
             document.getElementById('enableLocationControl').checked = locationSettings.enabled;
             document.getElementById('workLatitude').value = locationSettings.workLatitude || '';
             document.getElementById('workLongitude').value = locationSettings.workLongitude || '';
@@ -2326,7 +2185,6 @@
         let locationMonitoringInterval = null;
 
         function startLocationMonitoring() {
-             // ... (Lógica de startLocationMonitoring) ...
             if (!locationSettings.enabled || currentUser.type !== 'employee') return;
             
             const statusElement = document.getElementById('employeeLocationStatus');
@@ -2354,7 +2212,6 @@
         }
 
         function stopLocationMonitoring() {
-             // ... (Lógica de stopLocationMonitoring) ...
             if (locationMonitoringInterval) {
                 clearInterval(locationMonitoringInterval);
                 locationMonitoringInterval = null;
@@ -2367,7 +2224,6 @@
         }
 
         function updateEmployeeLocationStatus(locationCheck) {
-             // ... (Lógica de updateEmployeeLocationStatus) ...
             const statusTextElement = document.getElementById('locationStatusText');
             const indicatorElement = document.getElementById('locationStatusIndicator');
             
@@ -2391,7 +2247,6 @@
         }
 
         async function refreshEmployeeLocation() {
-             // ... (Lógica de refreshEmployeeLocation) ...
             if (!locationSettings.enabled || currentUser.type !== 'employee') return;
             
             const button = document.getElementById('refreshLocationBtn');
@@ -2423,7 +2278,6 @@
 
         // Data Loading Functions
         function loadDashboard() {
-             // ... (Lógica de loadDashboard) ...
             console.log('Cargando dashboard');
             const today = formatDate(new Date());
             let todayRecords = timeRecords.filter(record => record.date === today);
@@ -2494,7 +2348,6 @@
         }
 
         function updateEmployeeStatus(today) {
-             // ... (Lógica de updateEmployeeStatus) ...
             const statusElement = document.getElementById('currentStatus');
             const statusTimeElement = document.getElementById('statusTime');
             const employeeStatusElement = document.getElementById('employeeStatus');
@@ -2529,7 +2382,6 @@
         }
 
         function updateWorkingHoursProgress(record) {
-             // ... (Lógica de updateWorkingHoursProgress) ...
             const progressElement = document.getElementById('workingHoursProgress');
             const progressContent = document.getElementById('progressContent');
             
@@ -2598,7 +2450,6 @@
         }
 
         function loadRecentActivity() {
-             // ... (Lógica de loadRecentActivity) ...
             const activityElement = document.getElementById('recentActivity');
             if (!activityElement) return;
             
@@ -2647,7 +2498,6 @@
         }
 
         function loadEmployees() {
-             // ... (Lógica de loadEmployees) ...
             console.log('Cargando empleados');
             const gridElement = document.getElementById('employeesGrid');
             if (!gridElement) return;
@@ -2737,7 +2587,6 @@
         }
 
         function loadTimeRecords() {
-             // ... (Lógica de loadTimeRecords) ...
             console.log('Cargando registros de tiempo');
             const tableElement = document.getElementById('timeRecordsTable');
             if (!tableElement) return;
@@ -2796,7 +2645,6 @@
         }
 
         function loadStatistics() {
-             // ... (Lógica de loadStatistics) ...
             console.log('Cargando estadísticas');
             const statsElement = document.getElementById('statisticsContainer');
             if (!statsElement) return;
@@ -2830,7 +2678,6 @@
         }
 
         function loadCompanySettings() {
-             // ... (Lógica de loadCompanySettings) ...
             console.log('Cargando configuración de empresa');
             document.getElementById('companyName').value = companySettings.companyName || '';
             document.getElementById('companyCIF').value = companySettings.companyCIF || '';
@@ -2839,7 +2686,6 @@
         }
 
         function loadAdminCredentialsForm() {
-             // ... (Lógica de loadAdminCredentialsForm) ...
             console.log('Cargando credenciales de administrador');
             document.getElementById('adminUsername').value = adminCredentials.username || 'admin';
             document.getElementById('currentAdminPassword').value = '';
@@ -2848,7 +2694,6 @@
         }
 
         function updateDataStatistics() {
-             // ... (Lógica de updateDataStatistics) ...
             const statsElement = document.getElementById('dataStatistics');
             if (!statsElement) return;
             
@@ -2877,7 +2722,6 @@
 
         // Modal Functions
         function showEmployeeModal() {
-             // ... (Lógica de showEmployeeModal) ...
             document.getElementById('employeeModal').classList.remove('hidden');
             
             if (!editingEmployeeId) {
@@ -2902,7 +2746,6 @@
         }
 
         function hideEmployeeModal() {
-             // ... (Lógica de hideEmployeeModal) ...
             document.getElementById('employeeModal').classList.add('hidden');
             editingEmployeeId = null;
             
@@ -2913,7 +2756,6 @@
         }
 
         function showManualRecordModal() {
-             // ... (Lógica de showManualRecordModal) ...
             document.getElementById('manualRecordModal').classList.remove('hidden');
             document.getElementById('manualRecordEmployee').value = '';
             document.getElementById('manualRecordDate').value = formatDate(new Date());
@@ -2924,29 +2766,24 @@
         }
 
         function hideManualRecordModal() {
-             // ... (Lógica de hideManualRecordModal) ...
             document.getElementById('manualRecordModal').classList.add('hidden');
         }
 
         function hideEditRecordModal() {
-             // ... (Lógica de hideEditRecordModal) ...
             document.getElementById('editRecordModal').classList.add('hidden');
             editingRecordId = null;
         }
 
         function showHelpModal() {
-             // ... (Lógica de showHelpModal) ...
             document.getElementById('helpModal').classList.remove('hidden');
         }
 
         function hideHelpModal() {
-             // ... (Lógica de hideHelpModal) ...
             document.getElementById('helpModal').classList.add('hidden');
         }
 
         // Save Functions
         function saveEmployee() {
-             // ... (Lógica de saveEmployee) ...
             console.log('Guardando empleado');
             const name = document.getElementById('employeeName').value.trim();
             const lastName = document.getElementById('employeeLastName').value.trim();
@@ -2954,7 +2791,6 @@
             const position = document.getElementById('employeePosition').value.trim();
             const accessCode = document.getElementById('employeeAccessCode').value.trim();
             
-            // Validaciones mejoradas
             if (!name || !lastName || !dni || !accessCode) {
                 UI.showNotification('⚠️ Complete todos los campos obligatorios', 'warning');
                 return;
@@ -2965,7 +2801,6 @@
                 return;
             }
             
-            // Validación DNI/NIE español
             if (!validateDNI(dni)) {
                 UI.showNotification('⚠️ DNI/NIE no válido. Formato: 12345678A o X1234567A', 'warning');
                 return;
@@ -2976,7 +2811,6 @@
                 return;
             }
             
-            // Verificar duplicados (excluyendo el empleado que se está editando)
             const existingEmployee = employees.find(emp => 
                 (emp.accessCode === accessCode || emp.dni === dni) && 
                 emp.id !== editingEmployeeId
@@ -2991,7 +2825,6 @@
                 return;
             }
             
-            // Obtener jornada laboral
             const workingHoursSelect = document.getElementById('employeeWorkingHours').value;
             let workingHours;
             
@@ -3030,14 +2863,13 @@
                 UI.showNotification('✅ Empleado creado correctamente', 'success');
             }
             
-            saveEmployees(); // AHORA ESTO SINCRONIZA CON FIREBASE
+            saveEmployees();
             populateSelects();
             loadEmployees();
             hideEmployeeModal();
         }
 
         function saveManualRecord() {
-             // ... (Lógica de saveManualRecord) ...
             console.log('Guardando registro manual');
             const employeeId = document.getElementById('manualRecordEmployee').value;
             const date = document.getElementById('manualRecordDate').value;
@@ -3055,13 +2887,11 @@
                 return;
             }
             
-            // Validar rango de tiempo
             if (timeIn && timeOut && !validateTimeRange(timeIn, timeOut)) {
                 UI.showNotification('⚠️ El rango de tiempo no es válido (máximo 16 horas)', 'warning');
                 return;
             }
             
-            // Verificar si ya existe un registro para esa fecha
             const existingRecord = timeRecords.find(record => 
                 record.employeeId == employeeId && record.date === date
             );
@@ -3071,7 +2901,6 @@
                 return;
             }
             
-            // Validar fecha no futura
             const selectedDate = new Date(date);
             const today = new Date();
             today.setHours(23, 59, 59, 999);
@@ -3099,7 +2928,7 @@
             };
             
             timeRecords.push(newRecord);
-            saveTimeRecords(); // AHORA ESTO SINCRONIZA CON FIREBASE
+            saveTimeRecords();
             loadTimeRecords();
             loadDashboard();
             hideManualRecordModal();
@@ -3107,7 +2936,6 @@
         }
 
         function saveEditRecord() {
-             // ... (Lógica de saveEditRecord) ...
             console.log('Guardando edición de registro');
             if (!editingRecordId) return;
             
@@ -3125,7 +2953,7 @@
             record.totalHours = (timeIn && timeOut) ? calculateHours(timeIn, timeOut) : 0;
             record.notes = notes;
             
-            saveTimeRecords(); // AHORA ESTO SINCRONIZA CON FIREBASE
+            saveTimeRecords();
             loadTimeRecords();
             loadDashboard();
             hideEditRecordModal();
@@ -3133,13 +2961,12 @@
         }
 
         function deleteRecord() {
-             // ... (Lógica de deleteRecord) ...
             console.log('Eliminando registro');
             if (!editingRecordId) return;
             
             if (showConfirmDialog('¿Está seguro de eliminar este registro?')) {
                 timeRecords = timeRecords.filter(r => r.id !== editingRecordId);
-                saveTimeRecords(); // AHORA ESTO SINCRONIZA CON FIREBASE
+                saveTimeRecords(); 
                 loadTimeRecords();
                 loadDashboard();
                 hideEditRecordModal();
@@ -3148,19 +2975,17 @@
         }
 
         function saveCompanySettingsForm() {
-             // ... (Lógica de saveCompanySettingsForm) ...
             console.log('Guardando configuración de empresa');
             companySettings.companyName = document.getElementById('companyName').value;
             companySettings.companyCIF = document.getElementById('companyCIF').value;
             companySettings.companyAddress = document.getElementById('companyAddress').value;
             companySettings.companyPhone = document.getElementById('companyPhone').value;
             
-            ConfigManager.setCompanySettings(companySettings); // AHORA ESTO SINCRONIZA CON FIREBASE
+            ConfigManager.setCompanySettings(companySettings); 
             UI.showNotification('✅ Configuración guardada', 'success');
         }
 
         function saveAdminCredentialsForm() {
-             // ... (Lógica de saveAdminCredentialsForm) ...
             console.log('Guardando credenciales de administrador');
             const currentPassword = document.getElementById('currentAdminPassword').value;
             const newUsername = document.getElementById('adminUsername').value.trim();
@@ -3193,7 +3018,7 @@
             
             adminCredentials.username = newUsername;
             
-            DataManager.setAdminCredentials(adminCredentials); // NO SINCRONIZA CON FIREBASE, ES LOCAL
+            DataManager.setAdminCredentials(adminCredentials);
             
             document.getElementById('currentAdminPassword').value = '';
             document.getElementById('newAdminPassword').value = '';
@@ -3208,7 +3033,6 @@
 
         // Edit Functions
         function editEmployee(id) {
-             // ... (Lógica de editEmployee) ...
             console.log('Editando empleado:', id);
             const employee = employees.find(emp => emp.id === id);
             if (!employee) return;
@@ -3221,13 +3045,11 @@
             document.getElementById('employeePosition').value = employee.position || '';
             document.getElementById('employeeAccessCode').value = employee.accessCode;
             
-            // Configurar jornada laboral
             const workingHours = employee.workingHours || 8;
             const workingHoursSelect = document.getElementById('employeeWorkingHours');
             const customHoursContainer = document.getElementById('customHoursContainer');
             const customHoursInput = document.getElementById('employeeCustomHours');
             
-            // Verificar si es una jornada estándar
             const standardHours = ['8', '7', '6', '5', '4', '3', '2'];
             if (standardHours.includes(workingHours.toString())) {
                 workingHoursSelect.value = workingHours.toString();
@@ -3238,7 +3060,6 @@
                 customHoursContainer.classList.remove('hidden');
             }
             
-            // Cambiar título del modal
             const modalTitle = document.querySelector('#employeeModal .gradient-bg h3');
             if (modalTitle) {
                 modalTitle.textContent = '✏️ Editar Empleado';
@@ -3248,7 +3069,6 @@
         }
 
         function editRecord(id) {
-             // ... (Lógica de editRecord) ...
             console.log('Editando registro:', id);
             const record = timeRecords.find(r => r.id === id);
             if (!record) return;
@@ -3265,7 +3085,6 @@
         }
 
         function toggleEmployeeStatus(id) {
-             // ... (Lógica de toggleEmployeeStatus) ...
             console.log('Cambiando estado de empleado:', id);
             const employee = employees.find(emp => emp.id === id);
             if (!employee) return;
@@ -3275,7 +3094,7 @@
             
             if (showConfirmDialog(`¿Está seguro de ${action} a ${employee.name} ${employee.lastName}?`)) {
                 employee.status = newStatus;
-                saveEmployees(); // AHORA ESTO SINCRONIZA CON FIREBASE
+                saveEmployees(); 
                 loadEmployees();
                 populateSelects();
                 UI.showNotification(`✅ Empleado ${newStatus.toLowerCase()}`, 'success');
@@ -3283,7 +3102,6 @@
         }
 
         async function deleteEmployee(id) {
-             // ... (Lógica de deleteEmployee) ...
             console.log('Eliminando empleado:', id);
             const employee = employees.find(emp => emp.id === id);
             if (!employee) return;
@@ -3296,19 +3114,17 @@
             }
             
             if (await showConfirmDialog(confirmMessage)) {
-                // Eliminar empleado
                 const employeeIndex = employees.findIndex(emp => emp.id === id);
                 if (employeeIndex !== -1) {
                     employees.splice(employeeIndex, 1);
                 }
                 
-                // Eliminar todos los registros del empleado
                 if (hasRecords) {
                     timeRecords = timeRecords.filter(record => record.employeeId !== id);
-                    saveTimeRecords(); // AHORA ESTO SINCRONIZA CON FIREBASE
+                    saveTimeRecords();
                 }
                 
-                saveEmployees(); // AHORA ESTO SINCRONIZA CON FIREBASE
+                saveEmployees();
                 
                 loadEmployees();
                 loadTimeRecords();
@@ -3322,7 +3138,6 @@
 
         // Report Functions
         function generateReport() {
-             // ... (Lógica de generateReport) ...
             console.log('Generando informe');
             const employeeId = document.getElementById('reportEmployee').value;
             const startDate = document.getElementById('reportStartDate').value;
@@ -3409,7 +3224,6 @@
 
         // Filter Functions
         function applyFilters() {
-             // ... (Lógica de applyFilters) ...
             console.log('Aplicando filtros');
             loadTimeRecords();
             UI.showNotification('🔍 Filtros aplicados', 'success');
@@ -3417,7 +3231,6 @@
 
         // Export Functions
         function exportRecords() {
-             // ... (Lógica de exportRecords) ...
             console.log('Exportando registros');
             const csvContent = generateCSV(timeRecords);
             downloadFile(csvContent, 'registros_fichaje.csv', 'text/csv');
@@ -3425,7 +3238,6 @@
         }
 
         function exportAllData() {
-             // ... (Lógica de exportAllData) ...
             console.log('Exportando todos los datos');
             const allData = {
                 employees,
@@ -3442,7 +3254,6 @@
 
         // Import Functions
         function handleImportFile(event) {
-             // ... (Lógica de handleImportFile) ...
             console.log('Importando archivo');
             const file = event.target.files[0];
             if (!file) return;
@@ -3458,7 +3269,6 @@
                     if (data.adminCredentials) adminCredentials = data.adminCredentials;
                     if (data.locationSettings) locationSettings = data.locationSettings;
                     
-                    // Al importar, se usa el setTimeRecords/setEmployees que subirá a Firebase
                     DataManager.setEmployees(employees);
                     DataManager.setTimeRecords(timeRecords);
                     ConfigManager.setCompanySettings(companySettings);
@@ -3481,13 +3291,11 @@
         }
 
         function clearAllData() {
-             // ... (Lógica de clearAllData) ...
             console.log('Limpiando todos los datos');
             if (showConfirmDialog('¿Está seguro de eliminar TODOS los datos? Esta acción no se puede deshacer.')) {
                 employees.length = 0;
                 timeRecords.length = 0;
                 
-                // Actualiza Firebase y local
                 DataManager.setEmployees([]);
                 DataManager.setTimeRecords([]);
                 
@@ -3503,7 +3311,6 @@
 
         // Notification Functions
         function showConfirmDialog(message) {
-             // ... (Lógica de showConfirmDialog) ...
             const overlay = document.createElement('div');
             overlay.className = 'modal-overlay';
             overlay.style.zIndex = '9999';
@@ -3552,7 +3359,6 @@
         }
 
         function generateCSV(records) {
-             // ... (Lógica de generateCSV) ...
             const headers = ['Empleado', 'Fecha', 'Entrada', 'Salida', 'Total Horas', 'Notas'];
             const csvRows = [headers.join(',')];
             
@@ -3572,7 +3378,6 @@
         }
 
         function downloadFile(content, filename, mimeType) {
-             // ... (Lógica de downloadFile) ...
             const blob = new Blob([content], { type: mimeType });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -3585,7 +3390,6 @@
         }
 
         function setDefaultDates() {
-             // ... (Lógica de setDefaultDates) ...
             const today = formatDate(new Date());
             const weekAgo = formatDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
             
@@ -3607,11 +3411,10 @@
         }
 
         function syncNow() {
-            // El guardado se hace con cada acción, pero forzamos la subida de datos por si acaso.
             DataManager.setEmployees(employees);
             DataManager.setTimeRecords(timeRecords);
-            DataManager.setGlobalConfig('companySettings', companySettings);
-            DataManager.setGlobalConfig('locationSettings', locationSettings);
+            ConfigManager.setCompanySettings(companySettings);
+            ConfigManager.setLocationSettings(locationSettings);
             
             UI.showNotification('☁️ Sincronización manual completada (usando Firebase)', 'success');
         }
@@ -3634,7 +3437,6 @@
             const statusElement = document.getElementById('cloudSyncStatus');
             if (!statusElement) return;
             
-            // Forzamos el estado de Firebase en el UI
             const lastSyncText = new Date().toLocaleTimeString('es-ES');
                 
             statusElement.innerHTML = `
@@ -3650,19 +3452,17 @@
         }
 
         function loadCloudSettings() {
-            // Cambiamos el UI para reflejar que se usa Firebase en lugar de JSONBin.io
-            document.getElementById('enableCloudSync').checked = true;
             document.getElementById('cloudApiKey').value = '********';
             document.getElementById('cloudBinId').value = '********';
-            document.getElementById('enableAutoSync').checked = true;
-            document.getElementById('syncInterval').value = 0.03; 
-            document.getElementById('syncIntervalValue').textContent = 'Tiempo Real';
             
+            // Deshabilitar campos y actualizar el texto de "Tiempo Real"
             document.getElementById('cloudApiKey').disabled = true;
             document.getElementById('cloudBinId').disabled = true;
+            document.getElementById('enableAutoSync').checked = true;
             document.getElementById('enableAutoSync').disabled = true;
             document.getElementById('syncInterval').disabled = true;
             document.getElementById('saveCloudSettings').disabled = true;
+            document.getElementById('syncIntervalValue').textContent = 'Tiempo Real';
 
             updateCloudSyncStatus();
         }
@@ -3670,7 +3470,6 @@
         function saveCloudSettingsForm() {
             UI.showNotification('⚠️ La sincronización usa Firebase y se configura automáticamente. Los campos de JSONBin ya no se usan.', 'warning');
         }
-
 
         // Data persistence functions con Firebase
         function saveEmployees() {
@@ -3711,7 +3510,7 @@
             const outMinutes = outHour * 60 + outMinute;
             
             let diffMinutes = outMinutes - inMinutes;
-            if (diffMinutes < 0) diffMinutes += 24 * 60; // Handle overnight shifts
+            if (diffMinutes < 0) diffMinutes += 24 * 60; 
             
             return diffMinutes / 60;
         }
@@ -3762,7 +3561,6 @@
                 ).join('');
         }
 
-        // Nuevas funciones de utilidad
         function validateDNI(dni) {
             const dniRegex = /^[0-9]{8}[TRWAGMYFPDXBNJZSQVHLCKE]$/;
             const nieRegex = /^[XYZ][0-9]{7}[TRWAGMYFPDXBNJZSQVHLCKE]$/;
@@ -3786,7 +3584,7 @@
         }
 
         function setupActivityMonitoring() {
-            const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutos
+            const INACTIVITY_TIMEOUT = 30 * 60 * 1000; 
             
             function resetActivity() {
                 lastActivity = Date.now();
@@ -3828,7 +3626,6 @@
                             break;
                         case 's':
                             e.preventDefault();
-                            // Sincronización manual de datos de fichaje
                             syncNow();
                             UI.showNotification('💾 Datos guardados', 'success');
                             break;
@@ -3855,15 +3652,12 @@
         }
 
         function setupAutoSave() {
-            // El auto-guardado ahora solo sube a Firebase, ya no descarga.
-            // La descarga es gestionada por los listeners de Firebase.
             autoSaveTimer = setInterval(() => {
                 if (currentUser) {
-                    // Solo forzamos el guardado de los datos de fichaje (que usan set/push de firebase)
                     saveEmployees();
                     saveTimeRecords();
                 }
-            }, 120000); // Cada 2 minutos
+            }, 120000);
         }
 
         function formatTimeAgo(dateString) {
@@ -3899,10 +3693,10 @@
             const outMinutes = outHour * 60 + outMinute;
             
             if (outMinutes < inMinutes) {
-                return (outMinutes + 24 * 60) - inMinutes <= 16 * 60; // Máximo 16 horas
+                return (outMinutes + 24 * 60) - inMinutes <= 16 * 60;
             }
             
-            return outMinutes - inMinutes <= 16 * 60; // Máximo 16 horas
+            return outMinutes - inMinutes <= 16 * 60;
         }
     </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9907ba73137aec95',t:'MTc2MDc4NzI4NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
