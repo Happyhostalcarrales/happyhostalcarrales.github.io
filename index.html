@@ -567,6 +567,9 @@
                                     📍 Actualizar Ubicación
                                 </button>
                             </div>
+
+                            <div id="employeeNameDisplay" class="employee-only text-4xl font-extrabold text-purple-700 mb-6 hidden">
+                                </div>
                             
                             <div class="grid grid-cols-2 gap-3">
                                 <button id="clockInBtn" class="btn-success text-white font-bold py-4 px-6 rounded-xl">
@@ -1190,7 +1193,7 @@
         // Inicializa Firebase
         firebase.initializeApp(firebaseConfig);
 
-        // Referencias a los nodos de la base de datos (Se elimina refEstadoHostal)
+        // Referencias a los nodos de la base de datos
         const db = firebase.database();
         const refEmpleados = db.ref('fichaje/employees');
         const refRegistros = db.ref('fichaje/timeRecords');
@@ -1773,7 +1776,15 @@
             document.querySelectorAll('.employee-only').forEach(element => {
                 element.style.display = 'block';
             });
-            
+
+            // NUEVA LÓGICA: Mostrar el nombre del empleado en grande al entrar
+            const nameDisplay = document.getElementById('employeeNameDisplay');
+            if (nameDisplay && currentUser && currentUser.type === 'employee') {
+                nameDisplay.textContent = `${currentUser.name} ${currentUser.lastName}`;
+                nameDisplay.classList.remove('hidden'); 
+            }
+
+            // Lógica existente para el botón de refresco de ubicación
             const locationRefreshContainer = document.getElementById('locationRefreshContainer');
             if (locationRefreshContainer && locationSettings.enabled) {
                 locationRefreshContainer.classList.remove('hidden');
@@ -1789,6 +1800,12 @@
             document.querySelectorAll('.employee-only').forEach(element => {
                 element.style.display = 'none';
             });
+
+            // NUEVA LÓGICA: Ocultar el nombre del empleado cuando entra el admin
+            const nameDisplay = document.getElementById('employeeNameDisplay');
+            if (nameDisplay) {
+                nameDisplay.classList.add('hidden'); 
+            }
         }
 
         function logout() {
@@ -3455,7 +3472,6 @@
             document.getElementById('cloudApiKey').value = '********';
             document.getElementById('cloudBinId').value = '********';
             
-            // Deshabilitar campos y actualizar el texto de "Tiempo Real"
             document.getElementById('cloudApiKey').disabled = true;
             document.getElementById('cloudBinId').disabled = true;
             document.getElementById('enableAutoSync').checked = true;
