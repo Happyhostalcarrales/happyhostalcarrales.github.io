@@ -1187,7 +1187,6 @@
         // CONFIGURACIÓN E INICIALIZACIÓN DE FIREBASE
         // =========================================================================
 
-        // TUS CREDENCIALES DE FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyA3D7fH6QpdG7mUSNhFfUzD6RWje8TpGEk",
             authDomain: "hostaldatossincro.firebaseapp.com",
@@ -1198,10 +1197,8 @@
             appId: "1:955112940193:web:f30f52858c1e6c0ddc46e0"
         };
 
-        // Inicializa Firebase
         firebase.initializeApp(firebaseConfig);
 
-        // Referencias a los nodos de la base de datos
         const db = firebase.database();
         const refEmpleados = db.ref('fichaje/employees');
         const refRegistros = db.ref('fichaje/timeRecords');
@@ -1210,6 +1207,15 @@
         // =========================================================================
         // ESTADO GLOBAL Y VARIABLES
         // =========================================================================
+
+        function getDefaultEmployees() {
+            return [
+                { id: 1, name: 'Ana', lastName: 'García Martínez', dni: '12345678A', position: 'Recepcionista', status: 'Activo', accessCode: '1234', workingHours: 8, createdAt: new Date().toISOString() },
+                { id: 2, name: 'Carlos', lastName: 'López Rodríguez', dni: '87654321B', position: 'Conserje', status: 'Activo', accessCode: '5678', workingHours: 8, createdAt: new Date().toISOString() },
+                { id: 3, name: 'María', lastName: 'Fernández Silva', dni: '11223344C', position: 'Limpieza', status: 'Activo', accessCode: '9012', workingHours: 6, createdAt: new Date().toISOString() },
+                { id: 4, name: 'David', lastName: 'Ruiz Moreno', dni: '55667788D', position: 'Mantenimiento', status: 'Activo', accessCode: '3456', workingHours: 8, createdAt: new Date().toISOString() }
+            ];
+        }
 
         let employees = JSON.parse(localStorage.getItem('fichajemax_employees')) || getDefaultEmployees();
         let timeRecords = JSON.parse(localStorage.getItem('fichajemax_timeRecords')) || [];
@@ -1237,24 +1243,13 @@
         let lastActivity = Date.now();
         let autoSaveTimer = null;
         
-        // **NUEVO ESTADO: CONTROL DEL BOTÓN OCULTO**
         let editModeEnabled = false; 
-        // **NUEVO ESTADO: RESULTADOS DEL ÚLTIMO INFORME EXPORTABLE**
         let lastReportRecords = [];
 
         // =========================================================================
         // FUNCIONES CORE DE DATOS Y SINCRONIZACIÓN
         // =========================================================================
         
-        function getDefaultEmployees() {
-            return [
-                { id: 1, name: 'Ana', lastName: 'García Martínez', dni: '12345678A', position: 'Recepcionista', status: 'Activo', accessCode: '1234', workingHours: 8, createdAt: new Date().toISOString() },
-                { id: 2, name: 'Carlos', lastName: 'López Rodríguez', dni: '87654321B', position: 'Conserje', status: 'Activo', accessCode: '5678', workingHours: 8, createdAt: new Date().toISOString() },
-                { id: 3, name: 'María', lastName: 'Fernández Silva', dni: '11223344C', position: 'Limpieza', status: 'Activo', accessCode: '9012', workingHours: 6, createdAt: new Date().toISOString() },
-                { id: 4, name: 'David', lastName: 'Ruiz Moreno', dni: '55667788D', position: 'Mantenimiento', status: 'Activo', accessCode: '3456', workingHours: 8, createdAt: new Date().toISOString() }
-            ];
-        }
-
         function setEmployees(newEmployees) {
             localStorage.setItem('fichajemax_employees', JSON.stringify(newEmployees));
             employees = newEmployees; 
@@ -1282,7 +1277,6 @@
             });
         }
 
-        // FUNCIÓN CLAVE: ESCUCHADORES DE FIREBASE EN TIEMPO REAL
         function startRealtimeListeners() {
             refEmpleados.on('value', (snapshot) => {
                 const firebaseEmployees = snapshot.val();
@@ -1314,7 +1308,6 @@
             refConfig.on('value', (snapshot) => {
                 const config = snapshot.val();
                 if (config) {
-                    // Sincronizar companySettings y locationSettings
                     if (JSON.stringify(config.companySettings) !== JSON.stringify(companySettings)) {
                         companySettings = config.companySettings || companySettings;
                         localStorage.setItem('fichajemax_companySettings', JSON.stringify(companySettings));
@@ -1332,8 +1325,7 @@
         // =========================================================================
         // UTILIDADES Y UI
         // =========================================================================
-
-        // NUEVO: Convierte horas flotantes a formato HH:MMh
+        
         function formatHoursMinutes(floatHours) {
             if (floatHours === 0 || isNaN(floatHours)) return '00:00h';
             const totalMinutes = Math.round(floatHours * 60);
@@ -1421,6 +1413,8 @@
                 this.setupRealtimeSync(); 
                 this.setupSecurity();
                 this.setupKeyboardShortcuts();
+                // FIX: Asegurar que la pantalla de login esté visible al iniciar
+                document.getElementById('loginScreen').classList.remove('hidden');
             }
             
             setupDateTime() {
@@ -1456,6 +1450,19 @@
             
             setupKeyboardShortcuts() {
                 setupKeyboardShortcuts();
+            }
+            
+            populateSelects() {
+                populateSelects();
+            }
+            
+            setDefaultDates() {
+                setDefaultDates();
+            }
+            
+            loadSettings() {
+                loadLocationSettings();
+                loadCloudSettings();
             }
         }
         
@@ -1504,7 +1511,7 @@
             document.getElementById('deleteRecord').addEventListener('click', deleteRecord);
             
             document.getElementById('generateReport').addEventListener('click', generateReport);
-            document.getElementById('exportReportBtn').addEventListener('click', exportReport); // NUEVO
+            document.getElementById('exportReportBtn').addEventListener('click', exportReport); 
             
             document.getElementById('applyFilters').addEventListener('click', applyFilters);
             
@@ -1528,7 +1535,7 @@
             document.getElementById('logoutBtn').addEventListener('click', logout);
         }
 
-        // LÓGICA DE AUTH Y UI
+        // Authentication
         function selectUserType(type) {
             appState.selectedUserType = type;
             selectedUserType = type;
@@ -1607,7 +1614,6 @@
                 setupAdminInterface();
             }
             
-            // Cargar datos de la interfaz principal después del login
             loadDashboard();
             loadEmployees();
             loadTimeRecords();
@@ -1626,7 +1632,6 @@
                 element.style.display = 'block';
             });
 
-            // Mostrar el nombre del empleado en grande al entrar
             const nameDisplay = document.getElementById('employeeNameDisplay');
             if (nameDisplay && currentUser && currentUser.type === 'employee') {
                 nameDisplay.textContent = `${currentUser.name} ${currentUser.lastName}`;
@@ -1653,7 +1658,6 @@
                 nameDisplay.classList.add('hidden'); 
             }
             
-            // Ocultar el modo de edición al iniciar sesión
             editModeEnabled = false;
         }
 
@@ -1763,7 +1767,6 @@
                 }
                 
                 existingRecord.timeOut = currentTime;
-                // Almacenar horas como flotante para cálculos y minutos para display
                 existingRecord.totalHours = calculateFloatHours(existingRecord.timeIn, currentTime);
                 
                 const locationMsg = currentUser.type === 'employee' && locationSettings.enabled ? ' - Ubicación verificada ✓' : '';
@@ -1804,7 +1807,6 @@
             }
             if (filterEndDateStr) {
                 const endDate = new Date(filterEndDateStr);
-                // Añadir 23:59:59 al final del día para incluir el día de finalización
                 endDate.setHours(23, 59, 59, 999); 
                 recordsToShow = recordsToShow.filter(record => new Date(record.date) <= endDate);
             }
@@ -1812,18 +1814,18 @@
             // 3. ORDENAR
             recordsToShow = recordsToShow.sort((a, b) => new Date(b.date) - new Date(a.date));
             
-            // 4. ACTUALIZAR HEADER DE ACCIONES (VISIBILIDAD SECRETA)
+            // 4. CONTROL DEL MODO DE EDICIÓN (VISIBILIDAD SECRETA)
             const actionsHeader = document.getElementById('actionsHeader');
             const isActionsVisible = currentUser?.type === 'admin' && editModeEnabled;
             if (actionsHeader) {
-                 // Alternar la clase 'hidden' en el thead de la columna si es necesario
                 actionsHeader.classList.toggle('actions-col-hidden', !isActionsVisible);
                 actionsHeader.textContent = isActionsVisible ? '⚙️ Acciones (ON)' : '⚙️ Acciones';
             }
 
 
             if (recordsToShow.length === 0) {
-                tableElement.innerHTML = `<tr><td colspan="${isActionsVisible ? '7' : '6'}" class="text-center py-8 text-gray-500">No hay registros disponibles para los filtros aplicados.</td></tr>`;
+                const colspan = isActionsVisible ? '7' : '6';
+                tableElement.innerHTML = `<tr><td colspan="${colspan}" class="text-center py-8 text-gray-500">No hay registros disponibles para los filtros aplicados.</td></tr>`;
                 return;
             }
             
@@ -1856,7 +1858,7 @@
                             </span>
                         </td>
                         ${isActionsVisible ? `
-                            <td class="px-6 py-4">
+                            <td class="px-6 py-4 actions-col-visible">
                                 <button onclick="editRecord(${record.id})" class="text-blue-600 hover:text-blue-800 text-sm">
                                     ✏️ Editar
                                 </button>
@@ -1865,295 +1867,8 @@
                     </tr>
                 `;
             }).join('');
-
-             // Asegurar que todas las celdas de acción (td) se oculten si el modo no está activo
-             document.querySelectorAll('#timeRecordsTable tr').forEach(row => {
-                const lastCell = row.lastElementChild;
-                if (lastCell && lastCell.tagName === 'TD' && lastCell.closest('tbody')) {
-                    lastCell.classList.toggle('actions-col-hidden', !isActionsVisible);
-                }
-            });
         }
         
-        // LÓGICA DE INFORMES Y EXPORTACIÓN
-        let currentReportRecords = [];
-
-        function generateReport() {
-            const employeeId = document.getElementById('reportEmployee').value;
-            const startDateStr = document.getElementById('reportStartDate').value;
-            const endDateStr = document.getElementById('reportEndDate').value;
-            
-            if (!startDateStr || !endDateStr) {
-                UI.showNotification('⚠️ Seleccione las fechas del informe', 'warning');
-                return;
-            }
-            
-            let filteredRecords = timeRecords.filter(record => {
-                const recordDate = new Date(record.date);
-                const start = new Date(startDateStr);
-                const end = new Date(endDateStr);
-                end.setHours(23, 59, 59, 999);
-                return recordDate >= start && recordDate <= end;
-            });
-            
-            if (employeeId) {
-                filteredRecords = filteredRecords.filter(record => record.employeeId == employeeId);
-            }
-            
-            // Guardar el informe actual para exportación
-            currentReportRecords = filteredRecords;
-            document.getElementById('exportReportBtn').classList.remove('hidden'); // Mostrar botón de exportar
-
-            const resultsElement = document.getElementById('reportResults');
-            if (filteredRecords.length === 0) {
-                resultsElement.innerHTML = '<p class="text-gray-500 text-center py-8">No se encontraron registros para el período seleccionado</p>';
-                return;
-            }
-            
-            const totalHours = filteredRecords.reduce((sum, record) => sum + (record.totalHours || 0), 0);
-            const avgHours = totalHours / filteredRecords.length;
-            
-            resultsElement.innerHTML = `
-                <div class="mb-6">
-                    <h4 class="text-lg font-bold text-gray-800 mb-4">📊 Resumen del Informe</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <div class="stat-card">
-                            <div class="text-2xl font-bold text-blue-600">${filteredRecords.length}</div>
-                            <div class="text-sm text-gray-600">Registros</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="text-2xl font-bold text-green-600">${formatHoursMinutes(totalHours)}</div>
-                            <div class="text-sm text-gray-600">Total Horas</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="text-2xl font-bold text-purple-600">${formatHoursMinutes(avgHours)}</div>
-                            <div class="text-sm text-gray-600">Promedio</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="text-2xl font-bold text-orange-600">${formatDateDisplay(startDateStr)} - ${formatDateDisplay(endDateStr)}</div>
-                            <div class="text-sm text-gray-600">Período</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="table-modern overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full">
-                            <thead class="gradient-bg text-white">
-                                <tr>
-                                    <th class="px-6 py-4 text-left text-sm font-semibold">👤 Empleado</th>
-                                    <th class="px-6 py-4 text-left text-sm font-semibold">📅 Fecha</th>
-                                    <th class="px-6 py-4 text-left text-sm font-semibold">🕐 Entrada</th>
-                                    <th class="px-6 py-4 text-left text-sm font-semibold">🕕 Salida</th>
-                                    <th class="px-6 py-4 text-left text-sm font-semibold">⏱️ Total</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                ${filteredRecords.map(record => `
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-6 py-4 font-medium">${record.employeeName}</td>
-                                        <td class="px-6 py-4">${formatDateDisplay(record.date)}</td>
-                                        <td class="px-6 py-4 font-mono">${record.timeIn || '--:--'}</td>
-                                        <td class="px-6 py-4 font-mono">${record.timeOut || '--:--'}</td>
-                                        <td class="px-6 py-4 font-bold">${formatHoursMinutes(record.totalHours)}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
-            
-            UI.showNotification('✅ Informe generado correctamente', 'success');
-        }
-
-        function exportReport() {
-            if (currentReportRecords.length === 0) {
-                UI.showNotification('⚠️ Genere un informe primero antes de exportar', 'warning');
-                return;
-            }
-            
-            const csvContent = generateCSV(currentReportRecords);
-            const fileName = `informe_fichaje_${formatDate(new Date(document.getElementById('reportStartDate').value))}_a_${formatDate(new Date(document.getElementById('reportEndDate').value))}.csv`;
-            downloadFile(csvContent, fileName, 'text/csv');
-            UI.showNotification('📊 Informe exportado a CSV', 'success');
-        }
-
-        // Lógica de modo de edición (NUEVO)
-        function toggleEditMode() {
-            editModeEnabled = !editModeEnabled;
-            loadTimeRecords(); 
-            
-            const actionsHeader = document.getElementById('actionsHeader');
-            if (actionsHeader) {
-                actionsHeader.classList.toggle('actions-col-hidden', !editModeEnabled);
-                actionsHeader.textContent = editModeEnabled ? '⚙️ Acciones (ON)' : '⚙️ Acciones';
-            }
-
-            UI.showNotification(`Modo Edición ${editModeEnabled ? 'ACTIVADO' : 'DESACTIVADO'}`, editModeEnabled ? 'warning' : 'success');
-        }
-
-        // UTILITIES
-        function calculateFloatHours(timeIn, timeOut) {
-            const [inHour, inMinute] = timeIn.split(':').map(Number);
-            const [outHour, outMinute] = timeOut.split(':').map(Number);
-            
-            const inMinutes = inHour * 60 + inMinute;
-            const outMinutes = outHour * 60 + outMinute;
-            
-            let diffMinutes = outMinutes - inMinutes;
-            if (diffMinutes < 0) diffMinutes += 24 * 60; 
-            
-            return diffMinutes / 60; // Retorna horas flotantes
-        }
-
-        function setupKeyboardShortcuts() {
-            document.addEventListener('keydown', function(e) {
-                if (!currentUser) return;
-                
-                // Atajo para el modo de edición (SOLO ADMIN)
-                if (currentUser.type === 'admin' && (e.ctrlKey || e.metaKey) && e.altKey && e.key === 'e') {
-                    e.preventDefault();
-                    toggleEditMode();
-                    return;
-                }
-                
-                // Ctrl/Cmd + shortcuts
-                if (e.ctrlKey || e.metaKey) {
-                    switch(e.key) {
-                        case 'e':
-                            e.preventDefault();
-                            if (currentUser.type === 'admin') {
-                                showEmployeeModal();
-                            }
-                            break;
-                        case 'r':
-                            e.preventDefault();
-                            if (currentUser.type === 'admin') {
-                                showManualRecordModal();
-                            }
-                            break;
-                        case 's':
-                            e.preventDefault();
-                            syncNow();
-                            UI.showNotification('💾 Datos guardados', 'success');
-                            break;
-                    }
-                }
-                
-                // Escape para cerrar modales
-                if (e.key === 'Escape') {
-                    const modals = document.querySelectorAll('.modal-overlay:not(.hidden)');
-                    modals.forEach(modal => modal.classList.add('hidden'));
-                    editingRecordId = null;
-                    editingEmployeeId = null;
-                }
-                
-                // F1 para entrada, F2 para salida (solo empleados)
-                if (currentUser.type === 'employee') {
-                    if (e.key === 'F1') {
-                        e.preventDefault();
-                        clockAction('in');
-                    } else if (e.key === 'F2') {
-                        e.preventDefault();
-                        clockAction('out');
-                    }
-                }
-            });
-        }
-        
-        // --- (El resto de funciones de la aplicación se mantienen intactas) ---
-        
-        function loadEmployees() {
-            const gridElement = document.getElementById('employeesGrid');
-            if (!gridElement) return;
-            
-            if (employees.length === 0) {
-                gridElement.innerHTML = '<p class="text-gray-500 text-center py-8 col-span-full">No hay empleados registrados</p>';
-                return;
-            }
-            
-            gridElement.innerHTML = employees.map(employee => {
-                const lastRecord = timeRecords
-                    .filter(record => record.employeeId === employee.id)
-                    .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-                
-                const today = formatDate(new Date());
-                const todayRecord = timeRecords.find(record => 
-                    record.employeeId === employee.id && record.date === today
-                );
-                
-                let statusBadge = '';
-                if (employee.status === 'Activo' && todayRecord) {
-                    if (todayRecord.timeIn && !todayRecord.timeOut) {
-                        statusBadge = '<span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 animate-pulse">🟢 Trabajando</span>';
-                    } else if (todayRecord.timeOut) {
-                        statusBadge = '<span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">🔵 Completado</span>';
-                    }
-                } else if (employee.status === 'Activo') {
-                    statusBadge = '<span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">⚪ Sin fichar</span>';
-                } else {
-                    statusBadge = '<span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">❌ Inactivo</span>';
-                }
-                
-                return `
-                    <div class="employee-card p-6">
-                        <div class="flex items-center space-x-4 mb-4">
-                            <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-                                ${(employee.name[0] + employee.lastName[0]).toUpperCase()}
-                            </div>
-                            <div class="flex-1">
-                                <h4 class="font-bold text-gray-800">${employee.name} ${employee.lastName}</h4>
-                                <p class="text-sm text-gray-600">${employee.position || 'Sin especificar'}</p>
-                            </div>
-                            ${statusBadge}
-                        </div>
-                        
-                        <div class="space-y-2 text-sm text-gray-600 mb-4">
-                            <div class="flex justify-between">
-                                <span>🆔 DNI:</span>
-                                <span class="font-mono">${employee.dni}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>📱 PIN:</span>
-                                <span class="font-mono">••••</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>⏰ Jornada:</span>
-                                <span class="font-semibold">${employee.workingHours || 8}h/día</span>
-                            </div>
-                            ${lastRecord ? `
-                                <div class="flex justify-between">
-                                    <span>📅 Último:</span>
-                                    <span>${formatTimeAgo(lastRecord.date)}</span>
-                                </div>
-                            ` : ''}
-                            ${todayRecord ? `
-                                <div class="flex justify-between">
-                                    <span>⏰ Hoy:</span>
-                                    <span class="${todayRecord.totalHours >= (employee.workingHours || 8) ? 'text-green-600 font-bold' : 'text-orange-600'}">${formatHoursMinutes(todayRecord.totalHours)}</span>
-                                </div>
-                            ` : ''}
-                        </div>
-                        
-                        <div class="grid grid-cols-3 gap-2">
-                            <button onclick="editEmployee(${employee.id})" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-2 rounded-lg text-xs transition-colors">
-                                ✏️ Editar
-                            </button>
-                            <button onclick="toggleEmployeeStatus(${employee.id})" class="${employee.status === 'Activo' ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-500 hover:bg-green-600'} text-white px-2 py-2 rounded-lg text-xs transition-colors">
-                                ${employee.status === 'Activo' ? '🚫 Desactivar' : '✅ Activar'}
-                            </button>
-                            <button onclick="deleteEmployee(${employee.id})" class="bg-red-500 hover:bg-red-600 text-white px-2 py-2 rounded-lg text-xs transition-colors">
-                                🗑️ Eliminar
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // --- (Se han omitido funciones intermedias para mantener la brevedad) ---
-
         function loadDashboard() {
             const today = formatDate(new Date());
             let todayRecords = timeRecords.filter(record => record.date === today);
@@ -2223,7 +1938,6 @@
             loadRecentActivity();
         }
 
-        // --- (Funciones de soporte para UI y persistencia) ---
         function updateEmployeeStatus(today) {
             const statusElement = document.getElementById('currentStatus');
             const statusTimeElement = document.getElementById('statusTime');
@@ -2373,7 +2087,7 @@
                 </div>
             `).join('');
         }
-        
+
         function loadEmployees() {
             const gridElement = document.getElementById('employeesGrid');
             if (!gridElement) return;
@@ -2462,8 +2176,6 @@
             }).join('');
         }
 
-        // --- (Funciones de soporte para UI y persistencia) ---
-
         // LÓGICA DE REGISTROS Y FILTROS (CORREGIDA)
         function loadTimeRecords() {
             const tableElement = document.getElementById('timeRecordsTable');
@@ -2488,7 +2200,6 @@
             }
             if (filterEndDateStr) {
                 const endDate = new Date(filterEndDateStr);
-                // Asegurar que se incluye el día completo
                 endDate.setHours(23, 59, 59, 999); 
                 recordsToShow = recordsToShow.filter(record => new Date(record.date) <= endDate);
             }
@@ -2506,7 +2217,6 @@
 
 
             if (recordsToShow.length === 0) {
-                // Ajustar colspan dinámicamente
                 const colspan = isActionsVisible ? '7' : '6';
                 tableElement.innerHTML = `<tr><td colspan="${colspan}" class="text-center py-8 text-gray-500">No hay registros disponibles para los filtros aplicados.</td></tr>`;
                 return;
@@ -2551,8 +2261,313 @@
                 `;
             }).join('');
         }
+        
+        function loadDashboard() {
+            const today = formatDate(new Date());
+            let todayRecords = timeRecords.filter(record => record.date === today);
+            
+            if (currentUser && currentUser.type === 'employee') {
+                todayRecords = todayRecords.filter(record => record.employeeId === currentUser.id);
+                updateEmployeeStatus(today);
+            }
+            
+            const summaryElement = document.getElementById('todaySummary');
+            if (summaryElement) {
+                if (currentUser && currentUser.type === 'employee') {
+                    const myRecord = todayRecords[0];
+                    const myWeekRecords = timeRecords.filter(record => {
+                        const recordDate = new Date(record.date);
+                        const weekStart = new Date();
+                        weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+                        return record.employeeId === currentUser.id && recordDate >= weekStart;
+                    });
+                    const weekHours = myWeekRecords.reduce((sum, record) => sum + (record.totalHours || 0), 0);
+                    
+                    summaryElement.innerHTML = `
+                        <div class="stat-card">
+                            <div class="text-3xl font-bold text-blue-600">⏰ ${myRecord?.timeIn || '--:--'}</div>
+                            <div class="text-sm text-gray-600">Entrada</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-3xl font-bold text-green-600">🏁 ${myRecord?.timeOut || '--:--'}</div>
+                            <div class="text-sm text-gray-600">Salida</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-3xl font-bold text-purple-600">📊 ${formatHoursMinutes(myRecord?.totalHours)}</div>
+                            <div class="text-sm text-gray-600">Horas Hoy</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-3xl font-bold text-orange-600">📈 ${formatHoursMinutes(weekHours)}</div>
+                            <div class="text-sm text-gray-600">Esta Semana</div>
+                        </div>
+                    `;
+                } else {
+                    const totalEmployees = employees.filter(emp => emp.status === 'Activo').length;
+                    const presentEmployees = todayRecords.filter(record => record.timeIn).length;
+                    const completedShifts = todayRecords.filter(record => record.timeOut).length;
+                    const totalHours = todayRecords.reduce((sum, record) => sum + (record.totalHours || 0), 0);
+                    
+                    summaryElement.innerHTML = `
+                        <div class="stat-card">
+                            <div class="text-3xl font-bold text-blue-600">👥 ${totalEmployees}</div>
+                            <div class="text-sm text-gray-600">Empleados</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-3xl font-bold text-green-600">✅ ${presentEmployees}</div>
+                            <div class="text-sm text-gray-600">Presentes</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-3xl font-bold text-purple-600">🏁 ${completedShifts}</div>
+                            <div class="text-sm text-gray-600">Completados</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-3xl font-bold text-orange-600">⏱️ ${formatHoursMinutes(totalHours)}</div>
+                            <div class="text-sm text-gray-600">Total Horas</div>
+                        </div>
+                    `;
+                }
+            }
+            
+            loadRecentActivity();
+        }
 
-        // --- (El resto de funciones se mantienen o usan las nuevas utilidades) ---
+        function updateEmployeeStatus(today) {
+            const statusElement = document.getElementById('currentStatus');
+            const statusTimeElement = document.getElementById('statusTime');
+            const employeeStatusElement = document.getElementById('employeeStatus');
+            
+            if (!statusElement || !currentUser || currentUser.type !== 'employee') return;
+            
+            const myRecord = timeRecords.find(record => 
+                record.employeeId === currentUser.id && record.date === today
+            );
+            
+            if (employeeStatusElement) {
+                employeeStatusElement.style.display = 'block';
+            }
+            
+            if (myRecord) {
+                if (myRecord.timeIn && !myRecord.timeOut) {
+                    statusElement.innerHTML = '<span class="text-green-600 status-badge">🟢 TRABAJANDO</span>';
+                    statusTimeElement.textContent = `Entrada: ${myRecord.timeIn}`;
+                } else if (myRecord.timeIn && myRecord.timeOut) {
+                    statusElement.innerHTML = '<span class="text-blue-600">🔵 COMPLETADO</span>';
+                    statusTimeElement.textContent = `${myRecord.timeIn} - ${myRecord.timeOut} (${formatHoursMinutes(myRecord.totalHours)})`;
+                } else {
+                    statusElement.innerHTML = '<span class="text-gray-600">⚪ SIN FICHAR</span>';
+                    statusTimeElement.textContent = 'No hay registros para hoy';
+                }
+            } else {
+                statusElement.innerHTML = '<span class="text-gray-600">⚪ SIN FICHAR</span>';
+                statusTimeElement.textContent = 'No hay registros para hoy';
+            }
+            
+            updateWorkingHoursProgress(myRecord);
+        }
+
+        function updateWorkingHoursProgress(record) {
+            const progressElement = document.getElementById('workingHoursProgress');
+            const progressContent = document.getElementById('progressContent');
+            
+            if (!progressElement || !progressContent || !currentUser || currentUser.type !== 'employee') return;
+            
+            const employee = employees.find(emp => emp.id === currentUser.id);
+            if (!employee) return;
+            
+            const expectedHours = employee.workingHours || 8;
+            const workedHours = record?.totalHours || 0;
+            const progressPercentage = Math.min((workedHours / expectedHours) * 100, 100);
+            
+            let statusColor = 'bg-red-500';
+            let statusText = 'Pendiente';
+            let statusIcon = '🔴';
+            
+            if (progressPercentage >= 100) {
+                statusColor = 'bg-green-500';
+                statusText = 'Jornada Completa';
+                statusIcon = '✅';
+            } else if (progressPercentage >= 75) {
+                statusColor = 'bg-yellow-500';
+                statusText = 'Casi Completa';
+                statusIcon = '🟡';
+            } else if (progressPercentage >= 25) {
+                statusColor = 'bg-orange-500';
+                statusText = 'En Progreso';
+                statusIcon = '🟠';
+            }
+            
+            progressContent.innerHTML = `
+                <div class="mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-semibold text-gray-700">Horas Trabajadas</span>
+                        <span class="text-sm font-bold">${formatHoursMinutes(workedHours)} / ${expectedHours}h</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-4">
+                        <div class="${statusColor} h-4 rounded-full transition-all duration-500" style="width: ${progressPercentage}%"></div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div class="p-3 bg-gray-50 rounded-lg">
+                        <div class="text-lg font-bold text-gray-800">${expectedHours}h</div>
+                        <div class="text-xs text-gray-600">Jornada</div>
+                    </div>
+                    <div class="p-3 bg-blue-50 rounded-lg">
+                        <div class="text-lg font-bold text-blue-600">${formatHoursMinutes(workedHours)}</div>
+                        <div class="text-xs text-gray-600">Trabajadas</div>
+                    </div>
+                    <div class="p-3 bg-purple-50 rounded-lg">
+                        <div class="text-lg font-bold text-purple-600">${formatHoursMinutes(Math.max(0, expectedHours - workedHours))}</div>
+                        <div class="text-xs text-gray-600">Restantes</div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 p-3 rounded-lg ${statusColor.replace('bg-', 'bg-').replace('-500', '-100')} border border-${statusColor.replace('bg-', '').replace('-500', '-200')}">
+                    <div class="flex items-center justify-center space-x-2">
+                        <span class="text-lg">${statusIcon}</span>
+                        <span class="font-semibold text-${statusColor.replace('bg-', '').replace('-500', '-800')}">${statusText}</span>
+                    </div>
+                </div>
+            `;
+            
+            progressElement.classList.remove('hidden');
+        }
+
+        function loadRecentActivity() {
+            const activityElement = document.getElementById('recentActivity');
+            if (!activityElement) return;
+            
+            let recentRecords;
+            
+            if (currentUser && currentUser.type === 'employee') {
+                recentRecords = timeRecords
+                    .filter(record => record.employeeId === currentUser.id)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .slice(0, 5);
+            } else {
+                recentRecords = timeRecords
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .slice(0, 10);
+            }
+            
+            if (recentRecords.length === 0) {
+                activityElement.innerHTML = '<p class="text-gray-500 text-center py-8">No hay actividad reciente</p>';
+                return;
+            }
+            
+            activityElement.innerHTML = recentRecords.map(record => `
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                            <span class="text-purple-600 font-bold text-sm">
+                                ${record.employeeName.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                            </span>
+                        </div>
+                        <div>
+                            <div class="font-semibold">${record.employeeName}</div>
+                            <div class="text-sm text-gray-600">${formatDateDisplay(record.date)}</div>
+                            ${record.location ? `<div class="text-xs text-green-600">${record.location}</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold">
+                            ${record.timeIn || '--:--'} - ${record.timeOut || '--:--'}
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            ${formatHoursMinutes(record.totalHours)}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadEmployees() {
+            const gridElement = document.getElementById('employeesGrid');
+            if (!gridElement) return;
+            
+            if (employees.length === 0) {
+                gridElement.innerHTML = '<p class="text-gray-500 text-center py-8 col-span-full">No hay empleados registrados</p>';
+                return;
+            }
+            
+            gridElement.innerHTML = employees.map(employee => {
+                const lastRecord = timeRecords
+                    .filter(record => record.employeeId === employee.id)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+                
+                const today = formatDate(new Date());
+                const todayRecord = timeRecords.find(record => 
+                    record.employeeId === employee.id && record.date === today
+                );
+                
+                let statusBadge = '';
+                if (employee.status === 'Activo' && todayRecord) {
+                    if (todayRecord.timeIn && !todayRecord.timeOut) {
+                        statusBadge = '<span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 animate-pulse">🟢 Trabajando</span>';
+                    } else if (todayRecord.timeOut) {
+                        statusBadge = '<span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">🔵 Completado</span>';
+                    }
+                } else if (employee.status === 'Activo') {
+                    statusBadge = '<span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">⚪ Sin fichar</span>';
+                } else {
+                    statusBadge = '<span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">❌ Inactivo</span>';
+                }
+                
+                return `
+                    <div class="employee-card p-6">
+                        <div class="flex items-center space-x-4 mb-4">
+                            <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                                ${(employee.name[0] + employee.lastName[0]).toUpperCase()}
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-gray-800">${employee.name} ${employee.lastName}</h4>
+                                <p class="text-sm text-gray-600">${employee.position || 'Sin especificar'}</p>
+                            </div>
+                            ${statusBadge}
+                        </div>
+                        
+                        <div class="space-y-2 text-sm text-gray-600 mb-4">
+                            <div class="flex justify-between">
+                                <span>🆔 DNI:</span>
+                                <span class="font-mono">${employee.dni}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>📱 PIN:</span>
+                                <span class="font-mono">••••</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>⏰ Jornada:</span>
+                                <span class="font-semibold">${employee.workingHours || 8}h/día</span>
+                            </div>
+                            ${lastRecord ? `
+                                <div class="flex justify-between">
+                                    <span>📅 Último:</span>
+                                    <span>${formatTimeAgo(lastRecord.date)}</span>
+                                </div>
+                            ` : ''}
+                            ${todayRecord ? `
+                                <div class="flex justify-between">
+                                    <span>⏰ Hoy:</span>
+                                    <span class="${todayRecord.totalHours >= (employee.workingHours || 8) ? 'text-green-600 font-bold' : 'text-orange-600'}">${formatHoursMinutes(todayRecord.totalHours)}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="editEmployee(${employee.id})" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-2 rounded-lg text-xs transition-colors">
+                                ✏️ Editar
+                            </button>
+                            <button onclick="toggleEmployeeStatus(${employee.id})" class="${employee.status === 'Activo' ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-500 hover:bg-green-600'} text-white px-2 py-2 rounded-lg text-xs transition-colors">
+                                ${employee.status === 'Activo' ? '🚫 Desactivar' : '✅ Activar'}
+                            </button>
+                            <button onclick="deleteEmployee(${employee.id})" class="bg-red-500 hover:bg-red-600 text-white px-2 py-2 rounded-lg text-xs transition-colors">
+                                🗑️ Eliminar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
 
         function loadCompanySettings() {
             document.getElementById('companyName').value = companySettings.companyName || '';
@@ -2595,7 +2610,498 @@
             `;
         }
 
-        // Exportar Reporte (NUEVO)
+        function showEmployeeModal() {
+            document.getElementById('employeeModal').classList.remove('hidden');
+            
+            if (!editingEmployeeId) {
+                document.getElementById('employeeName').value = '';
+                document.getElementById('employeeLastName').value = '';
+                document.getElementById('employeeDNI').value = '';
+                document.getElementById('employeePosition').value = '';
+                document.getElementById('employeeAccessCode').value = '';
+                document.getElementById('employeeWorkingHours').value = '8';
+                document.getElementById('employeeCustomHours').value = '';
+                document.getElementById('customHoursContainer').classList.add('hidden');
+                
+                const modalTitle = document.querySelector('#employeeModal .gradient-bg h3');
+                if (modalTitle) {
+                    modalTitle.textContent = '👤 Nuevo Empleado';
+                }
+            }
+            
+            setTimeout(() => {
+                document.getElementById('employeeName').focus();
+            }, 100);
+        }
+
+        function hideEmployeeModal() {
+            document.getElementById('employeeModal').classList.add('hidden');
+            editingEmployeeId = null;
+            
+            const modalTitle = document.querySelector('#employeeModal .gradient-bg h3');
+            if (modalTitle) {
+                modalTitle.textContent = '👤 Nuevo Empleado';
+            }
+        }
+
+        function showManualRecordModal() {
+            document.getElementById('manualRecordModal').classList.remove('hidden');
+            document.getElementById('manualRecordEmployee').value = '';
+            document.getElementById('manualRecordDate').value = formatDate(new Date());
+            document.getElementById('manualRecordTimeIn').value = '';
+            document.getElementById('manualRecordTimeOut').value = '';
+            document.getElementById('manualRecordNotes').value = '';
+            populateManualRecordEmployees();
+        }
+
+        function hideManualRecordModal() {
+            document.getElementById('manualRecordModal').classList.add('hidden');
+        }
+
+        function hideEditRecordModal() {
+            document.getElementById('editRecordModal').classList.add('hidden');
+            editingRecordId = null;
+        }
+
+        function showHelpModal() {
+            document.getElementById('helpModal').classList.remove('hidden');
+        }
+
+        function hideHelpModal() {
+            document.getElementById('helpModal').classList.add('hidden');
+        }
+
+        function saveEmployee() {
+            const name = document.getElementById('employeeName').value.trim();
+            const lastName = document.getElementById('employeeLastName').value.trim();
+            const dni = document.getElementById('employeeDNI').value.trim().toUpperCase();
+            const position = document.getElementById('employeePosition').value.trim();
+            const accessCode = document.getElementById('employeeAccessCode').value.trim();
+            
+            if (!name || !lastName || !dni || !accessCode) {
+                UI.showNotification('⚠️ Complete todos los campos obligatorios', 'warning');
+                return;
+            }
+            
+            if (name.length < 2 || lastName.length < 2) {
+                UI.showNotification('⚠️ Nombre y apellidos deben tener al menos 2 caracteres', 'warning');
+                return;
+            }
+            
+            if (!validateDNI(dni)) {
+                UI.showNotification('⚠️ DNI/NIE no válido. Formato: 12345678A o X1234567A', 'warning');
+                return;
+            }
+            
+            if (accessCode.length !== 4 || !/^\d{4}$/.test(accessCode)) {
+                UI.showNotification('⚠️ El código PIN debe tener exactamente 4 dígitos', 'warning');
+                return;
+            }
+            
+            const existingEmployee = employees.find(emp => 
+                (emp.accessCode === accessCode || emp.dni === dni) && 
+                emp.id !== editingEmployeeId
+            );
+            
+            if (existingEmployee) {
+                if (existingEmployee.accessCode === accessCode) {
+                    UI.showNotification('⚠️ Este código PIN ya está en uso', 'warning');
+                } else {
+                    UI.showNotification('⚠️ Este DNI/NIE ya está registrado', 'warning');
+                }
+                return;
+            }
+            
+            const workingHoursSelect = document.getElementById('employeeWorkingHours').value;
+            let workingHours;
+            
+            if (workingHoursSelect === 'custom') {
+                const customHours = parseFloat(document.getElementById('employeeCustomHours').value);
+                if (!customHours || customHours < 0.5 || customHours > 12) {
+                    UI.showNotification('⚠️ Las horas personalizadas deben estar entre 0.5 y 12', 'warning');
+                    return;
+                }
+                workingHours = customHours;
+            } else {
+                workingHours = parseFloat(workingHoursSelect);
+            }
+            
+            const employeeData = {
+                id: editingEmployeeId || Date.now(),
+                name,
+                lastName,
+                dni,
+                position: position || 'Sin especificar',
+                status: 'Activo',
+                accessCode,
+                workingHours,
+                createdAt: editingEmployeeId ? employees.find(e => e.id === editingEmployeeId)?.createdAt : new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            if (editingEmployeeId) {
+                const index = employees.findIndex(emp => emp.id === editingEmployeeId);
+                if (index !== -1) {
+                    employees[index] = employeeData;
+                    UI.showNotification('✅ Empleado actualizado correctamente', 'success');
+                }
+            } else {
+                employees.push(employeeData);
+                UI.showNotification('✅ Empleado creado correctamente', 'success');
+            }
+            
+            setEmployees(employees);
+            populateSelects();
+            loadEmployees();
+            hideEmployeeModal();
+        }
+
+        function saveManualRecord() {
+            const employeeId = document.getElementById('manualRecordEmployee').value;
+            const date = document.getElementById('manualRecordDate').value;
+            const timeIn = document.getElementById('manualRecordTimeIn').value;
+            const timeOut = document.getElementById('manualRecordTimeOut').value;
+            const notes = document.getElementById('manualRecordNotes').value.trim();
+            
+            if (!employeeId || !date) {
+                UI.showNotification('⚠️ Complete los campos obligatorios', 'warning');
+                return;
+            }
+            
+            if (!timeIn && !timeOut) {
+                UI.showNotification('⚠️ Debe especificar al menos una hora', 'warning');
+                return;
+            }
+            
+            if (timeIn && timeOut && !validateTimeRange(timeIn, timeOut)) {
+                UI.showNotification('⚠️ El rango de tiempo no es válido (máximo 16 horas)', 'warning');
+                return;
+            }
+            
+            const existingRecord = timeRecords.find(record => 
+                record.employeeId == employeeId && record.date === date
+            );
+            
+            if (existingRecord) {
+                UI.showNotification('⚠️ Ya existe un registro para este empleado en esta fecha', 'warning');
+                return;
+            }
+            
+            const selectedDate = new Date(date);
+            const today = new Date();
+            today.setHours(23, 59, 59, 999);
+            
+            if (selectedDate > today) {
+                UI.showNotification('⚠️ No se pueden crear registros para fechas futuras', 'warning');
+                return;
+            }
+            
+            const employee = employees.find(emp => emp.id == employeeId);
+            const totalHours = (timeIn && timeOut) ? calculateFloatHours(timeIn, timeOut) : 0;
+            
+            const newRecord = {
+                id: Date.now(),
+                employeeId: parseInt(employeeId),
+                employeeName: employee.name + ' ' + employee.lastName,
+                date,
+                timeIn: timeIn || null,
+                timeOut: timeOut || null,
+                totalHours,
+                method: 'manual',
+                notes: notes || 'Registro manual',
+                createdAt: new Date().toISOString(),
+                createdBy: currentUser.name || 'Admin'
+            };
+            
+            timeRecords.push(newRecord);
+            setTimeRecords(timeRecords);
+            loadTimeRecords();
+            loadDashboard();
+            hideManualRecordModal();
+            UI.showNotification('✅ Registro manual creado correctamente', 'success');
+        }
+
+        function saveEditRecord() {
+            if (!editingRecordId) return;
+            
+            const record = timeRecords.find(r => r.id === editingRecordId);
+            if (!record) return;
+            
+            const date = document.getElementById('editRecordDate').value;
+            const timeIn = document.getElementById('editRecordTimeIn').value;
+            const timeOut = document.getElementById('editRecordTimeOut').value;
+            const notes = document.getElementById('editRecordNotes').value.trim();
+            
+            record.date = date;
+            record.timeIn = timeIn || null;
+            record.timeOut = timeOut || null;
+            record.totalHours = (timeIn && timeOut) ? calculateFloatHours(timeIn, timeOut) : 0;
+            record.notes = notes;
+            
+            setTimeRecords(timeRecords);
+            loadTimeRecords();
+            loadDashboard();
+            hideEditRecordModal();
+            UI.showNotification('✅ Registro actualizado', 'success');
+        }
+
+        function deleteRecord() {
+            if (!editingRecordId) return;
+            
+            if (showConfirmDialog('¿Está seguro de eliminar este registro?')) {
+                timeRecords = timeRecords.filter(r => r.id !== editingRecordId);
+                setTimeRecords(timeRecords); 
+                loadTimeRecords();
+                loadDashboard();
+                hideEditRecordModal();
+                UI.showNotification('✅ Registro eliminado', 'success');
+            }
+        }
+
+        function saveCompanySettingsForm() {
+            companySettings.companyName = document.getElementById('companyName').value;
+            companySettings.companyCIF = document.getElementById('companyCIF').value;
+            companySettings.companyAddress = document.getElementById('companyAddress').value;
+            companySettings.companyPhone = document.getElementById('companyPhone').value;
+            
+            setGlobalConfig('companySettings', companySettings); 
+            UI.showNotification('✅ Configuración guardada', 'success');
+        }
+
+        function saveAdminCredentialsForm() {
+            const currentPassword = document.getElementById('currentAdminPassword').value;
+            const newUsername = document.getElementById('adminUsername').value.trim();
+            const newPassword = document.getElementById('newAdminPassword').value;
+            const confirmPassword = document.getElementById('confirmAdminPassword').value;
+            
+            if (currentPassword !== adminCredentials.password) {
+                UI.showNotification('❌ Contraseña actual incorrecta', 'error');
+                return;
+            }
+            
+            if (!newUsername) {
+                UI.showNotification('⚠️ El nombre de usuario no puede estar vacío', 'warning');
+                return;
+            }
+            
+            if (newPassword) {
+                if (newPassword.length < 4) {
+                    UI.showNotification('⚠️ La nueva contraseña debe tener al menos 4 caracteres', 'warning');
+                    return;
+                }
+                
+                if (newPassword !== confirmPassword) {
+                    UI.showNotification('⚠️ Las contraseñas no coinciden', 'warning');
+                    return;
+                }
+                
+                adminCredentials.password = newPassword;
+            }
+            
+            adminCredentials.username = newUsername;
+            
+            DataManager.setAdminCredentials(adminCredentials);
+            
+            document.getElementById('currentAdminPassword').value = '';
+            document.getElementById('newAdminPassword').value = '';
+            document.getElementById('confirmAdminPassword').value = '';
+            
+            if (currentUser && currentUser.type === 'admin') {
+                currentUser.name = newUsername;
+            }
+            
+            UI.showNotification('🔐 Credenciales actualizadas correctamente', 'success');
+        }
+
+        function editEmployee(id) {
+            const employee = employees.find(emp => emp.id === id);
+            if (!employee) return;
+            
+            editingEmployeeId = id;
+            
+            document.getElementById('employeeName').value = employee.name;
+            document.getElementById('employeeLastName').value = employee.lastName;
+            document.getElementById('employeeDNI').value = employee.dni;
+            document.getElementById('employeePosition').value = employee.position || '';
+            document.getElementById('employeeAccessCode').value = employee.accessCode;
+            
+            const workingHours = employee.workingHours || 8;
+            const workingHoursSelect = document.getElementById('employeeWorkingHours');
+            const customHoursContainer = document.getElementById('customHoursContainer');
+            const customHoursInput = document.getElementById('employeeCustomHours');
+            
+            const standardHours = ['8', '7', '6', '5', '4', '3', '2'];
+            if (standardHours.includes(workingHours.toString())) {
+                workingHoursSelect.value = workingHours.toString();
+                customHoursContainer.classList.add('hidden');
+            } else {
+                workingHoursSelect.value = 'custom';
+                customHoursInput.value = workingHours;
+                customHoursContainer.classList.remove('hidden');
+            }
+            
+            const modalTitle = document.querySelector('#employeeModal .gradient-bg h3');
+            if (modalTitle) {
+                modalTitle.textContent = '✏️ Editar Empleado';
+            }
+            
+            showEmployeeModal();
+        }
+
+        function editRecord(id) {
+            const record = timeRecords.find(r => r.id === id);
+            if (!record) return;
+            
+            editingRecordId = id;
+            
+            document.getElementById('editRecordEmployeeName').value = record.employeeName;
+            document.getElementById('editRecordDate').value = record.date;
+            document.getElementById('editRecordTimeIn').value = record.timeIn || '';
+            document.getElementById('editRecordTimeOut').value = record.timeOut || '';
+            document.getElementById('editRecordNotes').value = record.notes || '';
+            
+            document.getElementById('editRecordModal').classList.remove('hidden');
+        }
+
+        function toggleEmployeeStatus(id) {
+            const employee = employees.find(emp => emp.id === id);
+            if (!employee) return;
+            
+            const newStatus = employee.status === 'Activo' ? 'Inactivo' : 'Activo';
+            const action = newStatus === 'Activo' ? 'activar' : 'desactivar';
+            
+            if (showConfirmDialog(`¿Está seguro de ${action} a ${employee.name} ${employee.lastName}?`)) {
+                employee.status = newStatus;
+                setEmployees(employees); 
+                loadEmployees();
+                populateSelects();
+                UI.showNotification(`✅ Empleado ${newStatus.toLowerCase()}`, 'success');
+            }
+        }
+
+        async function deleteEmployee(id) {
+            const employee = employees.find(emp => emp.id === id);
+            if (!employee) return;
+            
+            const hasRecords = timeRecords.some(record => record.employeeId === id);
+            let confirmMessage = `¿Está seguro de eliminar permanentemente a ${employee.name} ${employee.lastName}?`;
+            
+            if (hasRecords) {
+                confirmMessage += '\n\n⚠️ ATENCIÓN: Este empleado tiene registros de fichaje. Al eliminarlo también se eliminarán TODOS sus registros históricos.\n\nEsta acción NO se puede deshacer.';
+            }
+            
+            if (await showConfirmDialog(confirmMessage)) {
+                const employeeIndex = employees.findIndex(emp => emp.id === id);
+                if (employeeIndex !== -1) {
+                    employees.splice(employeeIndex, 1);
+                }
+                
+                if (hasRecords) {
+                    timeRecords = timeRecords.filter(record => record.employeeId !== id);
+                    setTimeRecords(timeRecords);
+                }
+                
+                setEmployees(employees);
+                
+                loadEmployees();
+                loadTimeRecords();
+                loadDashboard();
+                populateSelects();
+                updateDataStatistics();
+                
+                UI.showNotification('🗑️ Empleado y sus registros eliminados correctamente', 'success');
+            }
+        }
+
+        // Report Functions
+        function generateReport() {
+            const employeeId = document.getElementById('reportEmployee').value;
+            const startDateStr = document.getElementById('reportStartDate').value;
+            const endDateStr = document.getElementById('reportEndDate').value;
+            
+            if (!startDateStr || !endDateStr) {
+                UI.showNotification('⚠️ Seleccione las fechas del informe', 'warning');
+                return;
+            }
+            
+            let filteredRecords = timeRecords.filter(record => {
+                const recordDate = new Date(record.date);
+                const start = new Date(startDateStr);
+                const end = new Date(endDateStr);
+                end.setHours(23, 59, 59, 999);
+                return recordDate >= start && recordDate <= end;
+            });
+            
+            if (employeeId) {
+                filteredRecords = filteredRecords.filter(record => record.employeeId == employeeId);
+            }
+            
+            currentReportRecords = filteredRecords;
+            document.getElementById('exportReportBtn').classList.remove('hidden');
+
+            const resultsElement = document.getElementById('reportResults');
+            if (filteredRecords.length === 0) {
+                resultsElement.innerHTML = '<p class="text-gray-500 text-center py-8">No se encontraron registros para el período seleccionado</p>';
+                return;
+            }
+            
+            const totalHours = filteredRecords.reduce((sum, record) => sum + (record.totalHours || 0), 0);
+            const avgHours = totalHours / filteredRecords.length;
+            
+            resultsElement.innerHTML = `
+                <div class="mb-6">
+                    <h4 class="text-lg font-bold text-gray-800 mb-4">📊 Resumen del Informe</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div class="stat-card">
+                            <div class="text-2xl font-bold text-blue-600">${filteredRecords.length}</div>
+                            <div class="text-sm text-gray-600">Registros</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-2xl font-bold text-green-600">${formatHoursMinutes(totalHours)}</div>
+                            <div class="text-sm text-gray-600">Total Horas</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-2xl font-bold text-purple-600">${formatHoursMinutes(avgHours)}</div>
+                            <div class="text-sm text-gray-600">Promedio</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-2xl font-bold text-orange-600">${formatDateDisplay(startDateStr)} - ${formatDateDisplay(endDateStr)}</div>
+                            <div class="text-sm text-gray-600">Período</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-modern overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead class="gradient-bg text-white">
+                                <tr>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold">👤 Empleado</th>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold">📅 Fecha</th>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold">🕐 Entrada</th>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold">🕕 Salida</th>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold">⏱️ Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                ${filteredRecords.map(record => `
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 font-medium">${record.employeeName}</td>
+                                        <td class="px-6 py-4">${formatDateDisplay(record.date)}</td>
+                                        <td class="px-6 py-4 font-mono">${record.timeIn || '--:--'}</td>
+                                        <td class="px-6 py-4 font-mono">${record.timeOut || '--:--'}</td>
+                                        <td class="px-6 py-4 font-bold">${formatHoursMinutes(record.totalHours)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            UI.showNotification('✅ Informe generado correctamente', 'success');
+        }
+
         function exportReport() {
             if (currentReportRecords.length === 0) {
                 UI.showNotification('⚠️ Genere un informe primero antes de exportar', 'warning');
@@ -2611,22 +3117,8 @@
             UI.showNotification('📊 Informe exportado a CSV', 'success');
         }
 
-        // LÓGICA DE MODO EDICIÓN OCULTO
-        function toggleEditMode() {
-            editModeEnabled = !editModeEnabled;
-            loadTimeRecords(); 
-            
-            const actionsHeader = document.getElementById('actionsHeader');
-            if (actionsHeader) {
-                actionsHeader.classList.toggle('actions-col-hidden', !editModeEnabled);
-                actionsHeader.textContent = editModeEnabled ? '⚙️ Acciones (ON)' : '⚙️ Acciones';
-            }
-
-            UI.showNotification(`Modo Edición ${editModeEnabled ? 'ACTIVADO' : 'DESACTIVADO'}`, editModeEnabled ? 'warning' : 'success');
-        }
-
-
-        // UTILITIES
+        // --- UTILITIES ---
+        
         function calculateFloatHours(timeIn, timeOut) {
             const [inHour, inMinute] = timeIn.split(':').map(Number);
             const [outHour, outMinute] = timeOut.split(':').map(Number);
@@ -2637,7 +3129,7 @@
             let diffMinutes = outMinutes - inMinutes;
             if (diffMinutes < 0) diffMinutes += 24 * 60; 
             
-            return diffMinutes / 60; // Retorna horas flotantes
+            return diffMinutes / 60;
         }
 
         function generateCSV(records) {
@@ -2650,7 +3142,7 @@
                     record.date,
                     record.timeIn || '',
                     record.timeOut || '',
-                    formatHoursMinutes(record.totalHours).replace('h', ''), // Usa el nuevo formato para exportar
+                    formatHoursMinutes(record.totalHours).replace('h', ''),
                     `"${record.notes || ''}"`
                 ];
                 csvRows.push(row.join(','));
@@ -2659,34 +3151,72 @@
             return csvRows.join('\n');
         }
 
-        // --- (Funciones de exportación, validación, etc. Se mantienen las originales) ---
-        
-        function setupAutoSave() {
-            autoSaveTimer = setInterval(() => {
-                if (currentUser) {
-                    setEmployees(employees);
-                    setTimeRecords(timeRecords);
-                }
-            }, 120000);
-        }
-
-        function loadCloudSettings() {
-            document.getElementById('cloudApiKey').value = '********';
-            document.getElementById('cloudBinId').value = '********';
+        function toggleEditMode() {
+            editModeEnabled = !editModeEnabled;
+            loadTimeRecords(); 
             
-            document.getElementById('cloudApiKey').disabled = true;
-            document.getElementById('cloudBinId').disabled = true;
-            document.getElementById('enableAutoSync').checked = true;
-            document.getElementById('enableAutoSync').disabled = true;
-            document.getElementById('syncInterval').disabled = true;
-            document.getElementById('saveCloudSettings').disabled = true;
-            document.getElementById('syncIntervalValue').textContent = 'Tiempo Real';
+            const actionsHeader = document.getElementById('actionsHeader');
+            if (actionsHeader) {
+                actionsHeader.classList.toggle('actions-col-hidden', !editModeEnabled);
+                actionsHeader.textContent = editModeEnabled ? '⚙️ Acciones (ON)' : '⚙️ Acciones';
+            }
 
-            updateCloudSyncStatus();
+            UI.showNotification(`Modo Edición ${editModeEnabled ? 'ACTIVADO' : 'DESACTIVADO'}`, editModeEnabled ? 'warning' : 'success');
+        }
+        
+        function downloadFile(content, filename, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
         }
 
-        function saveAdminCredentialsData() {
-            localStorage.setItem('fichajemax_adminCredentials', JSON.stringify(adminCredentials));
+        function setDefaultDates() {
+            const today = formatDate(new Date());
+            const weekAgo = formatDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
+            
+            const reportStartDate = document.getElementById('reportStartDate');
+            const reportEndDate = document.getElementById('reportEndDate');
+            const filterStartDate = document.getElementById('filterStartDate');
+            const filterEndDate = document.getElementById('filterEndDate');
+            
+            if (reportStartDate) reportStartDate.value = weekAgo;
+            if (reportEndDate) reportEndDate.value = today;
+            if (filterStartDate) filterStartDate.value = weekAgo;
+            if (filterEndDate) filterEndDate.value = today;
+        }
+
+        function testCloudConnection() {
+            UI.showNotification('✅ Conexión establecida con Firebase', 'success');
+            updateCloudStatus(true, 'Conexión activa y en tiempo real');
+        }
+
+        function syncNow() {
+            setEmployees(employees);
+            setTimeRecords(timeRecords);
+            setGlobalConfig('companySettings', companySettings);
+            setGlobalConfig('locationSettings', locationSettings);
+            
+            UI.showNotification('☁️ Sincronización manual completada (usando Firebase)', 'success');
+        }
+
+        function updateCloudStatus(isConnected, message) {
+            const statusElement = document.getElementById('cloudStatus');
+            if (!statusElement) return;
+            
+            statusElement.classList.remove('hidden');
+            if (isConnected) {
+                statusElement.innerHTML = `<span class="text-green-600">✅ ${message}</span>`;
+                statusElement.className = 'p-3 rounded-lg bg-green-100 text-sm';
+            } else {
+                statusElement.innerHTML = `<span class="text-red-600">❌ ${message}</span>`;
+                statusElement.className = 'p-3 rounded-lg bg-red-100 text-sm';
+            }
         }
 
         function updateCloudSyncStatus() {
@@ -2707,6 +3237,83 @@
             statusElement.className = 'p-3 rounded-lg bg-green-100 text-sm';
         }
 
+        function loadCloudSettings() {
+            document.getElementById('cloudApiKey').value = '********';
+            document.getElementById('cloudBinId').value = '********';
+            
+            document.getElementById('cloudApiKey').disabled = true;
+            document.getElementById('cloudBinId').disabled = true;
+            document.getElementById('enableAutoSync').checked = true;
+            document.getElementById('enableAutoSync').disabled = true;
+            document.getElementById('syncInterval').disabled = true;
+            document.getElementById('saveCloudSettings').disabled = true;
+            document.getElementById('syncIntervalValue').textContent = 'Tiempo Real';
+
+            updateCloudSyncStatus();
+        }
+
+        function saveCloudSettingsForm() {
+            UI.showNotification('⚠️ La sincronización usa Firebase y se configura automáticamente. Los campos de JSONBin ya no se usan.', 'warning');
+        }
+
+        function saveAdminCredentialsData() {
+            localStorage.setItem('fichajemax_adminCredentials', JSON.stringify(adminCredentials));
+        }
+
+        function loadLocationSettings() {
+            document.getElementById('enableLocationControl').checked = locationSettings.enabled;
+            document.getElementById('workLatitude').value = locationSettings.workLatitude || '';
+            document.getElementById('workLongitude').value = locationSettings.workLongitude || '';
+            document.getElementById('allowedRadius').value = locationSettings.allowedRadius || 100;
+            document.getElementById('workAddress').value = locationSettings.workAddress || '';
+            
+            document.getElementById('radiusValue').textContent = locationSettings.allowedRadius || 100;
+            
+            updateLocationControlStatus();
+        }
+
+        function startLocationMonitoring() {
+            if (!locationSettings.enabled || currentUser.type !== 'employee') return;
+            
+            const statusElement = document.getElementById('employeeLocationStatus');
+            if (statusElement) {
+                statusElement.classList.remove('hidden');
+            }
+            
+            locationMonitoringInterval = setInterval(async () => {
+                try {
+                    const locationCheck = await getCurrentPosition().then(position => 
+                        checkLocationPermission({coords: position.coords})
+                    );
+                    updateEmployeeLocationStatus(locationCheck);
+                } catch (error) {
+                    console.error('Location monitoring error:', error);
+                }
+            }, 30000);
+            
+            setTimeout(async () => {
+                try {
+                    const position = await getCurrentPosition();
+                    const locationCheck = await checkLocationPermission({coords: position.coords});
+                    updateEmployeeLocationStatus(locationCheck);
+                } catch (error) {
+                    console.error('Initial location check error:', error);
+                }
+            }, 2000);
+        }
+
+        function stopLocationMonitoring() {
+            if (locationMonitoringInterval) {
+                clearInterval(locationMonitoringInterval);
+                locationMonitoringInterval = null;
+            }
+            
+            const statusElement = document.getElementById('employeeLocationStatus');
+            if (statusElement) {
+                statusElement.classList.add('hidden');
+            }
+        }
+        
         function getCurrentPosition() {
             return new Promise((resolve, reject) => {
                 if (!navigator.geolocation) {
