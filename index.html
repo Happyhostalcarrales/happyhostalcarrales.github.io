@@ -1032,7 +1032,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">📝 Notas</label>
-                    <textarea id="manualRecordNotes" class="input-modern w-full" rows="3" placeholder="Motivo del registro manual..."></textarea>
+                    <textarea id="manualRecordNotes" class="input-modern w-full" rows="3"></textarea>
                 </div>
             </div>
             <div class="p-6 border-t flex justify-end space-x-3">
@@ -2263,6 +2263,38 @@
             }).join('');
         }
 
+        function loadStatistics() {
+            const statsElement = document.getElementById('statisticsContainer');
+            if (!statsElement) return;
+            
+            const totalRecords = timeRecords.length;
+            const totalHours = timeRecords.reduce((sum, record) => sum + (record.totalHours || 0), 0);
+            const avgHours = totalRecords > 0 ? totalHours / totalRecords : 0;
+            const thisMonth = new Date().toISOString().slice(0, 7);
+            const monthRecords = timeRecords.filter(record => record.date.startsWith(thisMonth));
+            
+            statsElement.innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="stat-card">
+                        <div class="text-2xl font-bold text-blue-600">${totalRecords}</div>
+                        <div class="text-sm text-gray-600">Total Registros</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="text-2xl font-bold text-green-600">${formatHoursMinutes(totalHours)}</div>
+                        <div class="text-sm text-gray-600">Total Horas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="text-2xl font-bold text-purple-600">${formatHoursMinutes(avgHours)}</div>
+                        <div class="text-sm text-gray-600">Promedio por Día</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="text-2xl font-bold text-orange-600">${monthRecords.length}</div>
+                        <div class="text-sm text-gray-600">Este Mes</div>
+                    </div>
+                </div>
+            `;
+        }
+
         function loadCompanySettings() {
             document.getElementById('companyName').value = companySettings.companyName || '';
             document.getElementById('companyCIF').value = companySettings.companyCIF || '';
@@ -2736,7 +2768,7 @@
             const resultsElement = document.getElementById('reportResults');
             if (filteredRecords.length === 0) {
                 resultsElement.innerHTML = '<p class="text-gray-500 text-center py-12">No se encontraron registros para el período seleccionado</p>';
-                document.getElementById('exportReportBtn').classList.add('hidden'); // Ocultar si no hay datos
+                document.getElementById('exportReportBtn').classList.add('hidden');
                 return;
             }
             
@@ -2760,7 +2792,7 @@
                             <div class="text-sm text-gray-600">Promedio</div>
                         </div>
                         <div class="stat-card">
-                            <div class="text-2xl font-bold text-orange-600">${formatDateDisplay(startDateStr)} - ${formatDateDisplay(endDateStr)}</div>
+                            <div class="text-2xl font-bold text-orange-600">${formatDateDisplay(startDate)} - ${formatDateDisplay(endDate)}</div>
                             <div class="text-sm text-gray-600">Período</div>
                         </div>
                     </div>
