@@ -1327,7 +1327,7 @@
         // =========================================================================
         
         function formatHoursMinutes(floatHours) {
-            if (floatHours === 0 || isNaN(floatHours)) return '00:00h';
+            if (floatHours === 0 || isNaN(floatHours) || floatHours === null) return '00:00h';
             const totalMinutes = Math.round(floatHours * 60);
             const sign = totalMinutes < 0 ? '-' : '';
             const absMinutes = Math.abs(totalMinutes);
@@ -2178,6 +2178,91 @@
             }).join('');
         }
 
+        function loadTimeRecords() {
+            const tableElement = document.getElementById('timeRecordsTable');
+            if (!tableElement) return;
+            
+            let recordsToShow = timeRecords;
+            const filterEmployeeId = document.getElementById('filterEmployee')?.value;
+            const filterStartDateStr = document.getElementById('filterStartDate')?.value;
+            const filterEndDateStr = document.getElementById('filterEndDate')?.value;
+
+            // 1. FILTRADO POR EMPLEADO
+            if (currentUser?.type === 'employee') {
+                recordsToShow = recordsToShow.filter(record => record.employeeId === currentUser.id);
+            } else if (filterEmployeeId) {
+                recordsToShow = recordsToShow.filter(record => record.employeeId == filterEmployeeId);
+            }
+
+            // 2. FILTRADO POR FECHAS
+            if (filterStartDateStr) {
+                const startDate = new Date(filterStartDateStr);
+                recordsToShow = recordsToShow.filter(record => new Date(record.date) >= startDate);
+            }
+            if (filterEndDateStr) {
+                const endDate = new Date(filterEndDateStr);
+                endDate.setHours(23, 59, 59, 999); 
+                recordsToShow = recordsToShow.filter(record => new Date(record.date) <= endDate);
+            }
+
+            // 3. ORDENAR
+            recordsToShow = recordsToShow.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // 4. CONTROL DEL MODO DE EDICIÓN (VISIBILIDAD SECRETA)
+            const actionsHeader = document.getElementById('actionsHeader');
+            const isActionsVisible = currentUser?.type === 'admin' && editModeEnabled;
+            if (actionsHeader) {
+                actionsHeader.classList.toggle('actions-col-hidden', !isActionsVisible);
+                actionsHeader.textContent = isActionsVisible ? '⚙️ Acciones (ON)' : '⚙️ Acciones';
+            }
+
+
+            if (recordsToShow.length === 0) {
+                const colspan = isActionsVisible ? '7' : '6';
+                tableElement.innerHTML = `<tr><td colspan="${colspan}" class="text-center py-8 text-gray-500">No hay registros disponibles para los filtros aplicados.</td></tr>`;
+                return;
+            }
+            
+            tableElement.innerHTML = recordsToShow.map(record => {
+                const statusClass = record.timeOut ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
+                const statusText = record.timeOut ? '✅ Completo' : '⏳ En curso';
+                
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                    <span class="text-purple-600 font-bold text-xs">
+                                        ${record.employeeName.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="font-medium">${record.employeeName}</span>
+                                    ${record.location ? `<div class="text-xs text-green-600">${record.location}</div>` : ''}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">${formatDateDisplay(record.date)}</td>
+                        <td class="px-6 py-4 font-mono">${record.timeIn || '--:--'}</td>
+                        <td class="px-6 py-4 font-mono">${record.timeOut || '--:--'}</td>
+                        <td class="px-6 py-4 font-bold">${formatHoursMinutes(record.totalHours)}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 text-xs rounded-full ${statusClass}">
+                                ${statusText}
+                            </span>
+                        </td>
+                        ${isActionsVisible ? `
+                            <td class="px-6 py-4 actions-col-visible">
+                                <button onclick="editRecord(${record.id})" class="text-blue-600 hover:text-blue-800 text-sm">
+                                    ✏️ Editar
+                                </button>
+                            </td>
+                        ` : ''}
+                    </tr>
+                `;
+            }).join('');
+        }
+
         function loadCompanySettings() {
             document.getElementById('companyName').value = companySettings.companyName || '';
             document.getElementById('companyCIF').value = companySettings.companyCIF || '';
@@ -2651,6 +2736,7 @@
             const resultsElement = document.getElementById('reportResults');
             if (filteredRecords.length === 0) {
                 resultsElement.innerHTML = '<p class="text-gray-500 text-center py-12">No se encontraron registros para el período seleccionado</p>';
+                document.getElementById('exportReportBtn').classList.add('hidden'); // Ocultar si no hay datos
                 return;
             }
             
