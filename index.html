@@ -417,6 +417,11 @@
                 max-width: calc(100vw - 32px);
             }
         }
+
+        /* Ocultar columna de acciones por defecto */
+        .actions-col-hidden {
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-full" style="overflow-x: hidden;">
@@ -638,7 +643,7 @@
                         </select>
                         <input type="date" id="filterStartDate" class="input-modern">
                         <input type="date" id="filterEndDate" class="input-modern">
-                        <button id="applyFilters" class="btn-primary text-white px-4 py-2 rounded-lg">
+                        <button id="applyFilters" class="w-full btn-primary text-white px-4 py-2 rounded-lg">
                             🔍 Filtrar
                         </button>
                     </div>
@@ -654,7 +659,7 @@
                                         <th class="px-6 py-4 text-left text-sm font-semibold">🕕 Salida</th>
                                         <th class="px-6 py-4 text-left text-sm font-semibold">⏱️ Total</th>
                                         <th class="px-6 py-4 text-left text-sm font-semibold">📊 Estado</th>
-                                        <th id="actionsHeader" class="px-6 py-4 text-left text-sm font-semibold admin-only">⚙️ Acciones</th>
+                                        <th id="actionsHeader" class="px-6 py-4 text-left text-sm font-semibold admin-only actions-col-hidden">⚙️ Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody id="timeRecordsTable" class="divide-y divide-gray-200">
@@ -689,7 +694,7 @@
                             <button id="generateReport" class="w-full btn-primary text-white font-bold py-3 px-6 rounded-xl">
                                 🚀 Generar Informe
                             </button>
-                            <button id="exportReportBtn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl hidden">
+                            <button id="exportReportBtn" onclick="exportReport()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl hidden">
                                 💾 Exportar Informe CSV
                             </button>
                         </div>
@@ -824,4 +829,1908 @@
                                 <div class="flex justify-between text-xs text-gray-500 mt-1">
                                     <span>10m (muy estricto)</span>
                                     <span>500m (flexible)</span>
-                                </
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <button id="getCurrentLocation" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors text-sm">
+                                    📍 Obtener Ubicación Actual
+                                </button>
+                                <button id="testDistance" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors text-sm">
+                                    🎯 Probar Distancia
+                                </button>
+                                <button id="saveLocationSettings" class="btn-primary text-white px-4 py-2 rounded-lg text-sm">
+                                    💾 Guardar Configuración
+                                </button>
+                            </div>
+                            
+                            <div id="locationStatus" class="p-3 rounded-lg bg-gray-100 text-sm text-gray-600 hidden">
+                                Pruebe la distancia para ver el estado
+                            </div>
+                            
+                            <div id="locationControlStatus" class="p-3 rounded-lg bg-gray-100 text-sm text-gray-600">
+                                Estado: Control desactivado
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl card-shadow p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-6">☁️ Sincronización en la Nube (Firebase)</h3>
+                        
+                        <div class="space-y-4">
+                            <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                <h4 class="font-bold text-blue-800 mb-2">ℹ️ Información</h4>
+                                <p class="text-sm text-blue-700 mb-2">
+                                    **La sincronización de fichaje usa Firebase Realtime Database para la función en tiempo real.**
+                                </p>
+                                <ul class="text-xs text-blue-600 space-y-1 ml-4">
+                                    <li>• El sistema de sincronización es **instantáneo** y guarda los datos de forma persistente.</li>
+                                    <li>• La configuración de JSONBin.io de abajo ya no tiene efecto y está deshabilitada.</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">🔑 API Key de JSONBin.io</label>
+                                    <input type="password" id="cloudApiKey" class="input-modern w-full" placeholder="Ingrese su API Key" disabled>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">🆔 Bin ID</label>
+                                    <input type="text" id="cloudBinId" class="input-modern w-full" placeholder="ID del bin de datos" disabled>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center space-x-4">
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" id="enableAutoSync" class="rounded" checked disabled>
+                                    <span class="text-sm font-semibold">Sincronización Automática (Siempre activa con Firebase)</span>
+                                </label>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">⏱️ Intervalo de Sincronización: <span id="syncIntervalValue">Tiempo Real</span></label>
+                                <input type="range" id="syncInterval" class="w-full" min="1" max="60" value="5" disabled>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <button id="testCloudConnection" onclick="testCloudConnection()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors text-sm">
+                                    🔗 Probar Conexión
+                                </button>
+                                <button id="syncNow" onclick="syncNow()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors text-sm">
+                                    ☁️ Forzar Guardado
+                                </button>
+                                <button id="saveCloudSettings" class="btn-primary text-white px-4 py-2 rounded-lg text-sm" disabled>
+                                    💾 Guardar Configuración
+                                </button>
+                            </div>
+                            
+                            <div id="cloudStatus" class="p-3 rounded-lg bg-gray-100 text-sm text-gray-600 hidden">
+                                Pruebe la conexión para ver el estado
+                            </div>
+                            
+                            <div id="cloudSyncStatus" class="p-3 rounded-lg bg-gray-100 text-sm text-gray-600">
+                                Estado: Sincronización desactivada
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl card-shadow p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-6">💾 Gestión de Datos</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <button id="exportAllData" class="bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg text-center transition-colors">
+                                <div class="text-lg">📁</div>
+                                <div class="text-sm">Exportar Todo</div>
+                            </button>
+                            
+                            <label for="importDataFile" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-3 rounded-lg text-center cursor-pointer transition-colors">
+                                <div class="text-lg">📂</div>
+                                <div class="text-sm">Importar Datos</div>
+                                <input type="file" id="importDataFile" class="hidden" accept=".json">
+                            </label>
+                            
+                            <button id="clearAllData" class="bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-lg text-center transition-colors">
+                                <div class="text-lg">🗑️</div>
+                                <div class="text-sm">Limpiar Todo</div>
+                            </button>
+                        </div>
+                        
+                        <div id="dataStatistics" class="mt-6 p-4 bg-gray-50 rounded-xl">
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="employeeModal" class="modal-overlay hidden">
+        <div class="modal-content slide-up">
+            <div class="gradient-bg text-white p-6 rounded-t-2xl">
+                <h3 class="text-xl font-bold">👤 Nuevo Empleado</h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">👤 Nombre *</label>
+                    <input type="text" id="employeeName" class="input-modern w-full" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">👤 Apellidos *</label>
+                    <input type="text" id="employeeLastName" class="input-modern w-full" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">🆔 DNI/NIE *</label>
+                    <input type="text" id="employeeDNI" class="input-modern w-full" placeholder="12345678A" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">💼 Puesto</label>
+                    <input type="text" id="employeePosition" class="input-modern w-full">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">⏰ Jornada Diaria</label>
+                        <select id="employeeWorkingHours" class="input-modern w-full">
+                            <option value="8">8 horas (Completa)</option>
+                            <option value="7">7 horas</option>
+                            <option value="6">6 horas</option>
+                            <option value="5">5 horas</option>
+                            <option value="4">4 horas (Media jornada)</option>
+                            <option value="3">3 horas</option>
+                            <option value="2">2 horas</option>
+                            <option value="custom">Personalizada</option>
+                        </select>
+                    </div>
+                    <div id="customHoursContainer" class="hidden">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">🕐 Horas Personalizadas</label>
+                        <input type="number" id="employeeCustomHours" class="input-modern w-full" min="0.5" max="12" step="0.5" placeholder="Ej: 6.5">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">📱 Código PIN *</label>
+                    <div class="flex space-x-2">
+                        <input type="text" id="employeeAccessCode" class="input-modern flex-1 text-center text-lg tracking-widest" placeholder="1234" maxlength="4" pattern="[0-9]{4}" required>
+                        <button type="button" onclick="document.getElementById('employeeAccessCode').value = generateRandomPIN(); UI.showNotification('🎲 PIN generado automáticamente', 'success');" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded-lg text-sm transition-colors">
+                            🎲 Auto
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Código de 4 dígitos para el empleado</p>
+                </div>
+            </div>
+            <div class="p-6 border-t flex justify-end space-x-3">
+                <button id="cancelEmployee" class="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors">
+                    ❌ Cancelar
+                </button>
+                <button id="saveEmployee" class="btn-primary text-white px-6 py-2 rounded-lg">
+                    💾 Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="manualRecordModal" class="modal-overlay hidden">
+        <div class="modal-content slide-up">
+            <div class="gradient-bg text-white p-6 rounded-t-2xl">
+                <h3 class="text-xl font-bold">✏️ Registro Manual</h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">👤 Empleado *</label>
+                    <select id="manualRecordEmployee" class="input-modern w-full" required>
+                        <option value="">Seleccionar empleado</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">📅 Fecha *</label>
+                    <input type="date" id="manualRecordDate" class="input-modern w-full" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">🕐 Hora de Entrada</label>
+                    <input type="time" id="manualRecordTimeIn" class="input-modern w-full">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">🕕 Hora de Salida</label>
+                    <input type="time" id="manualRecordTimeOut" class="input-modern w-full">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">📝 Notas</label>
+                    <textarea id="manualRecordNotes" class="input-modern w-full" rows="3" placeholder="Motivo del registro manual..."></textarea>
+                </div>
+            </div>
+            <div class="p-6 border-t flex justify-end space-x-3">
+                <button id="cancelManualRecord" class="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors">
+                    ❌ Cancelar
+                </button>
+                <button id="saveManualRecord" class="btn-primary text-white px-6 py-2 rounded-lg">
+                    💾 Guardar Registro
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="helpModal" class="modal-overlay hidden">
+        <div class="modal-content slide-up">
+            <div class="gradient-bg text-white p-6 rounded-t-2xl">
+                <h3 class="text-xl font-bold">❓ Ayuda y Atajos de Teclado</h3>
+            </div>
+            <div class="p-6 space-y-6">
+                <div>
+                    <h4 class="font-bold text-gray-800 mb-3">⌨️ Atajos de Teclado</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                            <span>Nuevo empleado</span>
+                            <kbd class="px-2 py-1 bg-gray-200 rounded text-xs">Ctrl + E</kbd>
+                        </div>
+                        <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                            <span>Registro manual</span>
+                            <kbd class="px-2 py-1 bg-gray-200 rounded text-xs">Ctrl + R</kbd>
+                        </div>
+                        <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                            <span>Guardar datos</span>
+                            <kbd class="px-2 py-1 bg-gray-200 rounded text-xs">Ctrl + S</kbd>
+                        </div>
+                        <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                            <span>Cerrar modales</span>
+                            <kbd class="px-2 py-1 bg-gray-200 rounded text-xs">Escape</kbd>
+                        </div>
+                        <div class="flex justify-between items-center p-2 bg-green-50 rounded">
+                            <span>Fichar entrada (empleados)</span>
+                            <kbd class="px-2 py-1 bg-green-200 rounded text-xs">F1</kbd>
+                        </div>
+                        <div class="flex justify-between items-center p-2 bg-red-50 rounded">
+                            <span>Fichar salida (empleados)</span>
+                            <kbd class="px-2 py-1 bg-red-200 rounded text-xs">F2</kbd>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-gray-800 mb-3">🔧 Funciones Principales</h4>
+                    <div class="space-y-2 text-sm text-gray-600">
+                        <div class="flex items-start space-x-2">
+                            <span class="text-blue-500">•</span>
+                            <span><strong>Fichaje:</strong> Los empleados pueden fichar entrada/salida con su PIN</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <span class="text-green-500">•</span>
+                            <span><strong>Control de ubicación:</strong> Verificación GPS opcional para empleados</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <span class="text-purple-500">•</span>
+                            <span><strong>Sincronización:</strong> Datos automáticamente sincronizados en la nube</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <span class="text-orange-500">•</span>
+                            <span><strong>Informes:</strong> Generación de reportes y estadísticas</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <span class="text-red-500">•</span>
+                            <span><strong>Seguridad:</strong> Auto-logout por inactividad (30 min)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-gray-800 mb-3">💡 Consejos</h4>
+                    <div class="space-y-2 text-sm text-gray-600">
+                        <div class="flex items-start space-x-2">
+                            <span class="text-yellow-500">💡</span>
+                            <span>Use el botón "Auto" para generar PINs únicos automáticamente</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <span class="text-yellow-500">💡</span>
+                            <span>Los datos se guardan automáticamente cada 2 minutos</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <span class="text-yellow-500">💡</span>
+                            <span>Puede acceder desde múltiples dispositivos con sincronización instantánea</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <span class="text-yellow-500">💡</span>
+                            <span>Los turnos nocturnos son soportados (máximo 16 horas)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 border-t flex justify-end">
+                <button id="closeHelp" class="btn-primary text-white px-6 py-2 rounded-lg">
+                    ✅ Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editRecordModal" class="modal-overlay hidden">
+        <div class="modal-content slide-up">
+            <div class="gradient-bg text-white p-6 rounded-t-2xl">
+                <h3 class="text-xl font-bold">✏️ Editar Registro</h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">👤 Empleado</label>
+                    <input type="text" id="editRecordEmployeeName" class="input-modern w-full" readonly>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">📅 Fecha</label>
+                    <input type="date" id="editRecordDate" class="input-modern w-full">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">🕐 Hora de Entrada</label>
+                    <input type="time" id="editRecordTimeIn" class="input-modern w-full">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">🕕 Hora de Salida</label>
+                    <input type="time" id="editRecordTimeOut" class="input-modern w-full">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">📝 Notas</label>
+                    <textarea id="editRecordNotes" class="input-modern w-full" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="p-6 border-t flex justify-end space-x-3">
+                <button id="deleteRecord" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors">
+                    🗑️ Eliminar
+                </button>
+                <button id="cancelEditRecord" class="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors">
+                    ❌ Cancelar
+                </button>
+                <button id="saveEditRecord" class="btn-primary text-white px-6 py-2 rounded-lg">
+                    💾 Actualizar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+
+    <script>
+        // =========================================================================
+        // CONFIGURACIÓN E INICIALIZACIÓN DE FIREBASE
+        // =========================================================================
+
+        // TUS CREDENCIALES DE FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3D7fH6QpdG7mUSNhFfUzD6RWje8TpGEk",
+            authDomain: "hostaldatossincro.firebaseapp.com",
+            databaseURL: "https://hostaldatossincro-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "hostaldatossincro",
+            storageBucket: "hostaldatossincro.firebasestorage.app",
+            messagingSenderId: "955112940193",
+            appId: "1:955112940193:web:f30f52858c1e6c0ddc46e0"
+        };
+
+        // Inicializa Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Referencias a los nodos de la base de datos
+        const db = firebase.database();
+        const refEmpleados = db.ref('fichaje/employees');
+        const refRegistros = db.ref('fichaje/timeRecords');
+        const refConfig = db.ref('fichaje/config');
+
+        // =========================================================================
+        // ESTADO GLOBAL Y VARIABLES
+        // =========================================================================
+
+        let employees = JSON.parse(localStorage.getItem('fichajemax_employees')) || getDefaultEmployees();
+        let timeRecords = JSON.parse(localStorage.getItem('fichajemax_timeRecords')) || [];
+        let companySettings = JSON.parse(localStorage.getItem('fichajemax_companySettings')) || {
+            companyName: 'Happy Hostal Carrales',
+            companyCIF: 'B09539271',
+            companyAddress: 'Calle Puente Gasset 4º 1º drch',
+            companyPhone: '947263547'
+        };
+        let locationSettings = JSON.parse(localStorage.getItem('fichajemax_locationSettings')) || {
+            enabled: true,
+            workLatitude: 42.341646,
+            workLongitude: -3.694808,
+            allowedRadius: 10,
+            workAddress: 'Happy Hostal Carrales - Calle Puente Gasset 4º 1º drch'
+        };
+        let adminCredentials = JSON.parse(localStorage.getItem('fichajemax_adminCredentials')) || {
+            username: 'admin',
+            password: 'Octubre2012'
+        };
+        let currentUser = null;
+        let selectedUserType = null;
+        let editingRecordId = null;
+        let editingEmployeeId = null;
+        let lastActivity = Date.now();
+        let autoSaveTimer = null;
+        
+        // **NUEVO ESTADO: CONTROL DEL BOTÓN OCULTO**
+        let editModeEnabled = false; 
+        // **NUEVO ESTADO: RESULTADOS DEL ÚLTIMO INFORME EXPORTABLE**
+        let lastReportRecords = [];
+
+        // =========================================================================
+        // FUNCIONES CORE DE DATOS Y SINCRONIZACIÓN
+        // =========================================================================
+        
+        function getDefaultEmployees() {
+            return [
+                { id: 1, name: 'Ana', lastName: 'García Martínez', dni: '12345678A', position: 'Recepcionista', status: 'Activo', accessCode: '1234', workingHours: 8, createdAt: new Date().toISOString() },
+                { id: 2, name: 'Carlos', lastName: 'López Rodríguez', dni: '87654321B', position: 'Conserje', status: 'Activo', accessCode: '5678', workingHours: 8, createdAt: new Date().toISOString() },
+                { id: 3, name: 'María', lastName: 'Fernández Silva', dni: '11223344C', position: 'Limpieza', status: 'Activo', accessCode: '9012', workingHours: 6, createdAt: new Date().toISOString() },
+                { id: 4, name: 'David', lastName: 'Ruiz Moreno', dni: '55667788D', position: 'Mantenimiento', status: 'Activo', accessCode: '3456', workingHours: 8, createdAt: new Date().toISOString() }
+            ];
+        }
+
+        function setEmployees(newEmployees) {
+            localStorage.setItem('fichajemax_employees', JSON.stringify(newEmployees));
+            employees = newEmployees; 
+            refEmpleados.set(newEmployees).catch(error => {
+                console.error("Error al sincronizar empleados en Firebase:", error);
+                UI.showNotification('❌ Error al sincronizar empleados con la nube', 'error');
+            });
+        }
+        
+        function setTimeRecords(newRecords) {
+            localStorage.setItem('fichajemax_timeRecords', JSON.stringify(newRecords));
+            timeRecords = newRecords; 
+            refRegistros.set(newRecords).catch(error => {
+                console.error("Error al sincronizar registros en Firebase:", error);
+                UI.showNotification('❌ Error al sincronizar registros con la nube', 'error');
+            });
+        }
+        
+        function setGlobalConfig(configName, data) {
+            localStorage.setItem(`fichajemax_${configName}`, JSON.stringify(data));
+            if (configName === 'companySettings') companySettings = data;
+            if (configName === 'locationSettings') locationSettings = data;
+            refConfig.child(configName).set(data).catch(error => {
+                console.error(`Error sincronizando ${configName}:`, error);
+            });
+        }
+
+        // FUNCIÓN CLAVE: ESCUCHADORES DE FIREBASE EN TIEMPO REAL
+        function startRealtimeListeners() {
+            refEmpleados.on('value', (snapshot) => {
+                const firebaseEmployees = snapshot.val();
+                if (firebaseEmployees) {
+                    employees = firebaseEmployees;
+                    localStorage.setItem('fichajemax_employees', JSON.stringify(employees));
+                    if (currentUser) {
+                        loadEmployees();
+                        populateSelects();
+                        loadDashboard();
+                    }
+                    UI.updateSyncIndicator('success');
+                }
+            }, (error) => { UI.updateSyncIndicator('error'); });
+
+            refRegistros.on('value', (snapshot) => {
+                const firebaseRecords = snapshot.val();
+                if (firebaseRecords) {
+                    timeRecords = firebaseRecords;
+                    localStorage.setItem('fichajemax_timeRecords', JSON.stringify(timeRecords));
+                    if (currentUser) {
+                        loadTimeRecords();
+                        loadDashboard();
+                    }
+                    UI.updateSyncIndicator('success');
+                }
+            }, (error) => { UI.updateSyncIndicator('error'); });
+
+            refConfig.on('value', (snapshot) => {
+                const config = snapshot.val();
+                if (config) {
+                    // Sincronizar companySettings y locationSettings
+                    if (JSON.stringify(config.companySettings) !== JSON.stringify(companySettings)) {
+                        companySettings = config.companySettings || companySettings;
+                        localStorage.setItem('fichajemax_companySettings', JSON.stringify(companySettings));
+                        loadCompanySettings();
+                    }
+                    if (JSON.stringify(config.locationSettings) !== JSON.stringify(locationSettings)) {
+                        locationSettings = config.locationSettings || locationSettings;
+                        localStorage.setItem('fichajemax_locationSettings', JSON.stringify(locationSettings));
+                        loadLocationSettings();
+                    }
+                }
+            });
+        }
+
+        // =========================================================================
+        // UTILIDADES Y UI
+        // =========================================================================
+
+        // NUEVO: Convierte horas flotantes a formato HH:MMh
+        function formatHoursMinutes(floatHours) {
+            if (floatHours === 0 || isNaN(floatHours)) return '00:00h';
+            const totalMinutes = Math.round(floatHours * 60);
+            const sign = totalMinutes < 0 ? '-' : '';
+            const absMinutes = Math.abs(totalMinutes);
+            const hours = Math.floor(absMinutes / 60);
+            const minutes = absMinutes % 60;
+            return `${sign}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}h`;
+        }
+
+        const UI = {
+            updateSyncIndicator(status) {
+                const indicator = document.getElementById('syncIndicator');
+                if (!indicator) return;
+                
+                indicator.className = `sync-indicator ${status}`;
+                
+                switch(status) {
+                    case 'success':
+                        indicator.textContent = '☁️ Sincronizado (Firebase)';
+                        break;
+                    case 'syncing':
+                        indicator.innerHTML = '<div class="loading-spinner"></div> Sincronizando...';
+                        break;
+                    case 'error':
+                        indicator.textContent = '❌ Error de Sync';
+                        break;
+                }
+            },
+            
+            showNotification(message, type = 'success') {
+                document.querySelectorAll('.notification').forEach(n => n.remove());
+                
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => notification.remove(), 4000);
+            },
+            
+            updateDateTime() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('es-ES', { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit' 
+                });
+                const dateString = now.toLocaleDateString('es-ES', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+                
+                const timeElements = ['currentTime', 'mainClock'];
+                const dateElements = ['currentDate', 'mainDate'];
+                
+                timeElements.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = timeString;
+                });
+                
+                dateElements.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = dateString;
+                });
+            }
+        };
+        
+        // =========================================================================
+        // LÓGICA DE LA APLICACIÓN
+        // =========================================================================
+
+        class App {
+            constructor() {
+                this.init();
+            }
+            
+            init() {
+                this.setupDateTime();
+                this.setupEventListeners();
+                this.initializeData();
+                this.setupRealtimeSync(); 
+                this.setupSecurity();
+                this.setupKeyboardShortcuts();
+            }
+            
+            setupDateTime() {
+                UI.updateDateTime();
+                setInterval(UI.updateDateTime, 1000);
+            }
+            
+            setupEventListeners() {
+                setupEventListeners();
+            }
+            
+            initializeData() {
+                if (!localStorage.getItem('fichajemax_employees')) {
+                    setEmployees(getDefaultEmployees());
+                }
+                if (!localStorage.getItem('fichajemax_adminCredentials')) {
+                    DataManager.setAdminCredentials(adminCredentials);
+                }
+                
+                populateSelects();
+                setDefaultDates();
+                loadLocationSettings();
+                loadCloudSettings();
+            }
+            
+            setupRealtimeSync() { 
+                startRealtimeListeners();
+            }
+            
+            setupSecurity() {
+                setupActivityMonitoring();
+            }
+            
+            setupKeyboardShortcuts() {
+                setupKeyboardShortcuts();
+            }
+        }
+        
+        // Inicializar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', () => new App());
+
+        function setupEventListeners() {
+            document.getElementById('adminBtn').addEventListener('click', () => selectUserType('admin'));
+            document.getElementById('employeeBtn').addEventListener('click', () => selectUserType('employee'));
+            document.getElementById('loginButton').addEventListener('click', handleLogin);
+            
+            document.getElementById('adminPassword').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleLogin();
+            });
+            document.getElementById('employeeCode').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleLogin();
+            });
+            
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+            });
+            
+            document.getElementById('clockInBtn').addEventListener('click', () => clockAction('in'));
+            document.getElementById('clockOutBtn').addEventListener('click', () => clockAction('out'));
+            
+            document.getElementById('addEmployeeBtn').addEventListener('click', showEmployeeModal);
+            document.getElementById('saveEmployee').addEventListener('click', saveEmployee);
+            document.getElementById('cancelEmployee').addEventListener('click', hideEmployeeModal);
+            
+            document.getElementById('employeeWorkingHours').addEventListener('change', function() {
+                const customContainer = document.getElementById('customHoursContainer');
+                if (this.value === 'custom') {
+                    customContainer.classList.remove('hidden');
+                    document.getElementById('employeeCustomHours').focus();
+                } else {
+                    customContainer.classList.add('hidden');
+                }
+            });
+            
+            document.getElementById('addManualRecord').addEventListener('click', showManualRecordModal);
+            document.getElementById('saveManualRecord').addEventListener('click', saveManualRecord);
+            document.getElementById('cancelManualRecord').addEventListener('click', hideManualRecordModal);
+            
+            document.getElementById('saveEditRecord').addEventListener('click', saveEditRecord);
+            document.getElementById('cancelEditRecord').addEventListener('click', hideEditRecordModal);
+            document.getElementById('deleteRecord').addEventListener('click', deleteRecord);
+            
+            document.getElementById('generateReport').addEventListener('click', generateReport);
+            document.getElementById('exportReportBtn').addEventListener('click', exportReport); // NUEVO
+            
+            document.getElementById('applyFilters').addEventListener('click', applyFilters);
+            
+            document.getElementById('saveCompanySettings').addEventListener('click', saveCompanySettingsForm);
+            document.getElementById('saveAdminCredentials').addEventListener('click', saveAdminCredentialsForm);
+            document.getElementById('saveLocationSettings').addEventListener('click', saveLocationSettingsForm);
+            document.getElementById('testCloudConnection').addEventListener('click', testCloudConnection);
+            document.getElementById('syncNow').addEventListener('click', syncNow);
+            
+            document.getElementById('getCurrentLocation').addEventListener('click', getCurrentLocationForSetup);
+            document.getElementById('testDistance').addEventListener('click', testDistance);
+            document.getElementById('refreshLocationBtn').addEventListener('click', refreshEmployeeLocation);
+            
+            document.getElementById('exportAllData').addEventListener('click', exportAllData);
+            document.getElementById('exportRecords').addEventListener('click', exportRecords);
+            document.getElementById('importDataFile').addEventListener('change', handleImportFile);
+            document.getElementById('clearAllData').addEventListener('click', clearAllData);
+            
+            document.getElementById('helpBtn').addEventListener('click', showHelpModal);
+            document.getElementById('closeHelp').addEventListener('click', hideHelpModal);
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+        }
+
+        // LÓGICA DE AUTH Y UI
+        function selectUserType(type) {
+            appState.selectedUserType = type;
+            selectedUserType = type;
+            
+            document.querySelectorAll('.user-type-btn').forEach(btn => {
+                btn.classList.remove('border-purple-500', 'bg-purple-50');
+                btn.classList.add('border-gray-200');
+            });
+
+            if (type === 'admin') {
+                document.getElementById('adminBtn').classList.add('border-purple-500', 'bg-purple-50');
+                document.getElementById('adminLogin').classList.remove('hidden');
+                document.getElementById('employeeLogin').classList.add('hidden');
+                setTimeout(() => {
+                    document.getElementById('adminPassword').focus();
+                }, 100);
+            } else {
+                document.getElementById('employeeBtn').classList.add('border-purple-500', 'bg-purple-50');
+                document.getElementById('employeeLogin').classList.remove('hidden');
+                document.getElementById('adminLogin').classList.add('hidden');
+                setTimeout(() => {
+                    document.getElementById('employeeCode').focus();
+                }, 100);
+            }
+        }
+
+        function handleLogin() {
+            if (!selectedUserType) {
+                UI.showNotification('⚠️ Seleccione un tipo de usuario', 'warning');
+                return;
+            }
+            
+            if (selectedUserType === 'admin') {
+                const password = document.getElementById('adminPassword').value.trim();
+                
+                if (password === adminCredentials.password) {
+                    currentUser = { type: 'admin', name: adminCredentials.username };
+                    showMainApp();
+                    UI.showNotification(`✅ Bienvenido ${adminCredentials.username}`, 'success');
+                } else {
+                    UI.showNotification('❌ Contraseña incorrecta', 'error');
+                }
+            } else if (selectedUserType === 'employee') {
+                const employeeCode = document.getElementById('employeeCode').value.trim();
+                
+                if (employeeCode) {
+                    authenticateEmployee(employeeCode);
+                } else {
+                    UI.showNotification('📱 Ingrese su código PIN', 'warning');
+                }
+            }
+        }
+
+        function authenticateEmployee(code) {
+            const employee = employees.find(emp => emp.accessCode === code && emp.status === 'Activo');
+            if (employee) {
+                currentUser = { type: 'employee', ...employee };
+                showMainApp();
+                UI.showNotification(`✅ Bienvenido/a ${employee.name}`, 'success');
+            } else {
+                UI.showNotification('❌ Código incorrecto o empleado inactivo', 'error');
+                document.getElementById('employeeCode').value = '';
+            }
+        }
+
+        function showMainApp() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            
+            if (currentUser.type === 'employee') {
+                setupEmployeeInterface();
+                if (locationSettings.enabled) {
+                    startLocationMonitoring();
+                }
+            } else {
+                setupAdminInterface();
+            }
+            
+            // Cargar datos de la interfaz principal después del login
+            loadDashboard();
+            loadEmployees();
+            loadTimeRecords();
+            loadStatistics();
+            loadCompanySettings();
+            loadAdminCredentialsForm();
+            updateDataStatistics();
+        }
+
+        function setupEmployeeInterface() {
+            document.querySelectorAll('.admin-only').forEach(element => {
+                element.style.display = 'none';
+            });
+            
+            document.querySelectorAll('.employee-only').forEach(element => {
+                element.style.display = 'block';
+            });
+
+            // Mostrar el nombre del empleado en grande al entrar
+            const nameDisplay = document.getElementById('employeeNameDisplay');
+            if (nameDisplay && currentUser && currentUser.type === 'employee') {
+                nameDisplay.textContent = `${currentUser.name} ${currentUser.lastName}`;
+                nameDisplay.classList.remove('hidden'); 
+            }
+
+            const locationRefreshContainer = document.getElementById('locationRefreshContainer');
+            if (locationRefreshContainer && locationSettings.enabled) {
+                locationRefreshContainer.classList.remove('hidden');
+            }
+        }
+
+        function setupAdminInterface() {
+            document.querySelectorAll('.admin-only').forEach(element => {
+                element.style.display = 'block';
+            });
+            
+            document.querySelectorAll('.employee-only').forEach(element => {
+                element.style.display = 'none';
+            });
+
+            const nameDisplay = document.getElementById('employeeNameDisplay');
+            if (nameDisplay) {
+                nameDisplay.classList.add('hidden'); 
+            }
+            
+            // Ocultar el modo de edición al iniciar sesión
+            editModeEnabled = false;
+        }
+
+        function logout() {
+            currentUser = null;
+            selectedUserType = null;
+            stopLocationMonitoring();
+
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('employeeCode').value = '';
+            document.querySelectorAll('.user-type-btn').forEach(btn => {
+                btn.classList.remove('border-purple-500', 'bg-purple-50');
+                btn.classList.add('border-gray-200');
+            });
+            document.getElementById('adminLogin').classList.add('hidden');
+            document.getElementById('employeeLogin').classList.add('hidden');
+            
+            UI.showNotification('👋 Sesión cerrada', 'success');
+        }
+
+        // LÓGICA DE FICHAJE
+        function clockAction(type) {
+            let employeeId;
+            if (currentUser.type === 'employee') {
+                employeeId = currentUser.id;
+            } else {
+                employeeId = document.getElementById('clockEmployeeSelect').value;
+                if (!employeeId) {
+                    UI.showNotification('👤 Seleccione un empleado', 'warning');
+                    return;
+                }
+            }
+            performClockAction(employeeId, type);
+        }
+
+        async function performClockAction(employeeId, type) {
+            UI.updateSyncIndicator('syncing');
+            
+            const employee = employees.find(emp => emp.id == employeeId);
+            if (!employee) {
+                UI.showNotification('❌ Empleado no encontrado', 'error');
+                UI.updateSyncIndicator('error');
+                return;
+            }
+
+            if (currentUser.type === 'employee' && locationSettings.enabled) {
+                const locationCheck = await checkLocationPermission();
+                if (!locationCheck.allowed) {
+                    UI.showNotification(locationCheck.message, 'error');
+                    UI.updateSyncIndicator('error');
+                    return;
+                }
+            }
+            
+            const now = new Date();
+            const today = formatDate(now);
+            const currentTime = now.toTimeString().slice(0, 5);
+            
+            let existingRecord = timeRecords.find(record => 
+                record.employeeId == employeeId && record.date === today
+            );
+
+            if (type === 'in') {
+                if (existingRecord && existingRecord.timeIn) {
+                    UI.showNotification('⚠️ Ya hay un registro de entrada para hoy', 'warning');
+                    UI.updateSyncIndicator('success');
+                    return;
+                }
+                
+                if (!existingRecord) {
+                    existingRecord = {
+                        id: Date.now(),
+                        employeeId: parseInt(employeeId),
+                        employeeName: employee.name + ' ' + employee.lastName,
+                        date: today,
+                        timeIn: currentTime,
+                        timeOut: null,
+                        totalHours: 0,
+                        method: currentUser.type === 'employee' ? 'pin' : 'manual',
+                        notes: `Entrada registrada vía ${currentUser.type === 'employee' ? 'PIN' : 'manual'}`,
+                        location: currentUser.type === 'employee' && locationSettings.enabled ? 'Ubicación verificada ✓' : null
+                    };
+                    timeRecords.push(existingRecord);
+                } else {
+                    existingRecord.timeIn = currentTime;
+                    if (currentUser.type === 'employee' && locationSettings.enabled) {
+                        existingRecord.location = 'Ubicación verificada ✓';
+                    }
+                }
+                
+                const locationMsg = currentUser.type === 'employee' && locationSettings.enabled ? ' - Ubicación verificada ✓' : '';
+                UI.showNotification(`✅ Entrada registrada: ${currentTime}${locationMsg}`, 'success');
+            } else {
+                if (!existingRecord || !existingRecord.timeIn) {
+                    UI.showNotification('⚠️ No hay registro de entrada para hoy', 'warning');
+                    UI.updateSyncIndicator('success');
+                    return;
+                }
+                
+                if (existingRecord.timeOut) {
+                    UI.showNotification('⚠️ Ya hay un registro de salida para hoy', 'warning');
+                    UI.updateSyncIndicator('success');
+                    return;
+                }
+                
+                existingRecord.timeOut = currentTime;
+                // Almacenar horas como flotante para cálculos y minutos para display
+                existingRecord.totalHours = calculateFloatHours(existingRecord.timeIn, currentTime);
+                
+                const locationMsg = currentUser.type === 'employee' && locationSettings.enabled ? ' - Ubicación verificada ✓' : '';
+                UI.showNotification(`🏁 Salida registrada: ${currentTime}${locationMsg}`, 'success');
+            }
+            
+            setTimeRecords(timeRecords);
+            loadDashboard();
+            loadTimeRecords();
+        }
+
+        // LÓGICA DE REGISTROS Y FILTROS
+        function applyFilters() {
+            loadTimeRecords();
+            UI.showNotification('🔍 Filtros aplicados', 'success');
+        }
+
+        function loadTimeRecords() {
+            const tableElement = document.getElementById('timeRecordsTable');
+            if (!tableElement) return;
+            
+            let recordsToShow = timeRecords;
+            const filterEmployeeId = document.getElementById('filterEmployee')?.value;
+            const filterStartDateStr = document.getElementById('filterStartDate')?.value;
+            const filterEndDateStr = document.getElementById('filterEndDate')?.value;
+
+            // 1. FILTRADO POR EMPLEADO
+            if (currentUser?.type === 'employee') {
+                recordsToShow = recordsToShow.filter(record => record.employeeId === currentUser.id);
+            } else if (filterEmployeeId) {
+                recordsToShow = recordsToShow.filter(record => record.employeeId == filterEmployeeId);
+            }
+
+            // 2. FILTRADO POR FECHAS
+            if (filterStartDateStr) {
+                const startDate = new Date(filterStartDateStr);
+                recordsToShow = recordsToShow.filter(record => new Date(record.date) >= startDate);
+            }
+            if (filterEndDateStr) {
+                const endDate = new Date(filterEndDateStr);
+                // Añadir 23:59:59 al final del día para incluir el día de finalización
+                endDate.setHours(23, 59, 59, 999); 
+                recordsToShow = recordsToShow.filter(record => new Date(record.date) <= endDate);
+            }
+
+            // 3. ORDENAR
+            recordsToShow = recordsToShow.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // 4. ACTUALIZAR HEADER DE ACCIONES (VISIBILIDAD SECRETA)
+            const actionsHeader = document.getElementById('actionsHeader');
+            const isActionsVisible = currentUser?.type === 'admin' && editModeEnabled;
+            if (actionsHeader) {
+                 // Alternar la clase 'hidden' en el thead de la columna si es necesario
+                actionsHeader.classList.toggle('actions-col-hidden', !isActionsVisible);
+                actionsHeader.textContent = isActionsVisible ? '⚙️ Acciones (ON)' : '⚙️ Acciones';
+            }
+
+
+            if (recordsToShow.length === 0) {
+                tableElement.innerHTML = `<tr><td colspan="${isActionsVisible ? '7' : '6'}" class="text-center py-8 text-gray-500">No hay registros disponibles para los filtros aplicados.</td></tr>`;
+                return;
+            }
+            
+            tableElement.innerHTML = recordsToShow.map(record => {
+                const statusClass = record.timeOut ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
+                const statusText = record.timeOut ? '✅ Completo' : '⏳ En curso';
+                
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                    <span class="text-purple-600 font-bold text-xs">
+                                        ${record.employeeName.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="font-medium">${record.employeeName}</span>
+                                    ${record.location ? `<div class="text-xs text-green-600">${record.location}</div>` : ''}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">${formatDateDisplay(record.date)}</td>
+                        <td class="px-6 py-4 font-mono">${record.timeIn || '--:--'}</td>
+                        <td class="px-6 py-4 font-mono">${record.timeOut || '--:--'}</td>
+                        <td class="px-6 py-4 font-bold">${formatHoursMinutes(record.totalHours)}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 text-xs rounded-full ${statusClass}">
+                                ${statusText}
+                            </span>
+                        </td>
+                        ${isActionsVisible ? `
+                            <td class="px-6 py-4">
+                                <button onclick="editRecord(${record.id})" class="text-blue-600 hover:text-blue-800 text-sm">
+                                    ✏️ Editar
+                                </button>
+                            </td>
+                        ` : ''}
+                    </tr>
+                `;
+            }).join('');
+
+             // Asegurar que todas las celdas de acción (td) se oculten si el modo no está activo
+             document.querySelectorAll('#timeRecordsTable tr').forEach(row => {
+                const lastCell = row.lastElementChild;
+                if (lastCell && lastCell.tagName === 'TD' && lastCell.closest('tbody')) {
+                    lastCell.classList.toggle('actions-col-hidden', !isActionsVisible);
+                }
+            });
+        }
+        
+        // LÓGICA DE INFORMES Y EXPORTACIÓN
+        let currentReportRecords = [];
+
+        function generateReport() {
+            const employeeId = document.getElementById('reportEmployee').value;
+            const startDateStr = document.getElementById('reportStartDate').value;
+            const endDateStr = document.getElementById('reportEndDate').value;
+            
+            if (!startDateStr || !endDateStr) {
+                UI.showNotification('⚠️ Seleccione las fechas del informe', 'warning');
+                return;
+            }
+            
+            let filteredRecords = timeRecords.filter(record => {
+                const recordDate = new Date(record.date);
+                const start = new Date(startDateStr);
+                const end = new Date(endDateStr);
+                end.setHours(23, 59, 59, 999);
+                return recordDate >= start && recordDate <= end;
+            });
+            
+            if (employeeId) {
+                filteredRecords = filteredRecords.filter(record => record.employeeId == employeeId);
+            }
+            
+            // Guardar el informe actual para exportación
+            currentReportRecords = filteredRecords;
+            document.getElementById('exportReportBtn').classList.remove('hidden'); // Mostrar botón de exportar
+
+            const resultsElement = document.getElementById('reportResults');
+            if (filteredRecords.length === 0) {
+                resultsElement.innerHTML = '<p class="text-gray-500 text-center py-8">No se encontraron registros para el período seleccionado</p>';
+                return;
+            }
+            
+            const totalHours = filteredRecords.reduce((sum, record) => sum + (record.totalHours || 0), 0);
+            const avgHours = totalHours / filteredRecords.length;
+            
+            resultsElement.innerHTML = `
+                <div class="mb-6">
+                    <h4 class="text-lg font-bold text-gray-800 mb-4">📊 Resumen del Informe</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div class="stat-card">
+                            <div class="text-2xl font-bold text-blue-600">${filteredRecords.length}</div>
+                            <div class="text-sm text-gray-600">Registros</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-2xl font-bold text-green-600">${formatHoursMinutes(totalHours)}</div>
+                            <div class="text-sm text-gray-600">Total Horas</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-2xl font-bold text-purple-600">${formatHoursMinutes(avgHours)}</div>
+                            <div class="text-sm text-gray-600">Promedio</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-2xl font-bold text-orange-600">${formatDateDisplay(startDateStr)} - ${formatDateDisplay(endDateStr)}</div>
+                            <div class="text-sm text-gray-600">Período</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-modern overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead class="gradient-bg text-white">
+                                <tr>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold">👤 Empleado</th>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold">📅 Fecha</th>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold">🕐 Entrada</th>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold">🕕 Salida</th>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold">⏱️ Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                ${filteredRecords.map(record => `
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 font-medium">${record.employeeName}</td>
+                                        <td class="px-6 py-4">${formatDateDisplay(record.date)}</td>
+                                        <td class="px-6 py-4 font-mono">${record.timeIn || '--:--'}</td>
+                                        <td class="px-6 py-4 font-mono">${record.timeOut || '--:--'}</td>
+                                        <td class="px-6 py-4 font-bold">${formatHoursMinutes(record.totalHours)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            UI.showNotification('✅ Informe generado correctamente', 'success');
+        }
+
+        function exportReport() {
+            if (currentReportRecords.length === 0) {
+                UI.showNotification('⚠️ Genere un informe primero antes de exportar', 'warning');
+                return;
+            }
+            
+            const csvContent = generateCSV(currentReportRecords);
+            const fileName = `informe_fichaje_${formatDate(new Date(document.getElementById('reportStartDate').value))}_a_${formatDate(new Date(document.getElementById('reportEndDate').value))}.csv`;
+            downloadFile(csvContent, fileName, 'text/csv');
+            UI.showNotification('📊 Informe exportado a CSV', 'success');
+        }
+
+        // Lógica de modo de edición (NUEVO)
+        function toggleEditMode() {
+            editModeEnabled = !editModeEnabled;
+            loadTimeRecords(); 
+            
+            const actionsHeader = document.getElementById('actionsHeader');
+            if (actionsHeader) {
+                actionsHeader.classList.toggle('actions-col-hidden', !editModeEnabled);
+                actionsHeader.textContent = editModeEnabled ? '⚙️ Acciones (ON)' : '⚙️ Acciones';
+            }
+
+            UI.showNotification(`Modo Edición ${editModeEnabled ? 'ACTIVADO' : 'DESACTIVADO'}`, editModeEnabled ? 'warning' : 'success');
+        }
+
+        // UTILITIES
+        function calculateFloatHours(timeIn, timeOut) {
+            const [inHour, inMinute] = timeIn.split(':').map(Number);
+            const [outHour, outMinute] = timeOut.split(':').map(Number);
+            
+            const inMinutes = inHour * 60 + inMinute;
+            const outMinutes = outHour * 60 + outMinute;
+            
+            let diffMinutes = outMinutes - inMinutes;
+            if (diffMinutes < 0) diffMinutes += 24 * 60; 
+            
+            return diffMinutes / 60; // Retorna horas flotantes
+        }
+
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', function(e) {
+                if (!currentUser) return;
+                
+                // Atajo para el modo de edición (SOLO ADMIN)
+                if (currentUser.type === 'admin' && (e.ctrlKey || e.metaKey) && e.altKey && e.key === 'e') {
+                    e.preventDefault();
+                    toggleEditMode();
+                    return;
+                }
+                
+                // Ctrl/Cmd + shortcuts
+                if (e.ctrlKey || e.metaKey) {
+                    switch(e.key) {
+                        case 'e':
+                            e.preventDefault();
+                            if (currentUser.type === 'admin') {
+                                showEmployeeModal();
+                            }
+                            break;
+                        case 'r':
+                            e.preventDefault();
+                            if (currentUser.type === 'admin') {
+                                showManualRecordModal();
+                            }
+                            break;
+                        case 's':
+                            e.preventDefault();
+                            syncNow();
+                            UI.showNotification('💾 Datos guardados', 'success');
+                            break;
+                    }
+                }
+                
+                // Escape para cerrar modales
+                if (e.key === 'Escape') {
+                    const modals = document.querySelectorAll('.modal-overlay:not(.hidden)');
+                    modals.forEach(modal => modal.classList.add('hidden'));
+                    editingRecordId = null;
+                    editingEmployeeId = null;
+                }
+                
+                // F1 para entrada, F2 para salida (solo empleados)
+                if (currentUser.type === 'employee') {
+                    if (e.key === 'F1') {
+                        e.preventDefault();
+                        clockAction('in');
+                    } else if (e.key === 'F2') {
+                        e.preventDefault();
+                        clockAction('out');
+                    }
+                }
+            });
+        }
+        
+        // --- (El resto de funciones de la aplicación se mantienen intactas) ---
+        
+        function loadEmployees() {
+            const gridElement = document.getElementById('employeesGrid');
+            if (!gridElement) return;
+            
+            if (employees.length === 0) {
+                gridElement.innerHTML = '<p class="text-gray-500 text-center py-8 col-span-full">No hay empleados registrados</p>';
+                return;
+            }
+            
+            gridElement.innerHTML = employees.map(employee => {
+                const lastRecord = timeRecords
+                    .filter(record => record.employeeId === employee.id)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+                
+                const today = formatDate(new Date());
+                const todayRecord = timeRecords.find(record => 
+                    record.employeeId === employee.id && record.date === today
+                );
+                
+                let statusBadge = '';
+                if (employee.status === 'Activo' && todayRecord) {
+                    if (todayRecord.timeIn && !todayRecord.timeOut) {
+                        statusBadge = '<span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 animate-pulse">🟢 Trabajando</span>';
+                    } else if (todayRecord.timeOut) {
+                        statusBadge = '<span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">🔵 Completado</span>';
+                    }
+                } else if (employee.status === 'Activo') {
+                    statusBadge = '<span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">⚪ Sin fichar</span>';
+                } else {
+                    statusBadge = '<span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">❌ Inactivo</span>';
+                }
+                
+                return `
+                    <div class="employee-card p-6">
+                        <div class="flex items-center space-x-4 mb-4">
+                            <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                                ${(employee.name[0] + employee.lastName[0]).toUpperCase()}
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-gray-800">${employee.name} ${employee.lastName}</h4>
+                                <p class="text-sm text-gray-600">${employee.position || 'Sin especificar'}</p>
+                            </div>
+                            ${statusBadge}
+                        </div>
+                        
+                        <div class="space-y-2 text-sm text-gray-600 mb-4">
+                            <div class="flex justify-between">
+                                <span>🆔 DNI:</span>
+                                <span class="font-mono">${employee.dni}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>📱 PIN:</span>
+                                <span class="font-mono">••••</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>⏰ Jornada:</span>
+                                <span class="font-semibold">${employee.workingHours || 8}h/día</span>
+                            </div>
+                            ${lastRecord ? `
+                                <div class="flex justify-between">
+                                    <span>📅 Último:</span>
+                                    <span>${formatTimeAgo(lastRecord.date)}</span>
+                                </div>
+                            ` : ''}
+                            ${todayRecord ? `
+                                <div class="flex justify-between">
+                                    <span>⏰ Hoy:</span>
+                                    <span class="${todayRecord.totalHours >= (employee.workingHours || 8) ? 'text-green-600 font-bold' : 'text-orange-600'}">${formatHoursMinutes(todayRecord.totalHours)}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="editEmployee(${employee.id})" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-2 rounded-lg text-xs transition-colors">
+                                ✏️ Editar
+                            </button>
+                            <button onclick="toggleEmployeeStatus(${employee.id})" class="${employee.status === 'Activo' ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-500 hover:bg-green-600'} text-white px-2 py-2 rounded-lg text-xs transition-colors">
+                                ${employee.status === 'Activo' ? '🚫 Desactivar' : '✅ Activar'}
+                            </button>
+                            <button onclick="deleteEmployee(${employee.id})" class="bg-red-500 hover:bg-red-600 text-white px-2 py-2 rounded-lg text-xs transition-colors">
+                                🗑️ Eliminar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- (Se han omitido funciones intermedias para mantener la brevedad) ---
+
+        function loadDashboard() {
+            const today = formatDate(new Date());
+            let todayRecords = timeRecords.filter(record => record.date === today);
+            
+            if (currentUser && currentUser.type === 'employee') {
+                todayRecords = todayRecords.filter(record => record.employeeId === currentUser.id);
+                updateEmployeeStatus(today);
+            }
+            
+            const summaryElement = document.getElementById('todaySummary');
+            if (summaryElement) {
+                if (currentUser && currentUser.type === 'employee') {
+                    const myRecord = todayRecords[0];
+                    const myWeekRecords = timeRecords.filter(record => {
+                        const recordDate = new Date(record.date);
+                        const weekStart = new Date();
+                        weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+                        return record.employeeId === currentUser.id && recordDate >= weekStart;
+                    });
+                    const weekHours = myWeekRecords.reduce((sum, record) => sum + (record.totalHours || 0), 0);
+                    
+                    summaryElement.innerHTML = `
+                        <div class="stat-card">
+                            <div class="text-3xl font-bold text-blue-600">⏰ ${myRecord?.timeIn || '--:--'}</div>
+                            <div class="text-sm text-gray-600">Entrada</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-3xl font-bold text-green-600">🏁 ${myRecord?.timeOut || '--:--'}</div>
+                            <div class="text-sm text-gray-600">Salida</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-3xl font-bold text-purple-600">📊 ${formatHoursMinutes(myRecord?.totalHours)}</div>
+                            <div class="text-sm text-gray-600">Horas Hoy</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-3xl font-bold text-orange-600">📈 ${formatHoursMinutes(weekHours)}</div>
+                            <div class="text-sm text-gray-600">Esta Semana</div>
+                        </div>
+                    `;
+                } else {
+                    const totalEmployees = employees.filter(emp => emp.status === 'Activo').length;
+                    const presentEmployees = todayRecords.filter(record => record.timeIn).length;
+                    const completedShifts = todayRecords.filter(record => record.timeOut).length;
+                    const totalHours = todayRecords.reduce((sum, record) => sum + (record.totalHours || 0), 0);
+                    
+                    summaryElement.innerHTML = `
+                        <div class="stat-card">
+                            <div class="text-3xl font-bold text-blue-600">👥 ${totalEmployees}</div>
+                            <div class="text-sm text-gray-600">Empleados</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-3xl font-bold text-green-600">✅ ${presentEmployees}</div>
+                            <div class="text-sm text-gray-600">Presentes</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-3xl font-bold text-purple-600">🏁 ${completedShifts}</div>
+                            <div class="text-sm text-gray-600">Completados</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-3xl font-bold text-orange-600">⏱️ ${formatHoursMinutes(totalHours)}</div>
+                            <div class="text-sm text-gray-600">Total Horas</div>
+                        </div>
+                    `;
+                }
+            }
+            
+            loadRecentActivity();
+        }
+
+        // --- (Funciones de soporte para UI y persistencia) ---
+        function updateEmployeeStatus(today) {
+            const statusElement = document.getElementById('currentStatus');
+            const statusTimeElement = document.getElementById('statusTime');
+            const employeeStatusElement = document.getElementById('employeeStatus');
+            
+            if (!statusElement || !currentUser || currentUser.type !== 'employee') return;
+            
+            const myRecord = timeRecords.find(record => 
+                record.employeeId === currentUser.id && record.date === today
+            );
+            
+            if (employeeStatusElement) {
+                employeeStatusElement.style.display = 'block';
+            }
+            
+            if (myRecord) {
+                if (myRecord.timeIn && !myRecord.timeOut) {
+                    statusElement.innerHTML = '<span class="text-green-600 status-badge">🟢 TRABAJANDO</span>';
+                    statusTimeElement.textContent = `Entrada: ${myRecord.timeIn}`;
+                } else if (myRecord.timeIn && myRecord.timeOut) {
+                    statusElement.innerHTML = '<span class="text-blue-600">🔵 COMPLETADO</span>';
+                    statusTimeElement.textContent = `${myRecord.timeIn} - ${myRecord.timeOut} (${formatHoursMinutes(myRecord.totalHours)})`;
+                } else {
+                    statusElement.innerHTML = '<span class="text-gray-600">⚪ SIN FICHAR</span>';
+                    statusTimeElement.textContent = 'No hay registros para hoy';
+                }
+            } else {
+                statusElement.innerHTML = '<span class="text-gray-600">⚪ SIN FICHAR</span>';
+                statusTimeElement.textContent = 'No hay registros para hoy';
+            }
+            
+            updateWorkingHoursProgress(myRecord);
+        }
+
+        function updateWorkingHoursProgress(record) {
+            const progressElement = document.getElementById('workingHoursProgress');
+            const progressContent = document.getElementById('progressContent');
+            
+            if (!progressElement || !progressContent || !currentUser || currentUser.type !== 'employee') return;
+            
+            const employee = employees.find(emp => emp.id === currentUser.id);
+            if (!employee) return;
+            
+            const expectedHours = employee.workingHours || 8;
+            const workedHours = record?.totalHours || 0;
+            const progressPercentage = Math.min((workedHours / expectedHours) * 100, 100);
+            
+            let statusColor = 'bg-red-500';
+            let statusText = 'Pendiente';
+            let statusIcon = '🔴';
+            
+            if (progressPercentage >= 100) {
+                statusColor = 'bg-green-500';
+                statusText = 'Jornada Completa';
+                statusIcon = '✅';
+            } else if (progressPercentage >= 75) {
+                statusColor = 'bg-yellow-500';
+                statusText = 'Casi Completa';
+                statusIcon = '🟡';
+            } else if (progressPercentage >= 25) {
+                statusColor = 'bg-orange-500';
+                statusText = 'En Progreso';
+                statusIcon = '🟠';
+            }
+            
+            progressContent.innerHTML = `
+                <div class="mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-semibold text-gray-700">Horas Trabajadas</span>
+                        <span class="text-sm font-bold">${formatHoursMinutes(workedHours)} / ${expectedHours}h</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-4">
+                        <div class="${statusColor} h-4 rounded-full transition-all duration-500" style="width: ${progressPercentage}%"></div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div class="p-3 bg-gray-50 rounded-lg">
+                        <div class="text-lg font-bold text-gray-800">${expectedHours}h</div>
+                        <div class="text-xs text-gray-600">Jornada</div>
+                    </div>
+                    <div class="p-3 bg-blue-50 rounded-lg">
+                        <div class="text-lg font-bold text-blue-600">${formatHoursMinutes(workedHours)}</div>
+                        <div class="text-xs text-gray-600">Trabajadas</div>
+                    </div>
+                    <div class="p-3 bg-purple-50 rounded-lg">
+                        <div class="text-lg font-bold text-purple-600">${formatHoursMinutes(Math.max(0, expectedHours - workedHours))}</div>
+                        <div class="text-xs text-gray-600">Restantes</div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 p-3 rounded-lg ${statusColor.replace('bg-', 'bg-').replace('-500', '-100')} border border-${statusColor.replace('bg-', '').replace('-500', '-200')}">
+                    <div class="flex items-center justify-center space-x-2">
+                        <span class="text-lg">${statusIcon}</span>
+                        <span class="font-semibold text-${statusColor.replace('bg-', '').replace('-500', '-800')}">${statusText}</span>
+                    </div>
+                </div>
+            `;
+            
+            progressElement.classList.remove('hidden');
+        }
+
+        function loadRecentActivity() {
+            const activityElement = document.getElementById('recentActivity');
+            if (!activityElement) return;
+            
+            let recentRecords;
+            
+            if (currentUser && currentUser.type === 'employee') {
+                recentRecords = timeRecords
+                    .filter(record => record.employeeId === currentUser.id)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .slice(0, 5);
+            } else {
+                recentRecords = timeRecords
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .slice(0, 10);
+            }
+            
+            if (recentRecords.length === 0) {
+                activityElement.innerHTML = '<p class="text-gray-500 text-center py-8">No hay actividad reciente</p>';
+                return;
+            }
+            
+            activityElement.innerHTML = recentRecords.map(record => `
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                            <span class="text-purple-600 font-bold text-sm">
+                                ${record.employeeName.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                            </span>
+                        </div>
+                        <div>
+                            <div class="font-semibold">${record.employeeName}</div>
+                            <div class="text-sm text-gray-600">${formatDateDisplay(record.date)}</div>
+                            ${record.location ? `<div class="text-xs text-green-600">${record.location}</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold">
+                            ${record.timeIn || '--:--'} - ${record.timeOut || '--:--'}
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            ${formatHoursMinutes(record.totalHours)}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function loadEmployees() {
+            const gridElement = document.getElementById('employeesGrid');
+            if (!gridElement) return;
+            
+            if (employees.length === 0) {
+                gridElement.innerHTML = '<p class="text-gray-500 text-center py-8 col-span-full">No hay empleados registrados</p>';
+                return;
+            }
+            
+            gridElement.innerHTML = employees.map(employee => {
+                const lastRecord = timeRecords
+                    .filter(record => record.employeeId === employee.id)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+                
+                const today = formatDate(new Date());
+                const todayRecord = timeRecords.find(record => 
+                    record.employeeId === employee.id && record.date === today
+                );
+                
+                let statusBadge = '';
+                if (employee.status === 'Activo' && todayRecord) {
+                    if (todayRecord.timeIn && !todayRecord.timeOut) {
+                        statusBadge = '<span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 animate-pulse">🟢 Trabajando</span>';
+                    } else if (todayRecord.timeOut) {
+                        statusBadge = '<span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">🔵 Completado</span>';
+                    }
+                } else if (employee.status === 'Activo') {
+                    statusBadge = '<span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">⚪ Sin fichar</span>';
+                } else {
+                    statusBadge = '<span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">❌ Inactivo</span>';
+                }
+                
+                return `
+                    <div class="employee-card p-6">
+                        <div class="flex items-center space-x-4 mb-4">
+                            <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                                ${(employee.name[0] + employee.lastName[0]).toUpperCase()}
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-gray-800">${employee.name} ${employee.lastName}</h4>
+                                <p class="text-sm text-gray-600">${employee.position || 'Sin especificar'}</p>
+                            </div>
+                            ${statusBadge}
+                        </div>
+                        
+                        <div class="space-y-2 text-sm text-gray-600 mb-4">
+                            <div class="flex justify-between">
+                                <span>🆔 DNI:</span>
+                                <span class="font-mono">${employee.dni}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>📱 PIN:</span>
+                                <span class="font-mono">••••</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>⏰ Jornada:</span>
+                                <span class="font-semibold">${employee.workingHours || 8}h/día</span>
+                            </div>
+                            ${lastRecord ? `
+                                <div class="flex justify-between">
+                                    <span>📅 Último:</span>
+                                    <span>${formatTimeAgo(lastRecord.date)}</span>
+                                </div>
+                            ` : ''}
+                            ${todayRecord ? `
+                                <div class="flex justify-between">
+                                    <span>⏰ Hoy:</span>
+                                    <span class="${todayRecord.totalHours >= (employee.workingHours || 8) ? 'text-green-600 font-bold' : 'text-orange-600'}">${formatHoursMinutes(todayRecord.totalHours)}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="editEmployee(${employee.id})" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-2 rounded-lg text-xs transition-colors">
+                                ✏️ Editar
+                            </button>
+                            <button onclick="toggleEmployeeStatus(${employee.id})" class="${employee.status === 'Activo' ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-500 hover:bg-green-600'} text-white px-2 py-2 rounded-lg text-xs transition-colors">
+                                ${employee.status === 'Activo' ? '🚫 Desactivar' : '✅ Activar'}
+                            </button>
+                            <button onclick="deleteEmployee(${employee.id})" class="bg-red-500 hover:bg-red-600 text-white px-2 py-2 rounded-lg text-xs transition-colors">
+                                🗑️ Eliminar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- (Funciones de soporte para UI y persistencia) ---
+
+        // LÓGICA DE REGISTROS Y FILTROS (CORREGIDA)
+        function loadTimeRecords() {
+            const tableElement = document.getElementById('timeRecordsTable');
+            if (!tableElement) return;
+            
+            let recordsToShow = timeRecords;
+            const filterEmployeeId = document.getElementById('filterEmployee')?.value;
+            const filterStartDateStr = document.getElementById('filterStartDate')?.value;
+            const filterEndDateStr = document.getElementById('filterEndDate')?.value;
+
+            // 1. FILTRADO POR EMPLEADO
+            if (currentUser?.type === 'employee') {
+                recordsToShow = recordsToShow.filter(record => record.employeeId === currentUser.id);
+            } else if (filterEmployeeId) {
+                recordsToShow = recordsToShow.filter(record => record.employeeId == filterEmployeeId);
+            }
+
+            // 2. FILTRADO POR FECHAS
+            if (filterStartDateStr) {
+                const startDate = new Date(filterStartDateStr);
+                recordsToShow = recordsToShow.filter(record => new Date(record.date) >= startDate);
+            }
+            if (filterEndDateStr) {
+                const endDate = new Date(filterEndDateStr);
+                // Asegurar que se incluye el día completo
+                endDate.setHours(23, 59, 59, 999); 
+                recordsToShow = recordsToShow.filter(record => new Date(record.date) <= endDate);
+            }
+
+            // 3. ORDENAR
+            recordsToShow = recordsToShow.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // 4. CONTROL DEL MODO DE EDICIÓN (VISIBILIDAD SECRETA)
+            const actionsHeader = document.getElementById('actionsHeader');
+            const isActionsVisible = currentUser?.type === 'admin' && editModeEnabled;
+            if (actionsHeader) {
+                actionsHeader.classList.toggle('actions-col-hidden', !isActionsVisible);
+                actionsHeader.textContent = isActionsVisible ? '⚙️ Acciones (ON)' : '⚙️ Acciones';
+            }
+
+
+            if (recordsToShow.length === 0) {
+                // Ajustar colspan dinámicamente
+                const colspan = isActionsVisible ? '7' : '6';
+                tableElement.innerHTML = `<tr><td colspan="${colspan}" class="text-center py-8 text-gray-500">No hay registros disponibles para los filtros aplicados.</td></tr>`;
+                return;
+            }
+            
+            tableElement.innerHTML = recordsToShow.map(record => {
+                const statusClass = record.timeOut ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
+                const statusText = record.timeOut ? '✅ Completo' : '⏳ En curso';
+                
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                    <span class="text-purple-600 font-bold text-xs">
+                                        ${record.employeeName.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="font-medium">${record.employeeName}</span>
+                                    ${record.location ? `<div class="text-xs text-green-600">${record.location}</div>` : ''}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">${formatDateDisplay(record.date)}</td>
+                        <td class="px-6 py-4 font-mono">${record.timeIn || '--:--'}</td>
+                        <td class="px-6 py-4 font-mono">${record.timeOut || '--:--'}</td>
+                        <td class="px-6 py-4 font-bold">${formatHoursMinutes(record.totalHours)}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 text-xs rounded-full ${statusClass}">
+                                ${statusText}
+                            </span>
+                        </td>
+                        ${isActionsVisible ? `
+                            <td class="px-6 py-4 actions-col-visible">
+                                <button onclick="editRecord(${record.id})" class="text-blue-600 hover:text-blue-800 text-sm">
+                                    ✏️ Editar
+                                </button>
+                            </td>
+                        ` : ''}
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // --- (El resto de funciones se mantienen o usan las nuevas utilidades) ---
+
+        function loadCompanySettings() {
+            document.getElementById('companyName').value = companySettings.companyName || '';
+            document.getElementById('companyCIF').value = companySettings.companyCIF || '';
+            document.getElementById('companyAddress').value = companySettings.companyAddress || '';
+            document.getElementById('companyPhone').value = companySettings.companyPhone || '';
+        }
+
+        function loadAdminCredentialsForm() {
+            document.getElementById('adminUsername').value = adminCredentials.username || 'admin';
+            document.getElementById('currentAdminPassword').value = '';
+            document.getElementById('newAdminPassword').value = '';
+            document.getElementById('confirmAdminPassword').value = '';
+        }
+
+        function updateDataStatistics() {
+            const statsElement = document.getElementById('dataStatistics');
+            if (!statsElement) return;
+            
+            const employeeCount = employees.length;
+            const recordCount = timeRecords.length;
+            const dataSize = JSON.stringify({employees, timeRecords, companySettings, adminCredentials, locationSettings}).length;
+            
+            statsElement.innerHTML = `
+                <h4 class="font-bold text-gray-800 mb-3">📈 Estadísticas de Datos</h4>
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                        <div class="text-2xl font-bold text-blue-600">${employeeCount}</div>
+                        <div class="text-sm text-gray-600">Empleados</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-green-600">${recordCount}</div>
+                        <div class="text-sm text-gray-600">Registros</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-purple-600">${(dataSize / 1024).toFixed(1)}KB</div>
+                        <div class="text-sm text-gray-600">Tamaño</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Exportar Reporte (NUEVO)
+        function exportReport() {
+            if (currentReportRecords.length === 0) {
+                UI.showNotification('⚠️ Genere un informe primero antes de exportar', 'warning');
+                return;
+            }
+            
+            const csvContent = generateCSV(currentReportRecords);
+            const startDate = document.getElementById('reportStartDate').value;
+            const endDate = document.getElementById('reportEndDate').value;
+            
+            const fileName = `informe_fichaje_${startDate}_a_${endDate}.csv`;
+            downloadFile(csvContent, fileName, 'text/csv');
+            UI.showNotification('📊 Informe exportado a CSV', 'success');
+        }
+
+        // LÓGICA DE MODO EDICIÓN OCULTO
+        function toggleEditMode() {
+            editModeEnabled = !editModeEnabled;
+            loadTimeRecords(); 
+            
+            const actionsHeader = document.getElementById('actionsHeader');
+            if (actionsHeader) {
+                actionsHeader.classList.toggle('actions-col-hidden', !editModeEnabled);
+                actionsHeader.textContent = editModeEnabled ? '⚙️ Acciones (ON)' : '⚙️ Acciones';
+            }
+
+            UI.showNotification(`Modo Edición ${editModeEnabled ? 'ACTIVADO' : 'DESACTIVADO'}`, editModeEnabled ? 'warning' : 'success');
+        }
+
+
+        // UTILITIES
+        function calculateFloatHours(timeIn, timeOut) {
+            const [inHour, inMinute] = timeIn.split(':').map(Number);
+            const [outHour, outMinute] = timeOut.split(':').map(Number);
+            
+            const inMinutes = inHour * 60 + inMinute;
+            const outMinutes = outHour * 60 + outMinute;
+            
+            let diffMinutes = outMinutes - inMinutes;
+            if (diffMinutes < 0) diffMinutes += 24 * 60; 
+            
+            return diffMinutes / 60; // Retorna horas flotantes
+        }
+
+        function generateCSV(records) {
+            const headers = ['Empleado', 'Fecha', 'Entrada', 'Salida', 'Total Horas', 'Notas'];
+            const csvRows = [headers.join(',')];
+            
+            records.forEach(record => {
+                const row = [
+                    `"${record.employeeName}"`,
+                    record.date,
+                    record.timeIn || '',
+                    record.timeOut || '',
+                    formatHoursMinutes(record.totalHours).replace('h', ''), // Usa el nuevo formato para exportar
+                    `"${record.notes || ''}"`
+                ];
+                csvRows.push(row.join(','));
+            });
+            
+            return csvRows.join('\n');
+        }
+
+        // --- (Funciones de exportación, validación, etc. Se mantienen las originales) ---
+        
+        function setupAutoSave() {
+            autoSaveTimer = setInterval(() => {
+                if (currentUser) {
+                    setEmployees(employees);
+                    setTimeRecords(timeRecords);
+                }
+            }, 120000);
+        }
+
+        function loadCloudSettings() {
+            document.getElementById('cloudApiKey').value = '********';
+            document.getElementById('cloudBinId').value = '********';
+            
+            document.getElementById('cloudApiKey').disabled = true;
+            document.getElementById('cloudBinId').disabled = true;
+            document.getElementById('enableAutoSync').checked = true;
+            document.getElementById('enableAutoSync').disabled = true;
+            document.getElementById('syncInterval').disabled = true;
+            document.getElementById('saveCloudSettings').disabled = true;
+            document.getElementById('syncIntervalValue').textContent = 'Tiempo Real';
+
+            updateCloudSyncStatus();
+        }
+
+        function saveAdminCredentialsData() {
+            localStorage.setItem('fichajemax_adminCredentials', JSON.stringify(adminCredentials));
+        }
+
+        function updateCloudSyncStatus() {
+            const statusElement = document.getElementById('cloudSyncStatus');
+            if (!statusElement) return;
+            
+            const lastSyncText = new Date().toLocaleTimeString('es-ES');
+                
+            statusElement.innerHTML = `
+                <div class="text-green-700">
+                    <strong>Estado:</strong> 🚀 Sincronización Ultra-Rápida Activa (Firebase)<br>
+                    <strong>Última verificación:</strong> ${lastSyncText}<br>
+                    <strong>Frecuencia:</strong> **En tiempo real** (Instantánea)<br>
+                    <strong>Dispositivos:</strong> Cambios instantáneos en móviles, tablets y ordenadores<br>
+                    <strong>Rendimiento:</strong> Optimizado para múltiples dispositivos simultáneos
+                </div>
+            `;
+            statusElement.className = 'p-3 rounded-lg bg-green-100 text-sm';
+        }
+
+        function getCurrentPosition() {
+            return new Promise((resolve, reject) => {
+                if (!navigator.geolocation) {
+                    reject({ code: 0, message: 'Geolocalización no soportada en este dispositivo' });
+                    return;
+                }
+
+                const options = {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 30000
+                };
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        resolve(position);
+                    },
+                    (error) => {
+                        reject(error);
+                    },
+                    options
+                );
+            });
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9907ba73137aec95',t:'MTc2MDc4NzI4NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
