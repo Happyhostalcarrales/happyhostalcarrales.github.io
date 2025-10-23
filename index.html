@@ -398,11 +398,44 @@
             background: var(--danger-gradient);
         }
         
+        /* Modificaciones del Modo Edición */
+        .admin-edit-action { /* Oculta el botón de editar por defecto */
+            display: none !important; 
+        }
+
+        .admin-edit-action.visible { /* Lo hace visible al activar el modo */
+            display: inline-block !important;
+        }
+
+        .edit-mode-indicator {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            background: var(--danger-gradient);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 24px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            z-index: 1000;
+            box-shadow: var(--shadow-md);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: var(--transition);
+        }
+        /* Fin Modificaciones Modo Edición */
+        
         /* Responsive Design Improvements */
         @media (max-width: 768px) {
             .sync-indicator,
             .location-status {
                 right: 16px;
+                padding: 0.5rem 1rem;
+                font-size: 0.75rem;
+            }
+            
+            .edit-mode-indicator {
+                left: 16px;
                 padding: 0.5rem 1rem;
                 font-size: 0.75rem;
             }
@@ -426,6 +459,10 @@
 
     <div id="locationStatusIndicator" class="location-status hidden">
         📍 Verificando ubicación...
+    </div>
+    
+    <div id="editModeIndicator" class="edit-mode-indicator hidden">
+        ⚠️ MODO EDICIÓN ACTIVO
     </div>
 
     <header class="gradient-bg text-white shadow-lg">
@@ -1048,6 +1085,10 @@
                     <h4 class="font-bold text-gray-800 mb-3">⌨️ Atajos de Teclado</h4>
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                            <span>**Activar/Desactivar Edición**</span>
+                            <kbd class="px-2 py-1 bg-gray-200 rounded text-xs">Ctrl + Alt + E</kbd>
+                        </div>
+                        <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
                             <span>Nuevo empleado</span>
                             <kbd class="px-2 py-1 bg-gray-200 rounded text-xs">Ctrl + E</kbd>
                         </div>
@@ -1358,6 +1399,9 @@
         let syncInterval = null;
         let lastActivity = Date.now();
         let autoSaveTimer = null;
+        
+        // NUEVA VARIABLE DE ESTADO para el modo edición
+        let isEditModeActive = false;
         
         // Configuration Management
         const ConfigManager = {
@@ -1806,12 +1850,19 @@
             if (nameDisplay) {
                 nameDisplay.classList.add('hidden'); 
             }
+            
+            // Asegura que los botones de edición están ocultos al entrar como admin por defecto
+            document.querySelectorAll('.admin-edit-action').forEach(btn => {
+                btn.classList.remove('visible');
+            });
         }
 
         function logout() {
             console.log('Cerrando sesión');
             currentUser = null;
             selectedUserType = null;
+            isEditModeActive = false; // Restablecer estado de edición
+            document.getElementById('editModeIndicator').classList.add('hidden'); // Ocultar indicador
             stopLocationMonitoring();
 
             document.getElementById('mainApp').classList.add('hidden');
@@ -2336,7 +2387,7 @@
                     `;
                 } else {
                     const totalEmployees = employees.filter(emp => emp.status === 'Activo').length;
-                    const presentEmployees = todayRecords.filter(record => record.timeIn).length;
+                    const presentEmployees = todayRecords.filter(record => record.timeIn && !record.timeOut).length;
                     const completedShifts = todayRecords.filter(record => record.timeOut).length;
                     const totalHours = todayRecords.reduce((sum, record) => sum + (record.totalHours || 0), 0);
                     
@@ -2347,7 +2398,7 @@
                         </div>
                         <div class="stat-card">
                             <div class="text-3xl font-bold text-green-600">✅ ${presentEmployees}</div>
-                            <div class="text-sm text-gray-600">Presentes</div>
+                            <div class="text-sm text-gray-600">Trabajando</div>
                         </div>
                         <div class="stat-card">
                             <div class="text-3xl font-bold text-purple-600">🏁 ${completedShifts}</div>
@@ -2625,6 +2676,9 @@
                 const statusClass = record.timeOut ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
                 const statusText = record.timeOut ? '✅ Completo' : '⏳ En curso';
                 
+                // Determina si el botón de edición debe ser visible al cargar (solo si el modo está activo)
+                const editButtonVisibilityClass = isEditModeActive ? 'visible' : '';
+
                 return `
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4">
@@ -2651,7 +2705,7 @@
                         </td>
                         ${currentUser?.type === 'admin' ? `
                             <td class="px-6 py-4">
-                                <button onclick="editRecord(${record.id})" class="text-blue-600 hover:text-blue-800 text-sm">
+                                <button onclick="editRecord(${record.id})" class="text-blue-600 hover:text-blue-800 text-sm admin-edit-action ${editButtonVisibilityClass}">
                                     ✏️ Editar
                                 </button>
                             </td>
@@ -3087,6 +3141,12 @@
 
         function editRecord(id) {
             console.log('Editando registro:', id);
+            
+            if (!isEditModeActive) {
+                UI.showNotification('⚠️ Modo de Edición Desactivado. Active con Ctrl + Alt + E', 'warning');
+                return;
+            }
+            
             const record = timeRecords.find(r => r.id === id);
             if (!record) return;
             
@@ -3598,6 +3658,33 @@
             const expectedLetter = letters[parseInt(number) % 23];
             return dni[dni.length - 1] === expectedLetter;
         }
+        
+        // Función para alternar el modo de edición
+        function toggleEditMode() {
+            if (currentUser?.type !== 'admin') {
+                UI.showNotification('⚠️ Esta función solo está disponible para administradores', 'error');
+                return;
+            }
+            
+            isEditModeActive = !isEditModeActive;
+            const indicator = document.getElementById('editModeIndicator');
+            
+            if (isEditModeActive) {
+                indicator.classList.remove('hidden');
+                UI.showNotification('⚠️ Modo de Edición de Registros ACTIVADO (Ctrl + Alt + E para desactivar)', 'warning');
+                document.querySelectorAll('.admin-edit-action').forEach(btn => {
+                    btn.classList.add('visible');
+                });
+            } else {
+                indicator.classList.add('hidden');
+                UI.showNotification('✅ Modo de Edición de Registros DESACTIVADO', 'success');
+                document.querySelectorAll('.admin-edit-action').forEach(btn => {
+                    btn.classList.remove('visible');
+                });
+            }
+            
+            console.log('Modo de Edición:', isEditModeActive ? 'ACTIVO' : 'INACTIVO');
+        }
 
         function setupActivityMonitoring() {
             const INACTIVITY_TIMEOUT = 30 * 60 * 1000; 
@@ -3626,6 +3713,12 @@
             document.addEventListener('keydown', function(e) {
                 if (!currentUser) return;
                 
+                // Atajo para alternar el modo de edición: Ctrl + Alt + E
+                if ((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'e' || e.key === 'E')) {
+                    e.preventDefault();
+                    toggleEditMode();
+                }
+
                 if (e.ctrlKey || e.metaKey) {
                     switch(e.key) {
                         case 'e':
