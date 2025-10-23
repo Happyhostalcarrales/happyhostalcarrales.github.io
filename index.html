@@ -417,22 +417,20 @@
                 max-width: calc(100vw - 32px);
             }
         }
-
-        /* Ocultar columna de acciones por defecto */
-        .actions-col-hidden {
-            display: none;
-        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-full" style="overflow-x: hidden;">
+    <!-- Sync Indicator -->
     <div id="syncIndicator" class="sync-indicator">
         💾 Sistema Listo
     </div>
 
+    <!-- Location Status Indicator -->
     <div id="locationStatusIndicator" class="location-status hidden">
         📍 Verificando ubicación...
     </div>
 
+    <!-- Header -->
     <header class="gradient-bg text-white shadow-lg">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-4">
@@ -465,6 +463,7 @@
         </div>
     </header>
 
+    <!-- Login Screen -->
     <div id="loginScreen" class="min-h-screen flex items-center justify-center py-12 px-4">
         <div class="max-w-md w-full">
             <div class="bg-white rounded-2xl card-shadow p-8 fade-in">
@@ -517,7 +516,9 @@
         </div>
     </div>
 
+    <!-- Main Application -->
     <div id="mainApp" class="hidden">
+        <!-- Navigation -->
         <nav class="bg-white shadow-sm border-b">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex space-x-2 py-4 overflow-x-auto">
@@ -540,42 +541,47 @@
             </div>
         </nav>
 
+        <!-- Tab Contents -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             
+            <!-- Dashboard Tab -->
             <div id="dashboardTab" class="tab-content active fade-in">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Clock Widget -->
                     <div class="lg:col-span-1">
                         <div class="clock-container text-center">
                             <h3 class="text-xl font-bold text-gray-800 mb-6">🕐 Reloj de Fichaje</h3>
                             <div id="mainClock" class="text-4xl font-bold text-purple-600 mb-2 time-display"></div>
                             <div id="mainDate" class="text-gray-600 mb-6"></div>
                             
+                            <!-- Location Status for Employees -->
                             <div id="employeeLocationStatus" class="employee-only mb-4 p-3 rounded-xl bg-blue-50 border border-blue-200 hidden">
                                 <div class="text-sm font-semibold text-blue-800 mb-1">📍 Estado de Ubicación:</div>
                                 <div id="locationStatusText" class="text-sm text-blue-600">Verificando...</div>
                             </div>
                             
+                            <!-- Employee Status -->
                             <div id="employeeStatus" class="employee-only mb-6 p-4 rounded-xl bg-gradient-to-r from-blue-50 to-purple-50" style="display: none;">
                                 <div class="text-lg font-semibold mb-2">Estado Actual:</div>
                                 <div id="currentStatus" class="text-2xl font-bold mb-2"></div>
                                 <div id="statusTime" class="text-sm text-gray-600"></div>
                             </div>
                             
+                            <!-- Admin Employee Selection -->
                             <div class="admin-only mb-4">
                                 <select id="clockEmployeeSelect" class="input-modern w-full">
                                     <option value="">Seleccionar empleado</option>
                                 </select>
                             </div>
                             
+                            <!-- Location Refresh Button for Employees -->
                             <div id="locationRefreshContainer" class="employee-only mb-4 hidden">
                                 <button id="refreshLocationBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-xl transition-colors">
                                     📍 Actualizar Ubicación
                                 </button>
                             </div>
-
-                            <div id="employeeNameDisplay" class="employee-only text-4xl font-extrabold text-purple-700 mb-6 hidden">
-                                </div>
                             
+                            <!-- Clock Buttons -->
                             <div class="grid grid-cols-2 gap-3">
                                 <button id="clockInBtn" class="btn-success text-white font-bold py-4 px-6 rounded-xl">
                                     ✅ ENTRADA
@@ -587,28 +593,35 @@
                         </div>
                     </div>
 
+                    <!-- Summary Cards -->
                     <div class="lg:col-span-2">
                         <div class="bg-white rounded-2xl card-shadow p-6">
                             <h3 class="text-xl font-bold text-gray-800 mb-6">📊 Resumen de Hoy</h3>
                             <div id="todaySummary" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                </div>
+                                <!-- Summary cards will be populated here -->
+                            </div>
                         </div>
                         
+                        <!-- Working Hours Progress for Employee -->
                         <div id="workingHoursProgress" class="employee-only mt-6 bg-white rounded-2xl card-shadow p-6 hidden">
                             <h3 class="text-xl font-bold text-gray-800 mb-6">⏰ Progreso de Jornada</h3>
                             <div id="progressContent">
-                                </div>
+                                <!-- Progress content will be populated here -->
+                            </div>
                         </div>
                         
+                        <!-- Recent Activity -->
                         <div class="mt-6 bg-white rounded-2xl card-shadow p-6">
                             <h3 class="text-xl font-bold text-gray-800 mb-6">🔄 Actividad Reciente</h3>
                             <div id="recentActivity" class="space-y-3">
-                                </div>
+                                <!-- Recent activity will be populated here -->
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Employees Tab -->
             <div id="employeesTab" class="tab-content">
                 <div class="bg-white rounded-2xl card-shadow p-6">
                     <div class="flex justify-between items-center mb-6">
@@ -619,10 +632,12 @@
                     </div>
 
                     <div id="employeesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        </div>
+                        <!-- Employee cards will be populated here -->
+                    </div>
                 </div>
             </div>
 
+            <!-- Records Tab -->
             <div id="recordsTab" class="tab-content">
                 <div class="bg-white rounded-2xl card-shadow p-6">
                     <div class="flex justify-between items-center mb-6">
@@ -637,17 +652,19 @@
                         </div>
                     </div>
                     
+                    <!-- Filters -->
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 admin-only">
                         <select id="filterEmployee" class="input-modern">
                             <option value="">Todos los empleados</option>
                         </select>
                         <input type="date" id="filterStartDate" class="input-modern">
                         <input type="date" id="filterEndDate" class="input-modern">
-                        <button id="applyFilters" class="w-full btn-primary text-white px-4 py-2 rounded-lg">
+                        <button id="applyFilters" class="btn-primary text-white px-4 py-2 rounded-lg">
                             🔍 Filtrar
                         </button>
                     </div>
 
+                    <!-- Records Table -->
                     <div class="table-modern overflow-hidden">
                         <div class="overflow-x-auto">
                             <table class="min-w-full">
@@ -659,19 +676,22 @@
                                         <th class="px-6 py-4 text-left text-sm font-semibold">🕕 Salida</th>
                                         <th class="px-6 py-4 text-left text-sm font-semibold">⏱️ Total</th>
                                         <th class="px-6 py-4 text-left text-sm font-semibold">📊 Estado</th>
-                                        <th id="actionsHeader" class="px-6 py-4 text-left text-sm font-semibold admin-only actions-col-hidden">⚙️ Acciones</th>
+                                        <th class="px-6 py-4 text-left text-sm font-semibold admin-only">⚙️ Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody id="timeRecordsTable" class="divide-y divide-gray-200">
-                                    </tbody>
+                                    <!-- Records will be populated here -->
+                                </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Reports Tab -->
             <div id="reportsTab" class="tab-content">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Report Generator -->
                     <div class="bg-white rounded-2xl card-shadow p-6">
                         <h3 class="text-xl font-bold text-gray-800 mb-6">📊 Generador de Informes</h3>
                         <div class="space-y-4">
@@ -694,19 +714,19 @@
                             <button id="generateReport" class="w-full btn-primary text-white font-bold py-3 px-6 rounded-xl">
                                 🚀 Generar Informe
                             </button>
-                            <button id="exportReportBtn" onclick="exportReport()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl hidden">
-                                💾 Exportar Informe CSV
-                            </button>
                         </div>
                     </div>
 
+                    <!-- Statistics -->
                     <div class="bg-white rounded-2xl card-shadow p-6">
                         <h3 class="text-xl font-bold text-gray-800 mb-6">📈 Estadísticas</h3>
                         <div id="statisticsContainer" class="space-y-4">
-                            </div>
+                            <!-- Statistics will be populated here -->
+                        </div>
                     </div>
                 </div>
 
+                <!-- Report Results -->
                 <div class="mt-8 bg-white rounded-2xl card-shadow p-6">
                     <h3 class="text-xl font-bold text-gray-800 mb-6">📋 Resultados del Informe</h3>
                     <div id="reportResults">
@@ -715,8 +735,10 @@
                 </div>
             </div>
 
+            <!-- Settings Tab -->
             <div id="settingsTab" class="tab-content">
                 <div class="space-y-8">
+                    <!-- Company Settings -->
                     <div class="bg-white rounded-2xl card-shadow p-6">
                         <h3 class="text-xl font-bold text-gray-800 mb-6">🏢 Configuración de la Empresa</h3>
                         
@@ -747,6 +769,7 @@
                         </button>
                     </div>
 
+                    <!-- Admin Credentials -->
                     <div class="bg-white rounded-2xl card-shadow p-6">
                         <h3 class="text-xl font-bold text-gray-800 mb-6">🔐 Credenciales de Administrador</h3>
                         
@@ -783,6 +806,7 @@
                         </button>
                     </div>
 
+                    <!-- Location Control Settings -->
                     <div class="bg-white rounded-2xl card-shadow p-6">
                         <h3 class="text-xl font-bold text-gray-800 mb-6">📍 Control de Ubicación</h3>
                         
@@ -854,52 +878,68 @@
                         </div>
                     </div>
 
+                    <!-- Cloud Sync Settings -->
                     <div class="bg-white rounded-2xl card-shadow p-6">
-                        <h3 class="text-xl font-bold text-gray-800 mb-6">☁️ Sincronización en la Nube (Firebase)</h3>
+                        <h3 class="text-xl font-bold text-gray-800 mb-6">☁️ Sincronización en la Nube</h3>
                         
                         <div class="space-y-4">
                             <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
                                 <h4 class="font-bold text-blue-800 mb-2">ℹ️ Información</h4>
                                 <p class="text-sm text-blue-700 mb-2">
-                                    **La sincronización de fichaje usa Firebase Realtime Database para la función en tiempo real.**
+                                    La sincronización en la nube permite mantener sus datos seguros y accesibles desde cualquier dispositivo usando JSONBin.io.
                                 </p>
                                 <ul class="text-xs text-blue-600 space-y-1 ml-4">
-                                    <li>• El sistema de sincronización es **instantáneo** y guarda los datos de forma persistente.</li>
-                                    <li>• La configuración de JSONBin.io de abajo ya no tiene efecto y está deshabilitada.</li>
+                                    <li>• Los datos se cifran antes de enviarse a la nube</li>
+                                    <li>• Sincronización automática cada 5 minutos</li>
+                                    <li>• Backup automático de empleados y registros</li>
+                                    <li>• Acceso desde múltiples dispositivos</li>
                                 </ul>
+                            </div>
+                            
+                            <div class="flex items-center space-x-4">
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" id="enableCloudSync" class="rounded">
+                                    <span class="text-sm font-semibold">Activar Sincronización en la Nube</span>
+                                </label>
                             </div>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">🔑 API Key de JSONBin.io</label>
-                                    <input type="password" id="cloudApiKey" class="input-modern w-full" placeholder="Ingrese su API Key" disabled>
+                                    <input type="password" id="cloudApiKey" class="input-modern w-full" placeholder="Ingrese su API Key">
+                                    <p class="text-xs text-gray-500 mt-1">Obtenga su API Key gratuita en jsonbin.io</p>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">🆔 Bin ID</label>
-                                    <input type="text" id="cloudBinId" class="input-modern w-full" placeholder="ID del bin de datos" disabled>
+                                    <input type="text" id="cloudBinId" class="input-modern w-full" placeholder="ID del bin de datos">
+                                    <p class="text-xs text-gray-500 mt-1">ID único de su contenedor de datos</p>
                                 </div>
                             </div>
                             
                             <div class="flex items-center space-x-4">
                                 <label class="flex items-center space-x-2">
-                                    <input type="checkbox" id="enableAutoSync" class="rounded" checked disabled>
-                                    <span class="text-sm font-semibold">Sincronización Automática (Siempre activa con Firebase)</span>
+                                    <input type="checkbox" id="enableAutoSync" class="rounded">
+                                    <span class="text-sm font-semibold">Sincronización Automática</span>
                                 </label>
                             </div>
                             
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">⏱️ Intervalo de Sincronización: <span id="syncIntervalValue">Tiempo Real</span></label>
-                                <input type="range" id="syncInterval" class="w-full" min="1" max="60" value="5" disabled>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">⏱️ Intervalo de Sincronización: <span id="syncIntervalValue">5</span> minutos</label>
+                                <input type="range" id="syncInterval" class="w-full" min="1" max="60" value="5" oninput="document.getElementById('syncIntervalValue').textContent = this.value">
+                                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>1 min (frecuente)</span>
+                                    <span>60 min (ocasional)</span>
+                                </div>
                             </div>
                             
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                <button id="testCloudConnection" onclick="testCloudConnection()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors text-sm">
+                                <button id="testCloudConnection" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors text-sm">
                                     🔗 Probar Conexión
                                 </button>
-                                <button id="syncNow" onclick="syncNow()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors text-sm">
-                                    ☁️ Forzar Guardado
+                                <button id="syncNow" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors text-sm">
+                                    ☁️ Sincronizar Ahora
                                 </button>
-                                <button id="saveCloudSettings" class="btn-primary text-white px-4 py-2 rounded-lg text-sm" disabled>
+                                <button id="saveCloudSettings" class="btn-primary text-white px-4 py-2 rounded-lg text-sm">
                                     💾 Guardar Configuración
                                 </button>
                             </div>
@@ -914,6 +954,7 @@
                         </div>
                     </div>
 
+                    <!-- Data Management -->
                     <div class="bg-white rounded-2xl card-shadow p-6">
                         <h3 class="text-xl font-bold text-gray-800 mb-6">💾 Gestión de Datos</h3>
                         
@@ -936,13 +977,16 @@
                         </div>
                         
                         <div id="dataStatistics" class="mt-6 p-4 bg-gray-50 rounded-xl">
-                            </div>
+                            <!-- Data statistics will be populated here -->
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Modals -->
+    <!-- Add Employee Modal -->
     <div id="employeeModal" class="modal-overlay hidden">
         <div class="modal-content slide-up">
             <div class="gradient-bg text-white p-6 rounded-t-2xl">
@@ -988,7 +1032,7 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-2">📱 Código PIN *</label>
                     <div class="flex space-x-2">
                         <input type="text" id="employeeAccessCode" class="input-modern flex-1 text-center text-lg tracking-widest" placeholder="1234" maxlength="4" pattern="[0-9]{4}" required>
-                        <button type="button" onclick="document.getElementById('employeeAccessCode').value = generateRandomPIN(); UI.showNotification('🎲 PIN generado automáticamente', 'success');" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded-lg text-sm transition-colors">
+                        <button type="button" onclick="document.getElementById('employeeAccessCode').value = generateRandomPIN(); showNotification('🎲 PIN generado automáticamente', 'success');" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded-lg text-sm transition-colors">
                             🎲 Auto
                         </button>
                     </div>
@@ -1006,6 +1050,7 @@
         </div>
     </div>
 
+    <!-- Manual Record Modal -->
     <div id="manualRecordModal" class="modal-overlay hidden">
         <div class="modal-content slide-up">
             <div class="gradient-bg text-white p-6 rounded-t-2xl">
@@ -1046,6 +1091,7 @@
         </div>
     </div>
 
+    <!-- Help Modal -->
     <div id="helpModal" class="modal-overlay hidden">
         <div class="modal-content slide-up">
             <div class="gradient-bg text-white p-6 rounded-t-2xl">
@@ -1138,6 +1184,7 @@
         </div>
     </div>
 
+    <!-- Edit Record Modal -->
     <div id="editRecordModal" class="modal-overlay hidden">
         <div class="modal-content slide-up">
             <div class="gradient-bg text-white p-6 rounded-t-2xl">
@@ -1179,163 +1226,268 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
-
     <script>
-        // =========================================================================
-        // CONFIGURACIÓN E INICIALIZACIÓN DE FIREBASE
-        // =========================================================================
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyA3D7fH6QpdG7mUSNhFfUzD6RWje8TpGEk",
-            authDomain: "hostaldatossincro.firebaseapp.com",
-            databaseURL: "https://hostaldatossincro-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "hostaldatossincro",
-            storageBucket: "hostaldatossincro.firebasestorage.app",
-            messagingSenderId: "955112940193",
-            appId: "1:955112940193:web:f30f52858c1e6c0ddc46e0"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-
-        const db = firebase.database();
-        const refEmpleados = db.ref('fichaje/employees');
-        const refRegistros = db.ref('fichaje/timeRecords');
-        const refConfig = db.ref('fichaje/config');
-
-        // =========================================================================
-        // ESTADO GLOBAL Y VARIABLES
-        // =========================================================================
-
-        function getDefaultEmployees() {
-            return [
-                { id: 1, name: 'Ana', lastName: 'García Martínez', dni: '12345678A', position: 'Recepcionista', status: 'Activo', accessCode: '1234', workingHours: 8, createdAt: new Date().toISOString() },
-                { id: 2, name: 'Carlos', lastName: 'López Rodríguez', dni: '87654321B', position: 'Conserje', status: 'Activo', accessCode: '5678', workingHours: 8, createdAt: new Date().toISOString() },
-                { id: 3, name: 'María', lastName: 'Fernández Silva', dni: '11223344C', position: 'Limpieza', status: 'Activo', accessCode: '9012', workingHours: 6, createdAt: new Date().toISOString() },
-                { id: 4, name: 'David', lastName: 'Ruiz Moreno', dni: '55667788D', position: 'Mantenimiento', status: 'Activo', accessCode: '3456', workingHours: 8, createdAt: new Date().toISOString() }
-            ];
+        // Application State Management
+        class AppState {
+            constructor() {
+                this.currentUser = null;
+                this.selectedUserType = null;
+                this.editingRecordId = null;
+                this.editingEmployeeId = null;
+                this.autoSaveTimer = null;
+                this.lastActivity = Date.now();
+                this.syncInProgress = false;
+                this.locationMonitoringInterval = null;
+            }
+            
+            reset() {
+                this.currentUser = null;
+                this.selectedUserType = null;
+                this.editingRecordId = null;
+                this.editingEmployeeId = null;
+                this.clearTimers();
+            }
+            
+            clearTimers() {
+                if (this.autoSaveTimer) {
+                    clearInterval(this.autoSaveTimer);
+                    this.autoSaveTimer = null;
+                }
+                if (this.locationMonitoringInterval) {
+                    clearInterval(this.locationMonitoringInterval);
+                    this.locationMonitoringInterval = null;
+                }
+            }
         }
-
-        let employees = JSON.parse(localStorage.getItem('fichajemax_employees')) || getDefaultEmployees();
-        let timeRecords = JSON.parse(localStorage.getItem('fichajemax_timeRecords')) || [];
-        let companySettings = JSON.parse(localStorage.getItem('fichajemax_companySettings')) || {
-            companyName: 'Happy Hostal Carrales',
-            companyCIF: 'B09539271',
-            companyAddress: 'Calle Puente Gasset 4º 1º drch',
-            companyPhone: '947263547'
+        
+        const appState = new AppState();
+        
+        // Data Storage with validation
+        const DataManager = {
+            getAdminCredentials() {
+                return JSON.parse(localStorage.getItem('fichajemax_adminCredentials')) || {
+                    username: 'admin',
+                    password: 'Octubre2012'
+                };
+            },
+            
+            setAdminCredentials(credentials) {
+                localStorage.setItem('fichajemax_adminCredentials', JSON.stringify(credentials));
+            },
+            
+            getEmployees() {
+                return JSON.parse(localStorage.getItem('fichajemax_employees')) || this.getDefaultEmployees();
+            },
+            
+            setEmployees(employees) {
+                localStorage.setItem('fichajemax_employees', JSON.stringify(employees));
+                CloudSync.syncToCloud();
+            },
+            
+            getDefaultEmployees() {
+                return [
+                    {
+                        id: 1,
+                        name: 'Ana',
+                        lastName: 'García Martínez',
+                        dni: '12345678A',
+                        position: 'Recepcionista',
+                        status: 'Activo',
+                        accessCode: '1234',
+                        workingHours: 8,
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: 2,
+                        name: 'Carlos',
+                        lastName: 'López Rodríguez',
+                        dni: '87654321B',
+                        position: 'Conserje',
+                        status: 'Activo',
+                        accessCode: '5678',
+                        workingHours: 8,
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: 3,
+                        name: 'María',
+                        lastName: 'Fernández Silva',
+                        dni: '11223344C',
+                        position: 'Limpieza',
+                        status: 'Activo',
+                        accessCode: '9012',
+                        workingHours: 6,
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: 4,
+                        name: 'David',
+                        lastName: 'Ruiz Moreno',
+                        dni: '55667788D',
+                        position: 'Mantenimiento',
+                        status: 'Activo',
+                        accessCode: '3456',
+                        workingHours: 8,
+                        createdAt: new Date().toISOString()
+                    }
+                ];
+            },
+            
+            getTimeRecords() {
+                return JSON.parse(localStorage.getItem('fichajemax_timeRecords')) || [];
+            },
+            
+            setTimeRecords(records) {
+                localStorage.setItem('fichajemax_timeRecords', JSON.stringify(records));
+                CloudSync.syncToCloud();
+            }
         };
-        let locationSettings = JSON.parse(localStorage.getItem('fichajemax_locationSettings')) || {
-            enabled: true,
-            workLatitude: 42.341646,
-            workLongitude: -3.694808,
-            allowedRadius: 10,
-            workAddress: 'Happy Hostal Carrales - Calle Puente Gasset 4º 1º drch'
-        };
-        let adminCredentials = JSON.parse(localStorage.getItem('fichajemax_adminCredentials')) || {
-            username: 'admin',
-            password: 'Octubre2012'
-        };
+        
+        // Global data references
+        let employees = DataManager.getEmployees();
+        let timeRecords = DataManager.getTimeRecords();
+        
+        // Global variables for application state
         let currentUser = null;
         let selectedUserType = null;
         let editingRecordId = null;
         let editingEmployeeId = null;
+        let syncInProgress = false;
+        let syncInterval = null;
         let lastActivity = Date.now();
         let autoSaveTimer = null;
         
-        let editModeEnabled = false; 
-        let lastReportRecords = [];
-
-        // =========================================================================
-        // FUNCIONES CORE DE DATOS Y SINCRONIZACIÓN
-        // =========================================================================
+        // Configuration Management
+        const ConfigManager = {
+            getCompanySettings() {
+                return JSON.parse(localStorage.getItem('fichajemax_companySettings')) || {
+                    companyName: 'Happy Hostal Carrales',
+                    companyCIF: 'B09539271',
+                    companyAddress: 'Calle Puente Gasset 4º 1º drch',
+                    companyPhone: '947263547'
+                };
+            },
+            
+            setCompanySettings(settings) {
+                localStorage.setItem('fichajemax_companySettings', JSON.stringify(settings));
+                CloudSync.syncToCloud();
+            },
+            
+            getLocationSettings() {
+                return JSON.parse(localStorage.getItem('fichajemax_locationSettings')) || {
+                    enabled: true,
+                    workLatitude: 42.341646,
+                    workLongitude: -3.694808,
+                    allowedRadius: 10,
+                    workAddress: 'Happy Hostal Carrales - Calle Puente Gasset 4º 1º drch'
+                };
+            },
+            
+            setLocationSettings(settings) {
+                localStorage.setItem('fichajemax_locationSettings', JSON.stringify(settings));
+            },
+            
+            getCloudSettings() {
+                return JSON.parse(localStorage.getItem('fichajemax_cloudSettings')) || {
+                    enabled: true,
+                    apiKey: '$2a$10$pCa2.t7IloY35YcJyWLuWuSN5BCaLn/GX.1x9rKgieJhdMTa8Zj76',
+                    binId: '68f28f92d0ea881f40a88ada',
+                    autoSync: true,
+                    syncInterval: 2000,
+                    lastSync: null
+                };
+            },
+            
+            setCloudSettings(settings) {
+                localStorage.setItem('fichajemax_cloudSettings', JSON.stringify(settings));
+            }
+        };
         
-        function setEmployees(newEmployees) {
-            localStorage.setItem('fichajemax_employees', JSON.stringify(newEmployees));
-            employees = newEmployees; 
-            refEmpleados.set(newEmployees).catch(error => {
-                console.error("Error al sincronizar empleados en Firebase:", error);
-                UI.showNotification('❌ Error al sincronizar empleados con la nube', 'error');
-            });
-        }
+        // Global configuration references
+        let companySettings = ConfigManager.getCompanySettings();
+        let locationSettings = ConfigManager.getLocationSettings();
+        let cloudSettings = ConfigManager.getCloudSettings();
+        let adminCredentials = DataManager.getAdminCredentials();
         
-        function setTimeRecords(newRecords) {
-            localStorage.setItem('fichajemax_timeRecords', JSON.stringify(newRecords));
-            timeRecords = newRecords; 
-            refRegistros.set(newRecords).catch(error => {
-                console.error("Error al sincronizar registros en Firebase:", error);
-                UI.showNotification('❌ Error al sincronizar registros con la nube', 'error');
-            });
-        }
-        
-        function setGlobalConfig(configName, data) {
-            localStorage.setItem(`fichajemax_${configName}`, JSON.stringify(data));
-            if (configName === 'companySettings') companySettings = data;
-            if (configName === 'locationSettings') locationSettings = data;
-            refConfig.child(configName).set(data).catch(error => {
-                console.error(`Error sincronizando ${configName}:`, error);
-            });
-        }
-
-        function startRealtimeListeners() {
-            refEmpleados.on('value', (snapshot) => {
-                const firebaseEmployees = snapshot.val();
-                if (firebaseEmployees) {
-                    employees = firebaseEmployees;
-                    localStorage.setItem('fichajemax_employees', JSON.stringify(employees));
-                    if (currentUser) {
-                        loadEmployees();
-                        populateSelects();
-                        loadDashboard();
-                    }
-                    UI.updateSyncIndicator('success');
+        // Cloud Sync Management
+        const CloudSync = {
+            syncInterval: null,
+            
+            async syncToCloud() {
+                if (!cloudSettings.enabled || !cloudSettings.apiKey || !cloudSettings.binId || appState.syncInProgress) {
+                    return false;
                 }
-            }, (error) => { UI.updateSyncIndicator('error'); });
 
-            refRegistros.on('value', (snapshot) => {
-                const firebaseRecords = snapshot.val();
-                if (firebaseRecords) {
-                    timeRecords = firebaseRecords;
-                    localStorage.setItem('fichajemax_timeRecords', JSON.stringify(timeRecords));
-                    if (currentUser) {
-                        loadTimeRecords();
-                        loadDashboard();
+                appState.syncInProgress = true;
+                UI.updateSyncIndicator('syncing');
+
+                try {
+                    const dataToSync = {
+                        employees,
+                        timeRecords,
+                        companySettings,
+                        locationSettings,
+                        lastSync: new Date().toISOString(),
+                        version: '2.0'
+                    };
+
+                    const response = await fetch(`https://api.jsonbin.io/v3/b/${cloudSettings.binId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Master-Key': cloudSettings.apiKey,
+                            'X-Bin-Name': 'FichajeMax-Data-v2'
+                        },
+                        body: JSON.stringify(dataToSync)
+                    });
+
+                    if (response.ok) {
+                        cloudSettings.lastSync = new Date().toISOString();
+                        ConfigManager.setCloudSettings(cloudSettings);
+                        UI.updateSyncIndicator('success');
+                        return true;
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
                     }
-                    UI.updateSyncIndicator('success');
+                } catch (error) {
+                    console.error('Cloud sync error:', error);
+                    UI.updateSyncIndicator('error');
+                    return false;
+                } finally {
+                    appState.syncInProgress = false;
                 }
-            }, (error) => { UI.updateSyncIndicator('error'); });
-
-            refConfig.on('value', (snapshot) => {
-                const config = snapshot.val();
-                if (config) {
-                    if (JSON.stringify(config.companySettings) !== JSON.stringify(companySettings)) {
-                        companySettings = config.companySettings || companySettings;
-                        localStorage.setItem('fichajemax_companySettings', JSON.stringify(companySettings));
-                        loadCompanySettings();
-                    }
-                    if (JSON.stringify(config.locationSettings) !== JSON.stringify(locationSettings)) {
-                        locationSettings = config.locationSettings || locationSettings;
-                        localStorage.setItem('fichajemax_locationSettings', JSON.stringify(locationSettings));
-                        loadLocationSettings();
-                    }
+            },
+            
+            start() {
+                if (this.syncInterval) {
+                    clearInterval(this.syncInterval);
                 }
-            });
-        }
+                
+                // Initial sync
+                setTimeout(() => this.syncFromCloud(), 1000);
+                
+                // Periodic sync every 2 seconds
+                this.syncInterval = setInterval(() => {
+                    if (Math.random() > 0.5) {
+                        this.syncToCloud();
+                    } else {
+                        this.syncFromCloud();
+                    }
+                }, 2000);
+                
+                // Ultra-fast check every second
+                setInterval(() => this.syncFromCloud(), 1000);
+            },
+            
+            stop() {
+                if (this.syncInterval) {
+                    clearInterval(this.syncInterval);
+                    this.syncInterval = null;
+                }
+            }
+        };
 
-        // =========================================================================
-        // UTILIDADES Y UI
-        // =========================================================================
-        
-        function formatHoursMinutes(floatHours) {
-            if (floatHours === 0 || isNaN(floatHours)) return '00:00h';
-            const totalMinutes = Math.round(floatHours * 60);
-            const sign = totalMinutes < 0 ? '-' : '';
-            const absMinutes = Math.abs(totalMinutes);
-            const hours = Math.floor(absMinutes / 60);
-            const minutes = absMinutes % 60;
-            return `${sign}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}h`;
-        }
-
+        // UI Management
         const UI = {
             updateSyncIndicator(status) {
                 const indicator = document.getElementById('syncIndicator');
@@ -1345,7 +1497,7 @@
                 
                 switch(status) {
                     case 'success':
-                        indicator.textContent = '☁️ Sincronizado (Firebase)';
+                        indicator.textContent = cloudSettings.enabled ? '☁️ Sincronizado' : '💾 Sistema Listo';
                         break;
                     case 'syncing':
                         indicator.innerHTML = '<div class="loading-spinner"></div> Sincronizando...';
@@ -1357,6 +1509,7 @@
             },
             
             showNotification(message, type = 'success') {
+                // Remove existing notifications
                 document.querySelectorAll('.notification').forEach(n => n.remove());
                 
                 const notification = document.createElement('div');
@@ -1397,24 +1550,24 @@
             }
         };
         
-        // =========================================================================
-        // LÓGICA DE LA APLICACIÓN
-        // =========================================================================
-
+        // Application Initialization
         class App {
             constructor() {
                 this.init();
             }
             
             init() {
+                console.log('🚀 Inicializando aplicación optimizada...');
+                
+                // Setup core functionality
                 this.setupDateTime();
                 this.setupEventListeners();
                 this.initializeData();
-                this.setupRealtimeSync(); 
+                this.setupCloudSync();
                 this.setupSecurity();
                 this.setupKeyboardShortcuts();
-                // FIX: Asegurar que la pantalla de login esté visible al iniciar
-                document.getElementById('loginScreen').classList.remove('hidden');
+                
+                console.log('✅ Aplicación inicializada correctamente');
             }
             
             setupDateTime() {
@@ -1427,21 +1580,25 @@
             }
             
             initializeData() {
+                // Initialize default data if needed
                 if (!localStorage.getItem('fichajemax_employees')) {
-                    setEmployees(getDefaultEmployees());
+                    DataManager.setEmployees(employees);
+                }
+                if (!localStorage.getItem('fichajemax_companySettings')) {
+                    ConfigManager.setCompanySettings(companySettings);
                 }
                 if (!localStorage.getItem('fichajemax_adminCredentials')) {
                     DataManager.setAdminCredentials(adminCredentials);
                 }
                 
-                populateSelects();
-                setDefaultDates();
-                loadLocationSettings();
-                loadCloudSettings();
+                // Load UI components
+                this.populateSelects();
+                this.setDefaultDates();
+                this.loadSettings();
             }
             
-            setupRealtimeSync() { 
-                startRealtimeListeners();
+            setupCloudSync() {
+                CloudSync.start();
             }
             
             setupSecurity() {
@@ -1466,14 +1623,19 @@
             }
         }
         
-        // Inicializar cuando el DOM esté listo
+        // Initialize when DOM is ready
         document.addEventListener('DOMContentLoaded', () => new App());
 
+        // Event Listeners
         function setupEventListeners() {
+            console.log('Configurando event listeners...');
+            
+            // Login
             document.getElementById('adminBtn').addEventListener('click', () => selectUserType('admin'));
             document.getElementById('employeeBtn').addEventListener('click', () => selectUserType('employee'));
             document.getElementById('loginButton').addEventListener('click', handleLogin);
             
+            // Enter key for login
             document.getElementById('adminPassword').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') handleLogin();
             });
@@ -1481,17 +1643,21 @@
                 if (e.key === 'Enter') handleLogin();
             });
             
+            // Navigation
             document.querySelectorAll('.nav-tab').forEach(tab => {
                 tab.addEventListener('click', () => switchTab(tab.dataset.tab));
             });
             
+            // Clock actions
             document.getElementById('clockInBtn').addEventListener('click', () => clockAction('in'));
             document.getElementById('clockOutBtn').addEventListener('click', () => clockAction('out'));
             
+            // Employee management
             document.getElementById('addEmployeeBtn').addEventListener('click', showEmployeeModal);
             document.getElementById('saveEmployee').addEventListener('click', saveEmployee);
             document.getElementById('cancelEmployee').addEventListener('click', hideEmployeeModal);
             
+            // Working hours change handler
             document.getElementById('employeeWorkingHours').addEventListener('change', function() {
                 const customContainer = document.getElementById('customHoursContainer');
                 if (this.value === 'custom') {
@@ -1502,106 +1668,147 @@
                 }
             });
             
+            // Manual record management
             document.getElementById('addManualRecord').addEventListener('click', showManualRecordModal);
             document.getElementById('saveManualRecord').addEventListener('click', saveManualRecord);
             document.getElementById('cancelManualRecord').addEventListener('click', hideManualRecordModal);
             
+            // Edit record management
             document.getElementById('saveEditRecord').addEventListener('click', saveEditRecord);
             document.getElementById('cancelEditRecord').addEventListener('click', hideEditRecordModal);
             document.getElementById('deleteRecord').addEventListener('click', deleteRecord);
             
+            // Reports
             document.getElementById('generateReport').addEventListener('click', generateReport);
-            document.getElementById('exportReportBtn').addEventListener('click', exportReport); 
             
+            // Filters
             document.getElementById('applyFilters').addEventListener('click', applyFilters);
             
+            // Settings
             document.getElementById('saveCompanySettings').addEventListener('click', saveCompanySettingsForm);
             document.getElementById('saveAdminCredentials').addEventListener('click', saveAdminCredentialsForm);
             document.getElementById('saveLocationSettings').addEventListener('click', saveLocationSettingsForm);
+            document.getElementById('saveCloudSettings').addEventListener('click', saveCloudSettingsForm);
             document.getElementById('testCloudConnection').addEventListener('click', testCloudConnection);
             document.getElementById('syncNow').addEventListener('click', syncNow);
             
+            // Location
             document.getElementById('getCurrentLocation').addEventListener('click', getCurrentLocationForSetup);
             document.getElementById('testDistance').addEventListener('click', testDistance);
             document.getElementById('refreshLocationBtn').addEventListener('click', refreshEmployeeLocation);
             
+            // Data management
             document.getElementById('exportAllData').addEventListener('click', exportAllData);
             document.getElementById('exportRecords').addEventListener('click', exportRecords);
             document.getElementById('importDataFile').addEventListener('change', handleImportFile);
             document.getElementById('clearAllData').addEventListener('click', clearAllData);
             
+            // Help and Logout
             document.getElementById('helpBtn').addEventListener('click', showHelpModal);
             document.getElementById('closeHelp').addEventListener('click', hideHelpModal);
             document.getElementById('logoutBtn').addEventListener('click', logout);
+            
+            console.log('Event listeners configurados');
         }
 
         // Authentication
         function selectUserType(type) {
+            console.log('Seleccionando tipo de usuario:', type);
             appState.selectedUserType = type;
             selectedUserType = type;
             
+            // Update button styles
             document.querySelectorAll('.user-type-btn').forEach(btn => {
                 btn.classList.remove('border-purple-500', 'bg-purple-50');
                 btn.classList.add('border-gray-200');
             });
 
+            // Show login button
+            const loginButton = document.getElementById('loginButton');
+            if (loginButton) {
+                loginButton.style.display = 'block';
+            }
+
+            // Hide all login forms first
+            const adminLogin = document.getElementById('adminLogin');
+            const employeeLogin = document.getElementById('employeeLogin');
+            
+            if (adminLogin) adminLogin.style.display = 'none';
+            if (employeeLogin) employeeLogin.style.display = 'none';
+
             if (type === 'admin') {
                 document.getElementById('adminBtn').classList.add('border-purple-500', 'bg-purple-50');
-                document.getElementById('adminLogin').classList.remove('hidden');
-                document.getElementById('employeeLogin').classList.add('hidden');
+                if (adminLogin) {
+                    adminLogin.style.display = 'block';
+                    adminLogin.classList.remove('hidden');
+                }
+                // Focus en el campo de contraseña
                 setTimeout(() => {
-                    document.getElementById('adminPassword').focus();
+                    const passwordField = document.getElementById('adminPassword');
+                    if (passwordField) passwordField.focus();
                 }, 100);
             } else {
                 document.getElementById('employeeBtn').classList.add('border-purple-500', 'bg-purple-50');
-                document.getElementById('employeeLogin').classList.remove('hidden');
-                document.getElementById('adminLogin').classList.add('hidden');
+                if (employeeLogin) {
+                    employeeLogin.style.display = 'block';
+                    employeeLogin.classList.remove('hidden');
+                }
+                // Focus en el campo de PIN
                 setTimeout(() => {
-                    document.getElementById('employeeCode').focus();
+                    const codeField = document.getElementById('employeeCode');
+                    if (codeField) codeField.focus();
                 }, 100);
             }
         }
 
         function handleLogin() {
+            console.log('Intentando login como:', selectedUserType);
+            
             if (!selectedUserType) {
-                UI.showNotification('⚠️ Seleccione un tipo de usuario', 'warning');
+                showNotification('⚠️ Seleccione un tipo de usuario', 'warning');
                 return;
             }
             
             if (selectedUserType === 'admin') {
                 const password = document.getElementById('adminPassword').value.trim();
+                console.log('Password ingresado:', password);
+                console.log('Password esperado:', adminCredentials.password);
                 
                 if (password === adminCredentials.password) {
                     currentUser = { type: 'admin', name: adminCredentials.username };
                     showMainApp();
-                    UI.showNotification(`✅ Bienvenido ${adminCredentials.username}`, 'success');
+                    showNotification(`✅ Bienvenido ${adminCredentials.username}`, 'success');
                 } else {
-                    UI.showNotification('❌ Contraseña incorrecta', 'error');
+                    showNotification('❌ Contraseña incorrecta', 'error');
+                    console.log('Login fallido - contraseña incorrecta');
                 }
             } else if (selectedUserType === 'employee') {
                 const employeeCode = document.getElementById('employeeCode').value.trim();
+                console.log('Código empleado ingresado:', employeeCode);
                 
                 if (employeeCode) {
                     authenticateEmployee(employeeCode);
                 } else {
-                    UI.showNotification('📱 Ingrese su código PIN', 'warning');
+                    showNotification('📱 Ingrese su código PIN', 'warning');
                 }
             }
         }
 
         function authenticateEmployee(code) {
+            console.log('Autenticando empleado con código:', code);
             const employee = employees.find(emp => emp.accessCode === code && emp.status === 'Activo');
             if (employee) {
                 currentUser = { type: 'employee', ...employee };
                 showMainApp();
-                UI.showNotification(`✅ Bienvenido/a ${employee.name}`, 'success');
+                showNotification(`✅ Bienvenido/a ${employee.name}`, 'success');
             } else {
-                UI.showNotification('❌ Código incorrecto o empleado inactivo', 'error');
+                showNotification('❌ Código incorrecto o empleado inactivo', 'error');
                 document.getElementById('employeeCode').value = '';
             }
         }
 
         function showMainApp() {
+            console.log('Mostrando aplicación principal para:', currentUser);
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
             
@@ -1624,6 +1831,7 @@
         }
 
         function setupEmployeeInterface() {
+            console.log('Configurando interfaz de empleado');
             document.querySelectorAll('.admin-only').forEach(element => {
                 element.style.display = 'none';
             });
@@ -1631,13 +1839,8 @@
             document.querySelectorAll('.employee-only').forEach(element => {
                 element.style.display = 'block';
             });
-
-            const nameDisplay = document.getElementById('employeeNameDisplay');
-            if (nameDisplay && currentUser && currentUser.type === 'employee') {
-                nameDisplay.textContent = `${currentUser.name} ${currentUser.lastName}`;
-                nameDisplay.classList.remove('hidden'); 
-            }
-
+            
+            // Show location refresh button if location control is enabled
             const locationRefreshContainer = document.getElementById('locationRefreshContainer');
             if (locationRefreshContainer && locationSettings.enabled) {
                 locationRefreshContainer.classList.remove('hidden');
@@ -1645,6 +1848,7 @@
         }
 
         function setupAdminInterface() {
+            console.log('Configurando interfaz de administrador');
             document.querySelectorAll('.admin-only').forEach(element => {
                 element.style.display = 'block';
             });
@@ -1652,23 +1856,19 @@
             document.querySelectorAll('.employee-only').forEach(element => {
                 element.style.display = 'none';
             });
-
-            const nameDisplay = document.getElementById('employeeNameDisplay');
-            if (nameDisplay) {
-                nameDisplay.classList.add('hidden'); 
-            }
-            
-            editModeEnabled = false;
         }
 
         function logout() {
+            console.log('Cerrando sesión');
             currentUser = null;
             selectedUserType = null;
             stopLocationMonitoring();
-
+            stopCloudSync();
+            
             document.getElementById('mainApp').classList.add('hidden');
             document.getElementById('loginScreen').classList.remove('hidden');
             
+            // Reset forms
             document.getElementById('adminPassword').value = '';
             document.getElementById('employeeCode').value = '';
             document.querySelectorAll('.user-type-btn').forEach(btn => {
@@ -1678,39 +1878,81 @@
             document.getElementById('adminLogin').classList.add('hidden');
             document.getElementById('employeeLogin').classList.add('hidden');
             
-            UI.showNotification('👋 Sesión cerrada', 'success');
+            showNotification('👋 Sesión cerrada', 'success');
         }
 
-        // LÓGICA DE FICHAJE
+        // Navigation
+        function switchTab(tabName) {
+            console.log('Cambiando a pestaña:', tabName);
+            
+            // Update navigation
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+            
+            // Load specific content
+            switch(tabName) {
+                case 'employees':
+                    loadEmployees();
+                    break;
+                case 'records':
+                    loadTimeRecords();
+                    break;
+                case 'reports':
+                    loadStatistics();
+                    break;
+                case 'settings':
+                    loadCompanySettings();
+                    loadAdminCredentialsForm();
+                    loadLocationSettings();
+                    loadCloudSettings();
+                    updateDataStatistics();
+                    break;
+            }
+        }
+
+        // Clock Functions
         function clockAction(type) {
+            console.log('Acción de fichaje:', type);
+            
             let employeeId;
             if (currentUser.type === 'employee') {
                 employeeId = currentUser.id;
             } else {
                 employeeId = document.getElementById('clockEmployeeSelect').value;
                 if (!employeeId) {
-                    UI.showNotification('👤 Seleccione un empleado', 'warning');
+                    showNotification('👤 Seleccione un empleado', 'warning');
                     return;
                 }
             }
+            
             performClockAction(employeeId, type);
         }
 
         async function performClockAction(employeeId, type) {
-            UI.updateSyncIndicator('syncing');
+            console.log('Realizando fichaje:', { employeeId, type });
+            updateSyncIndicator('syncing');
             
             const employee = employees.find(emp => emp.id == employeeId);
             if (!employee) {
-                UI.showNotification('❌ Empleado no encontrado', 'error');
-                UI.updateSyncIndicator('error');
+                showNotification('❌ Empleado no encontrado', 'error');
+                updateSyncIndicator('error');
                 return;
             }
 
+            // Check location for employees only
             if (currentUser.type === 'employee' && locationSettings.enabled) {
                 const locationCheck = await checkLocationPermission();
                 if (!locationCheck.allowed) {
-                    UI.showNotification(locationCheck.message, 'error');
-                    UI.updateSyncIndicator('error');
+                    showNotification(locationCheck.message, 'error');
+                    updateSyncIndicator('error');
                     return;
                 }
             }
@@ -1725,8 +1967,8 @@
 
             if (type === 'in') {
                 if (existingRecord && existingRecord.timeIn) {
-                    UI.showNotification('⚠️ Ya hay un registro de entrada para hoy', 'warning');
-                    UI.updateSyncIndicator('success');
+                    showNotification('⚠️ Ya hay un registro de entrada para hoy', 'warning');
+                    updateSyncIndicator('success');
                     return;
                 }
                 
@@ -1752,124 +1994,367 @@
                 }
                 
                 const locationMsg = currentUser.type === 'employee' && locationSettings.enabled ? ' - Ubicación verificada ✓' : '';
-                UI.showNotification(`✅ Entrada registrada: ${currentTime}${locationMsg}`, 'success');
+                showNotification(`✅ Entrada registrada: ${currentTime}${locationMsg}`, 'success');
             } else {
                 if (!existingRecord || !existingRecord.timeIn) {
-                    UI.showNotification('⚠️ No hay registro de entrada para hoy', 'warning');
-                    UI.updateSyncIndicator('success');
+                    showNotification('⚠️ No hay registro de entrada para hoy', 'warning');
+                    updateSyncIndicator('success');
                     return;
                 }
                 
                 if (existingRecord.timeOut) {
-                    UI.showNotification('⚠️ Ya hay un registro de salida para hoy', 'warning');
-                    UI.updateSyncIndicator('success');
+                    showNotification('⚠️ Ya hay un registro de salida para hoy', 'warning');
+                    updateSyncIndicator('success');
                     return;
                 }
                 
                 existingRecord.timeOut = currentTime;
-                existingRecord.totalHours = calculateFloatHours(existingRecord.timeIn, currentTime);
+                existingRecord.totalHours = calculateHours(existingRecord.timeIn, currentTime);
                 
                 const locationMsg = currentUser.type === 'employee' && locationSettings.enabled ? ' - Ubicación verificada ✓' : '';
-                UI.showNotification(`🏁 Salida registrada: ${currentTime}${locationMsg}`, 'success');
+                showNotification(`🏁 Salida registrada: ${currentTime}${locationMsg}`, 'success');
             }
             
-            setTimeRecords(timeRecords);
+            saveTimeRecords();
             loadDashboard();
             loadTimeRecords();
+            
+            // Immediate cloud sync for instant universal access
+            setTimeout(() => syncToCloud(), 500);
         }
 
-        // LÓGICA DE REGISTROS Y FILTROS
-        function applyFilters() {
-            loadTimeRecords();
-            UI.showNotification('🔍 Filtros aplicados', 'success');
+        // Location Functions
+        async function checkLocationPermission() {
+            if (!locationSettings.enabled || !locationSettings.workLatitude || !locationSettings.workLongitude) {
+                return { allowed: true, message: '' };
+            }
+
+            try {
+                const position = await getCurrentPosition();
+                const distance = calculateDistance(
+                    position.coords.latitude,
+                    position.coords.longitude,
+                    locationSettings.workLatitude,
+                    locationSettings.workLongitude
+                );
+
+                if (distance <= locationSettings.allowedRadius) {
+                    return { 
+                        allowed: true, 
+                        message: `Ubicación verificada (${Math.round(distance)}m del trabajo)`,
+                        distance: distance
+                    };
+                } else {
+                    return { 
+                        allowed: false, 
+                        message: `❌ Fuera del área de trabajo. Distancia: ${Math.round(distance)}m (máximo: ${locationSettings.allowedRadius}m)`,
+                        distance: distance
+                    };
+                }
+            } catch (error) {
+                console.error('Location error:', error);
+                let errorMessage = '❌ Error al obtener ubicación.';
+                
+                if (error.code === 1) {
+                    errorMessage = '❌ Permisos de ubicación denegados. Active el GPS y permita el acceso.';
+                } else if (error.code === 2) {
+                    errorMessage = '❌ Ubicación no disponible. Verifique su conexión GPS.';
+                } else if (error.code === 3) {
+                    errorMessage = '❌ Tiempo de espera agotado. Intente nuevamente.';
+                }
+                
+                return { 
+                    allowed: false, 
+                    message: errorMessage 
+                };
+            }
         }
 
-        function loadTimeRecords() {
-            const tableElement = document.getElementById('timeRecordsTable');
-            if (!tableElement) return;
+        function getCurrentPosition() {
+            return new Promise((resolve, reject) => {
+                if (!navigator.geolocation) {
+                    reject({ code: 0, message: 'Geolocalización no soportada en este dispositivo' });
+                    return;
+                }
+
+                const options = {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 30000
+                };
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        console.log('Ubicación obtenida:', position.coords.latitude, position.coords.longitude);
+                        resolve(position);
+                    },
+                    (error) => {
+                        console.error('Error de geolocalización:', error);
+                        reject(error);
+                    },
+                    options
+                );
+            });
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // Earth's radius in meters
+            const φ1 = lat1 * Math.PI/180;
+            const φ2 = lat2 * Math.PI/180;
+            const Δφ = (lat2-lat1) * Math.PI/180;
+            const Δλ = (lon2-lon1) * Math.PI/180;
+
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                      Math.cos(φ1) * Math.cos(φ2) *
+                      Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+            return R * c; // Distance in meters
+        }
+
+        async function getCurrentLocationForSetup() {
+            const button = document.getElementById('getCurrentLocation');
+            const originalText = button.innerHTML;
             
-            let recordsToShow = timeRecords;
-            const filterEmployeeId = document.getElementById('filterEmployee')?.value;
-            const filterStartDateStr = document.getElementById('filterStartDate')?.value;
-            const filterEndDateStr = document.getElementById('filterEndDate')?.value;
-
-            // 1. FILTRADO POR EMPLEADO
-            if (currentUser?.type === 'employee') {
-                recordsToShow = recordsToShow.filter(record => record.employeeId === currentUser.id);
-            } else if (filterEmployeeId) {
-                recordsToShow = recordsToShow.filter(record => record.employeeId == filterEmployeeId);
+            try {
+                button.innerHTML = '<div class="loading-spinner"></div> Obteniendo...';
+                button.disabled = true;
+                
+                showNotification('📍 Obteniendo ubicación actual...', 'success');
+                const position = await getCurrentPosition();
+                
+                document.getElementById('workLatitude').value = position.coords.latitude.toFixed(6);
+                document.getElementById('workLongitude').value = position.coords.longitude.toFixed(6);
+                
+                showNotification('✅ Ubicación capturada correctamente', 'success');
+            } catch (error) {
+                console.error('Error getting location:', error);
+                let errorMessage = '❌ Error al obtener ubicación.';
+                
+                if (error.code === 1) {
+                    errorMessage = '❌ Permisos de ubicación denegados. Active el GPS y permita el acceso en su navegador.';
+                } else if (error.code === 2) {
+                    errorMessage = '❌ Ubicación no disponible. Verifique que el GPS esté activado.';
+                } else if (error.code === 3) {
+                    errorMessage = '❌ Tiempo de espera agotado. Intente nuevamente.';
+                }
+                
+                showNotification(errorMessage, 'error');
+            } finally {
+                button.innerHTML = originalText;
+                button.disabled = false;
             }
+        }
 
-            // 2. FILTRADO POR FECHAS
-            if (filterStartDateStr) {
-                const startDate = new Date(filterStartDateStr);
-                recordsToShow = recordsToShow.filter(record => new Date(record.date) >= startDate);
-            }
-            if (filterEndDateStr) {
-                const endDate = new Date(filterEndDateStr);
-                endDate.setHours(23, 59, 59, 999); 
-                recordsToShow = recordsToShow.filter(record => new Date(record.date) <= endDate);
-            }
-
-            // 3. ORDENAR
-            recordsToShow = recordsToShow.sort((a, b) => new Date(b.date) - new Date(a.date));
-            
-            // 4. CONTROL DEL MODO DE EDICIÓN (VISIBILIDAD SECRETA)
-            const actionsHeader = document.getElementById('actionsHeader');
-            const isActionsVisible = currentUser?.type === 'admin' && editModeEnabled;
-            if (actionsHeader) {
-                actionsHeader.classList.toggle('actions-col-hidden', !isActionsVisible);
-                actionsHeader.textContent = isActionsVisible ? '⚙️ Acciones (ON)' : '⚙️ Acciones';
-            }
-
-
-            if (recordsToShow.length === 0) {
-                const colspan = isActionsVisible ? '7' : '6';
-                tableElement.innerHTML = `<tr><td colspan="${colspan}" class="text-center py-8 text-gray-500">No hay registros disponibles para los filtros aplicados.</td></tr>`;
+        async function testDistance() {
+            if (!locationSettings.workLatitude || !locationSettings.workLongitude) {
+                showNotification('⚠️ Configure primero la ubicación del trabajo', 'warning');
                 return;
             }
-            
-            tableElement.innerHTML = recordsToShow.map(record => {
-                const statusClass = record.timeOut ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
-                const statusText = record.timeOut ? '✅ Completo' : '⏳ En curso';
+
+            const button = document.getElementById('testDistance');
+            const originalText = button.innerHTML;
+
+            try {
+                button.innerHTML = '<div class="loading-spinner"></div> Verificando...';
+                button.disabled = true;
                 
-                return `
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                                    <span class="text-purple-600 font-bold text-xs">
-                                        ${record.employeeName.split(' ').map(n => n[0]).join('').substring(0, 2)}
-                                    </span>
-                                </div>
-                                <div>
-                                    <span class="font-medium">${record.employeeName}</span>
-                                    ${record.location ? `<div class="text-xs text-green-600">${record.location}</div>` : ''}
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4">${formatDateDisplay(record.date)}</td>
-                        <td class="px-6 py-4 font-mono">${record.timeIn || '--:--'}</td>
-                        <td class="px-6 py-4 font-mono">${record.timeOut || '--:--'}</td>
-                        <td class="px-6 py-4 font-bold">${formatHoursMinutes(record.totalHours)}</td>
-                        <td class="px-6 py-4">
-                            <span class="px-2 py-1 text-xs rounded-full ${statusClass}">
-                                ${statusText}
-                            </span>
-                        </td>
-                        ${isActionsVisible ? `
-                            <td class="px-6 py-4 actions-col-visible">
-                                <button onclick="editRecord(${record.id})" class="text-blue-600 hover:text-blue-800 text-sm">
-                                    ✏️ Editar
-                                </button>
-                            </td>
-                        ` : ''}
-                    </tr>
-                `;
-            }).join('');
+                showNotification('📍 Verificando distancia...', 'success');
+                const position = await getCurrentPosition();
+                const distance = calculateDistance(
+                    position.coords.latitude,
+                    position.coords.longitude,
+                    locationSettings.workLatitude,
+                    locationSettings.workLongitude
+                );
+
+                const isWithinRange = distance <= locationSettings.allowedRadius;
+                const message = isWithinRange 
+                    ? `✅ Dentro del área permitida: ${Math.round(distance)}m del trabajo`
+                    : `❌ Fuera del área: ${Math.round(distance)}m (máximo permitido: ${locationSettings.allowedRadius}m)`;
+                
+                showNotification(message, isWithinRange ? 'success' : 'warning');
+                
+                updateLocationStatus(isWithinRange, Math.round(distance));
+                
+            } catch (error) {
+                console.error('Error testing distance:', error);
+                let errorMessage = '❌ Error al verificar distancia.';
+                
+                if (error.code === 1) {
+                    errorMessage = '❌ Permisos de ubicación denegados.';
+                } else if (error.code === 2) {
+                    errorMessage = '❌ Ubicación no disponible.';
+                } else if (error.code === 3) {
+                    errorMessage = '❌ Tiempo de espera agotado.';
+                }
+                
+                showNotification(errorMessage, 'error');
+            } finally {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
         }
-        
+
+        function updateLocationStatus(isWithinRange, distance) {
+            const statusElement = document.getElementById('locationStatus');
+            if (statusElement) {
+                statusElement.classList.remove('hidden');
+                if (isWithinRange) {
+                    statusElement.innerHTML = `<span class="text-green-600">✅ En área de trabajo (${distance}m)</span>`;
+                    statusElement.className = 'p-3 rounded-lg bg-green-100 text-sm';
+                } else {
+                    statusElement.innerHTML = `<span class="text-red-600">❌ Fuera del área (${distance}m)</span>`;
+                    statusElement.className = 'p-3 rounded-lg bg-red-100 text-sm';
+                }
+            }
+        }
+
+        function saveLocationSettingsForm() {
+            locationSettings.enabled = document.getElementById('enableLocationControl').checked;
+            locationSettings.workLatitude = parseFloat(document.getElementById('workLatitude').value) || null;
+            locationSettings.workLongitude = parseFloat(document.getElementById('workLongitude').value) || null;
+            locationSettings.allowedRadius = parseInt(document.getElementById('allowedRadius').value) || 100;
+            locationSettings.workAddress = document.getElementById('workAddress').value || '';
+            
+            localStorage.setItem('fichajemax_locationSettings', JSON.stringify(locationSettings));
+            showNotification('📍 Configuración de ubicación guardada', 'success');
+            
+            updateLocationControlStatus();
+        }
+
+        function updateLocationControlStatus() {
+            const statusElement = document.getElementById('locationControlStatus');
+            if (!statusElement) return;
+            
+            if (locationSettings.enabled && locationSettings.workLatitude && locationSettings.workLongitude) {
+                statusElement.innerHTML = `
+                    <div class="text-green-700">
+                        <strong>Estado:</strong> 📍 Control activo<br>
+                        <strong>Ubicación:</strong> ${locationSettings.workAddress || 'Coordenadas configuradas'}<br>
+                        <strong>Radio:</strong> ${locationSettings.allowedRadius}m
+                    </div>
+                `;
+                statusElement.className = 'p-3 rounded-lg bg-green-100 text-sm';
+            } else if (locationSettings.enabled) {
+                statusElement.innerHTML = '<div class="text-yellow-700"><strong>Estado:</strong> ⚠️ Activado pero sin coordenadas</div>';
+                statusElement.className = 'p-3 rounded-lg bg-yellow-100 text-sm';
+            } else {
+                statusElement.innerHTML = '<div class="text-gray-600"><strong>Estado:</strong> ❌ Control desactivado</div>';
+                statusElement.className = 'p-3 rounded-lg bg-gray-100 text-sm';
+            }
+        }
+
+        function loadLocationSettings() {
+            document.getElementById('enableLocationControl').checked = locationSettings.enabled;
+            document.getElementById('workLatitude').value = locationSettings.workLatitude || '';
+            document.getElementById('workLongitude').value = locationSettings.workLongitude || '';
+            document.getElementById('allowedRadius').value = locationSettings.allowedRadius || 100;
+            document.getElementById('workAddress').value = locationSettings.workAddress || '';
+            
+            document.getElementById('radiusValue').textContent = locationSettings.allowedRadius || 100;
+            
+            updateLocationControlStatus();
+        }
+
+        // Location monitoring for employees
+        let locationMonitoringInterval = null;
+
+        function startLocationMonitoring() {
+            if (!locationSettings.enabled || currentUser.type !== 'employee') return;
+            
+            const statusElement = document.getElementById('employeeLocationStatus');
+            if (statusElement) {
+                statusElement.classList.remove('hidden');
+            }
+            
+            locationMonitoringInterval = setInterval(async () => {
+                try {
+                    const locationCheck = await checkLocationPermission();
+                    updateEmployeeLocationStatus(locationCheck);
+                } catch (error) {
+                    console.error('Location monitoring error:', error);
+                }
+            }, 30000);
+            
+            setTimeout(async () => {
+                try {
+                    const locationCheck = await checkLocationPermission();
+                    updateEmployeeLocationStatus(locationCheck);
+                } catch (error) {
+                    console.error('Initial location check error:', error);
+                }
+            }, 2000);
+        }
+
+        function stopLocationMonitoring() {
+            if (locationMonitoringInterval) {
+                clearInterval(locationMonitoringInterval);
+                locationMonitoringInterval = null;
+            }
+            
+            const statusElement = document.getElementById('employeeLocationStatus');
+            if (statusElement) {
+                statusElement.classList.add('hidden');
+            }
+        }
+
+        function updateEmployeeLocationStatus(locationCheck) {
+            const statusTextElement = document.getElementById('locationStatusText');
+            const indicatorElement = document.getElementById('locationStatusIndicator');
+            
+            if (statusTextElement) {
+                if (locationCheck.allowed) {
+                    statusTextElement.innerHTML = `<span class="text-green-600">✅ En área de trabajo</span>`;
+                    if (indicatorElement) {
+                        indicatorElement.innerHTML = '📍 En área de trabajo';
+                        indicatorElement.className = 'location-status success';
+                        indicatorElement.classList.remove('hidden');
+                    }
+                } else {
+                    statusTextElement.innerHTML = `<span class="text-red-600">❌ Fuera del área de trabajo</span>`;
+                    if (indicatorElement) {
+                        indicatorElement.innerHTML = '📍 Fuera del área';
+                        indicatorElement.className = 'location-status error';
+                        indicatorElement.classList.remove('hidden');
+                    }
+                }
+            }
+        }
+
+        async function refreshEmployeeLocation() {
+            if (!locationSettings.enabled || currentUser.type !== 'employee') return;
+            
+            const button = document.getElementById('refreshLocationBtn');
+            const originalText = button.innerHTML;
+            
+            try {
+                button.innerHTML = '<div class="loading-spinner"></div> Verificando...';
+                button.disabled = true;
+                
+                showNotification('📍 Actualizando ubicación...', 'success');
+                const locationCheck = await checkLocationPermission();
+                
+                updateEmployeeLocationStatus(locationCheck);
+                
+                if (locationCheck.allowed) {
+                    showNotification(`✅ Ubicación actualizada - En área de trabajo (${Math.round(locationCheck.distance)}m)`, 'success');
+                } else {
+                    showNotification(locationCheck.message, 'warning');
+                }
+                
+            } catch (error) {
+                console.error('Error refreshing location:', error);
+                showNotification('❌ Error al actualizar ubicación', 'error');
+            } finally {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
+
+        // Data Loading Functions
         function loadDashboard() {
+            console.log('Cargando dashboard');
             const today = formatDate(new Date());
             let todayRecords = timeRecords.filter(record => record.date === today);
             
@@ -1900,11 +2385,11 @@
                             <div class="text-sm text-gray-600">Salida</div>
                         </div>
                         <div class="stat-card">
-                            <div class="text-3xl font-bold text-purple-600">📊 ${formatHoursMinutes(myRecord?.totalHours)}</div>
+                            <div class="text-3xl font-bold text-purple-600">📊 ${myRecord?.totalHours?.toFixed(1) || '0.0'}h</div>
                             <div class="text-sm text-gray-600">Horas Hoy</div>
                         </div>
                         <div class="stat-card">
-                            <div class="text-3xl font-bold text-orange-600">📈 ${formatHoursMinutes(weekHours)}</div>
+                            <div class="text-3xl font-bold text-orange-600">📈 ${weekHours.toFixed(1)}h</div>
                             <div class="text-sm text-gray-600">Esta Semana</div>
                         </div>
                     `;
@@ -1928,7 +2413,7 @@
                             <div class="text-sm text-gray-600">Completados</div>
                         </div>
                         <div class="stat-card">
-                            <div class="text-3xl font-bold text-orange-600">⏱️ ${formatHoursMinutes(totalHours)}</div>
+                            <div class="text-3xl font-bold text-orange-600">⏱️ ${totalHours.toFixed(1)}h</div>
                             <div class="text-sm text-gray-600">Total Horas</div>
                         </div>
                     `;
@@ -1959,7 +2444,7 @@
                     statusTimeElement.textContent = `Entrada: ${myRecord.timeIn}`;
                 } else if (myRecord.timeIn && myRecord.timeOut) {
                     statusElement.innerHTML = '<span class="text-blue-600">🔵 COMPLETADO</span>';
-                    statusTimeElement.textContent = `${myRecord.timeIn} - ${myRecord.timeOut} (${formatHoursMinutes(myRecord.totalHours)})`;
+                    statusTimeElement.textContent = `${myRecord.timeIn} - ${myRecord.timeOut} (${myRecord.totalHours}h)`;
                 } else {
                     statusElement.innerHTML = '<span class="text-gray-600">⚪ SIN FICHAR</span>';
                     statusTimeElement.textContent = 'No hay registros para hoy';
@@ -1969,6 +2454,7 @@
                 statusTimeElement.textContent = 'No hay registros para hoy';
             }
             
+            // Actualizar progreso de jornada
             updateWorkingHoursProgress(myRecord);
         }
 
@@ -2007,7 +2493,7 @@
                 <div class="mb-4">
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-sm font-semibold text-gray-700">Horas Trabajadas</span>
-                        <span class="text-sm font-bold">${formatHoursMinutes(workedHours)} / ${expectedHours}h</span>
+                        <span class="text-sm font-bold">${workedHours.toFixed(1)}h / ${expectedHours}h</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-4">
                         <div class="${statusColor} h-4 rounded-full transition-all duration-500" style="width: ${progressPercentage}%"></div>
@@ -2020,11 +2506,11 @@
                         <div class="text-xs text-gray-600">Jornada</div>
                     </div>
                     <div class="p-3 bg-blue-50 rounded-lg">
-                        <div class="text-lg font-bold text-blue-600">${formatHoursMinutes(workedHours)}</div>
+                        <div class="text-lg font-bold text-blue-600">${workedHours.toFixed(1)}h</div>
                         <div class="text-xs text-gray-600">Trabajadas</div>
                     </div>
                     <div class="p-3 bg-purple-50 rounded-lg">
-                        <div class="text-lg font-bold text-purple-600">${formatHoursMinutes(Math.max(0, expectedHours - workedHours))}</div>
+                        <div class="text-lg font-bold text-purple-600">${Math.max(0, expectedHours - workedHours).toFixed(1)}h</div>
                         <div class="text-xs text-gray-600">Restantes</div>
                     </div>
                 </div>
@@ -2081,7 +2567,7 @@
                             ${record.timeIn || '--:--'} - ${record.timeOut || '--:--'}
                         </div>
                         <div class="text-sm text-gray-600">
-                            ${formatHoursMinutes(record.totalHours)}
+                            ${record.totalHours?.toFixed(1) || '0.0'}h
                         </div>
                     </div>
                 </div>
@@ -2089,6 +2575,7 @@
         }
 
         function loadEmployees() {
+            console.log('Cargando empleados');
             const gridElement = document.getElementById('employeesGrid');
             if (!gridElement) return;
             
@@ -2098,6 +2585,7 @@
             }
             
             gridElement.innerHTML = employees.map(employee => {
+                // Obtener último registro del empleado
                 const lastRecord = timeRecords
                     .filter(record => record.employeeId === employee.id)
                     .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
@@ -2155,7 +2643,7 @@
                             ${todayRecord ? `
                                 <div class="flex justify-between">
                                     <span>⏰ Hoy:</span>
-                                    <span class="${todayRecord.totalHours >= (employee.workingHours || 8) ? 'text-green-600 font-bold' : 'text-orange-600'}">${formatHoursMinutes(todayRecord.totalHours)}</span>
+                                    <span class="${todayRecord.totalHours >= (employee.workingHours || 8) ? 'text-green-600 font-bold' : 'text-orange-600'}">${todayRecord.totalHours?.toFixed(1) || '0.0'}h</span>
                                 </div>
                             ` : ''}
                         </div>
@@ -2176,49 +2664,21 @@
             }).join('');
         }
 
-        // LÓGICA DE REGISTROS Y FILTROS (CORREGIDA)
         function loadTimeRecords() {
+            console.log('Cargando registros de tiempo');
             const tableElement = document.getElementById('timeRecordsTable');
             if (!tableElement) return;
             
             let recordsToShow = timeRecords;
-            const filterEmployeeId = document.getElementById('filterEmployee')?.value;
-            const filterStartDateStr = document.getElementById('filterStartDate')?.value;
-            const filterEndDateStr = document.getElementById('filterEndDate')?.value;
-
-            // 1. FILTRADO POR EMPLEADO
-            if (currentUser?.type === 'employee') {
-                recordsToShow = recordsToShow.filter(record => record.employeeId === currentUser.id);
-            } else if (filterEmployeeId) {
-                recordsToShow = recordsToShow.filter(record => record.employeeId == filterEmployeeId);
+            
+            if (currentUser && currentUser.type === 'employee') {
+                recordsToShow = timeRecords.filter(record => record.employeeId === currentUser.id);
             }
-
-            // 2. FILTRADO POR FECHAS
-            if (filterStartDateStr) {
-                const startDate = new Date(filterStartDateStr);
-                recordsToShow = recordsToShow.filter(record => new Date(record.date) >= startDate);
-            }
-            if (filterEndDateStr) {
-                const endDate = new Date(filterEndDateStr);
-                endDate.setHours(23, 59, 59, 999); 
-                recordsToShow = recordsToShow.filter(record => new Date(record.date) <= endDate);
-            }
-
-            // 3. ORDENAR
+            
             recordsToShow = recordsToShow.sort((a, b) => new Date(b.date) - new Date(a.date));
             
-            // 4. CONTROL DEL MODO DE EDICIÓN (VISIBILIDAD SECRETA)
-            const actionsHeader = document.getElementById('actionsHeader');
-            const isActionsVisible = currentUser?.type === 'admin' && editModeEnabled;
-            if (actionsHeader) {
-                actionsHeader.classList.toggle('actions-col-hidden', !isActionsVisible);
-                actionsHeader.textContent = isActionsVisible ? '⚙️ Acciones (ON)' : '⚙️ Acciones';
-            }
-
-
             if (recordsToShow.length === 0) {
-                const colspan = isActionsVisible ? '7' : '6';
-                tableElement.innerHTML = `<tr><td colspan="${colspan}" class="text-center py-8 text-gray-500">No hay registros disponibles para los filtros aplicados.</td></tr>`;
+                tableElement.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-500">No hay registros disponibles</td></tr>';
                 return;
             }
             
@@ -2244,14 +2704,14 @@
                         <td class="px-6 py-4">${formatDateDisplay(record.date)}</td>
                         <td class="px-6 py-4 font-mono">${record.timeIn || '--:--'}</td>
                         <td class="px-6 py-4 font-mono">${record.timeOut || '--:--'}</td>
-                        <td class="px-6 py-4 font-bold">${formatHoursMinutes(record.totalHours)}</td>
+                        <td class="px-6 py-4 font-bold">${record.totalHours?.toFixed(1) || '0.0'}h</td>
                         <td class="px-6 py-4">
                             <span class="px-2 py-1 text-xs rounded-full ${statusClass}">
                                 ${statusText}
                             </span>
                         </td>
-                        ${isActionsVisible ? `
-                            <td class="px-6 py-4 actions-col-visible">
+                        ${currentUser?.type === 'admin' ? `
+                            <td class="px-6 py-4">
                                 <button onclick="editRecord(${record.id})" class="text-blue-600 hover:text-blue-800 text-sm">
                                     ✏️ Editar
                                 </button>
@@ -2261,315 +2721,42 @@
                 `;
             }).join('');
         }
-        
-        function loadDashboard() {
-            const today = formatDate(new Date());
-            let todayRecords = timeRecords.filter(record => record.date === today);
-            
-            if (currentUser && currentUser.type === 'employee') {
-                todayRecords = todayRecords.filter(record => record.employeeId === currentUser.id);
-                updateEmployeeStatus(today);
-            }
-            
-            const summaryElement = document.getElementById('todaySummary');
-            if (summaryElement) {
-                if (currentUser && currentUser.type === 'employee') {
-                    const myRecord = todayRecords[0];
-                    const myWeekRecords = timeRecords.filter(record => {
-                        const recordDate = new Date(record.date);
-                        const weekStart = new Date();
-                        weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-                        return record.employeeId === currentUser.id && recordDate >= weekStart;
-                    });
-                    const weekHours = myWeekRecords.reduce((sum, record) => sum + (record.totalHours || 0), 0);
-                    
-                    summaryElement.innerHTML = `
-                        <div class="stat-card">
-                            <div class="text-3xl font-bold text-blue-600">⏰ ${myRecord?.timeIn || '--:--'}</div>
-                            <div class="text-sm text-gray-600">Entrada</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="text-3xl font-bold text-green-600">🏁 ${myRecord?.timeOut || '--:--'}</div>
-                            <div class="text-sm text-gray-600">Salida</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="text-3xl font-bold text-purple-600">📊 ${formatHoursMinutes(myRecord?.totalHours)}</div>
-                            <div class="text-sm text-gray-600">Horas Hoy</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="text-3xl font-bold text-orange-600">📈 ${formatHoursMinutes(weekHours)}</div>
-                            <div class="text-sm text-gray-600">Esta Semana</div>
-                        </div>
-                    `;
-                } else {
-                    const totalEmployees = employees.filter(emp => emp.status === 'Activo').length;
-                    const presentEmployees = todayRecords.filter(record => record.timeIn).length;
-                    const completedShifts = todayRecords.filter(record => record.timeOut).length;
-                    const totalHours = todayRecords.reduce((sum, record) => sum + (record.totalHours || 0), 0);
-                    
-                    summaryElement.innerHTML = `
-                        <div class="stat-card">
-                            <div class="text-3xl font-bold text-blue-600">👥 ${totalEmployees}</div>
-                            <div class="text-sm text-gray-600">Empleados</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="text-3xl font-bold text-green-600">✅ ${presentEmployees}</div>
-                            <div class="text-sm text-gray-600">Presentes</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="text-3xl font-bold text-purple-600">🏁 ${completedShifts}</div>
-                            <div class="text-sm text-gray-600">Completados</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="text-3xl font-bold text-orange-600">⏱️ ${formatHoursMinutes(totalHours)}</div>
-                            <div class="text-sm text-gray-600">Total Horas</div>
-                        </div>
-                    `;
-                }
-            }
-            
-            loadRecentActivity();
-        }
 
-        function updateEmployeeStatus(today) {
-            const statusElement = document.getElementById('currentStatus');
-            const statusTimeElement = document.getElementById('statusTime');
-            const employeeStatusElement = document.getElementById('employeeStatus');
+        function loadStatistics() {
+            console.log('Cargando estadísticas');
+            const statsElement = document.getElementById('statisticsContainer');
+            if (!statsElement) return;
             
-            if (!statusElement || !currentUser || currentUser.type !== 'employee') return;
+            const totalRecords = timeRecords.length;
+            const totalHours = timeRecords.reduce((sum, record) => sum + (record.totalHours || 0), 0);
+            const avgHours = totalRecords > 0 ? totalHours / totalRecords : 0;
+            const thisMonth = new Date().toISOString().slice(0, 7);
+            const monthRecords = timeRecords.filter(record => record.date.startsWith(thisMonth));
             
-            const myRecord = timeRecords.find(record => 
-                record.employeeId === currentUser.id && record.date === today
-            );
-            
-            if (employeeStatusElement) {
-                employeeStatusElement.style.display = 'block';
-            }
-            
-            if (myRecord) {
-                if (myRecord.timeIn && !myRecord.timeOut) {
-                    statusElement.innerHTML = '<span class="text-green-600 status-badge">🟢 TRABAJANDO</span>';
-                    statusTimeElement.textContent = `Entrada: ${myRecord.timeIn}`;
-                } else if (myRecord.timeIn && myRecord.timeOut) {
-                    statusElement.innerHTML = '<span class="text-blue-600">🔵 COMPLETADO</span>';
-                    statusTimeElement.textContent = `${myRecord.timeIn} - ${myRecord.timeOut} (${formatHoursMinutes(myRecord.totalHours)})`;
-                } else {
-                    statusElement.innerHTML = '<span class="text-gray-600">⚪ SIN FICHAR</span>';
-                    statusTimeElement.textContent = 'No hay registros para hoy';
-                }
-            } else {
-                statusElement.innerHTML = '<span class="text-gray-600">⚪ SIN FICHAR</span>';
-                statusTimeElement.textContent = 'No hay registros para hoy';
-            }
-            
-            updateWorkingHoursProgress(myRecord);
-        }
-
-        function updateWorkingHoursProgress(record) {
-            const progressElement = document.getElementById('workingHoursProgress');
-            const progressContent = document.getElementById('progressContent');
-            
-            if (!progressElement || !progressContent || !currentUser || currentUser.type !== 'employee') return;
-            
-            const employee = employees.find(emp => emp.id === currentUser.id);
-            if (!employee) return;
-            
-            const expectedHours = employee.workingHours || 8;
-            const workedHours = record?.totalHours || 0;
-            const progressPercentage = Math.min((workedHours / expectedHours) * 100, 100);
-            
-            let statusColor = 'bg-red-500';
-            let statusText = 'Pendiente';
-            let statusIcon = '🔴';
-            
-            if (progressPercentage >= 100) {
-                statusColor = 'bg-green-500';
-                statusText = 'Jornada Completa';
-                statusIcon = '✅';
-            } else if (progressPercentage >= 75) {
-                statusColor = 'bg-yellow-500';
-                statusText = 'Casi Completa';
-                statusIcon = '🟡';
-            } else if (progressPercentage >= 25) {
-                statusColor = 'bg-orange-500';
-                statusText = 'En Progreso';
-                statusIcon = '🟠';
-            }
-            
-            progressContent.innerHTML = `
-                <div class="mb-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-sm font-semibold text-gray-700">Horas Trabajadas</span>
-                        <span class="text-sm font-bold">${formatHoursMinutes(workedHours)} / ${expectedHours}h</span>
+            statsElement.innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="stat-card">
+                        <div class="text-2xl font-bold text-blue-600">${totalRecords}</div>
+                        <div class="text-sm text-gray-600">Total Registros</div>
                     </div>
-                    <div class="w-full bg-gray-200 rounded-full h-4">
-                        <div class="${statusColor} h-4 rounded-full transition-all duration-500" style="width: ${progressPercentage}%"></div>
+                    <div class="stat-card">
+                        <div class="text-2xl font-bold text-green-600">${totalHours.toFixed(1)}h</div>
+                        <div class="text-sm text-gray-600">Total Horas</div>
                     </div>
-                </div>
-                
-                <div class="grid grid-cols-3 gap-4 text-center">
-                    <div class="p-3 bg-gray-50 rounded-lg">
-                        <div class="text-lg font-bold text-gray-800">${expectedHours}h</div>
-                        <div class="text-xs text-gray-600">Jornada</div>
+                    <div class="stat-card">
+                        <div class="text-2xl font-bold text-purple-600">${avgHours.toFixed(1)}h</div>
+                        <div class="text-sm text-gray-600">Promedio por Día</div>
                     </div>
-                    <div class="p-3 bg-blue-50 rounded-lg">
-                        <div class="text-lg font-bold text-blue-600">${formatHoursMinutes(workedHours)}</div>
-                        <div class="text-xs text-gray-600">Trabajadas</div>
-                    </div>
-                    <div class="p-3 bg-purple-50 rounded-lg">
-                        <div class="text-lg font-bold text-purple-600">${formatHoursMinutes(Math.max(0, expectedHours - workedHours))}</div>
-                        <div class="text-xs text-gray-600">Restantes</div>
-                    </div>
-                </div>
-                
-                <div class="mt-4 p-3 rounded-lg ${statusColor.replace('bg-', 'bg-').replace('-500', '-100')} border border-${statusColor.replace('bg-', '').replace('-500', '-200')}">
-                    <div class="flex items-center justify-center space-x-2">
-                        <span class="text-lg">${statusIcon}</span>
-                        <span class="font-semibold text-${statusColor.replace('bg-', '').replace('-500', '-800')}">${statusText}</span>
+                    <div class="stat-card">
+                        <div class="text-2xl font-bold text-orange-600">${monthRecords.length}</div>
+                        <div class="text-sm text-gray-600">Este Mes</div>
                     </div>
                 </div>
             `;
-            
-            progressElement.classList.remove('hidden');
-        }
-
-        function loadRecentActivity() {
-            const activityElement = document.getElementById('recentActivity');
-            if (!activityElement) return;
-            
-            let recentRecords;
-            
-            if (currentUser && currentUser.type === 'employee') {
-                recentRecords = timeRecords
-                    .filter(record => record.employeeId === currentUser.id)
-                    .sort((a, b) => new Date(b.date) - new Date(a.date))
-                    .slice(0, 5);
-            } else {
-                recentRecords = timeRecords
-                    .sort((a, b) => new Date(b.date) - new Date(a.date))
-                    .slice(0, 10);
-            }
-            
-            if (recentRecords.length === 0) {
-                activityElement.innerHTML = '<p class="text-gray-500 text-center py-8">No hay actividad reciente</p>';
-                return;
-            }
-            
-            activityElement.innerHTML = recentRecords.map(record => `
-                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div class="flex items-center space-x-4">
-                        <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                            <span class="text-purple-600 font-bold text-sm">
-                                ${record.employeeName.split(' ').map(n => n[0]).join('').substring(0, 2)}
-                            </span>
-                        </div>
-                        <div>
-                            <div class="font-semibold">${record.employeeName}</div>
-                            <div class="text-sm text-gray-600">${formatDateDisplay(record.date)}</div>
-                            ${record.location ? `<div class="text-xs text-green-600">${record.location}</div>` : ''}
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <div class="font-semibold">
-                            ${record.timeIn || '--:--'} - ${record.timeOut || '--:--'}
-                        </div>
-                        <div class="text-sm text-gray-600">
-                            ${formatHoursMinutes(record.totalHours)}
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function loadEmployees() {
-            const gridElement = document.getElementById('employeesGrid');
-            if (!gridElement) return;
-            
-            if (employees.length === 0) {
-                gridElement.innerHTML = '<p class="text-gray-500 text-center py-8 col-span-full">No hay empleados registrados</p>';
-                return;
-            }
-            
-            gridElement.innerHTML = employees.map(employee => {
-                const lastRecord = timeRecords
-                    .filter(record => record.employeeId === employee.id)
-                    .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-                
-                const today = formatDate(new Date());
-                const todayRecord = timeRecords.find(record => 
-                    record.employeeId === employee.id && record.date === today
-                );
-                
-                let statusBadge = '';
-                if (employee.status === 'Activo' && todayRecord) {
-                    if (todayRecord.timeIn && !todayRecord.timeOut) {
-                        statusBadge = '<span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 animate-pulse">🟢 Trabajando</span>';
-                    } else if (todayRecord.timeOut) {
-                        statusBadge = '<span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">🔵 Completado</span>';
-                    }
-                } else if (employee.status === 'Activo') {
-                    statusBadge = '<span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">⚪ Sin fichar</span>';
-                } else {
-                    statusBadge = '<span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">❌ Inactivo</span>';
-                }
-                
-                return `
-                    <div class="employee-card p-6">
-                        <div class="flex items-center space-x-4 mb-4">
-                            <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-                                ${(employee.name[0] + employee.lastName[0]).toUpperCase()}
-                            </div>
-                            <div class="flex-1">
-                                <h4 class="font-bold text-gray-800">${employee.name} ${employee.lastName}</h4>
-                                <p class="text-sm text-gray-600">${employee.position || 'Sin especificar'}</p>
-                            </div>
-                            ${statusBadge}
-                        </div>
-                        
-                        <div class="space-y-2 text-sm text-gray-600 mb-4">
-                            <div class="flex justify-between">
-                                <span>🆔 DNI:</span>
-                                <span class="font-mono">${employee.dni}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>📱 PIN:</span>
-                                <span class="font-mono">••••</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>⏰ Jornada:</span>
-                                <span class="font-semibold">${employee.workingHours || 8}h/día</span>
-                            </div>
-                            ${lastRecord ? `
-                                <div class="flex justify-between">
-                                    <span>📅 Último:</span>
-                                    <span>${formatTimeAgo(lastRecord.date)}</span>
-                                </div>
-                            ` : ''}
-                            ${todayRecord ? `
-                                <div class="flex justify-between">
-                                    <span>⏰ Hoy:</span>
-                                    <span class="${todayRecord.totalHours >= (employee.workingHours || 8) ? 'text-green-600 font-bold' : 'text-orange-600'}">${formatHoursMinutes(todayRecord.totalHours)}</span>
-                                </div>
-                            ` : ''}
-                        </div>
-                        
-                        <div class="grid grid-cols-3 gap-2">
-                            <button onclick="editEmployee(${employee.id})" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-2 rounded-lg text-xs transition-colors">
-                                ✏️ Editar
-                            </button>
-                            <button onclick="toggleEmployeeStatus(${employee.id})" class="${employee.status === 'Activo' ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-500 hover:bg-green-600'} text-white px-2 py-2 rounded-lg text-xs transition-colors">
-                                ${employee.status === 'Activo' ? '🚫 Desactivar' : '✅ Activar'}
-                            </button>
-                            <button onclick="deleteEmployee(${employee.id})" class="bg-red-500 hover:bg-red-600 text-white px-2 py-2 rounded-lg text-xs transition-colors">
-                                🗑️ Eliminar
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
         }
 
         function loadCompanySettings() {
+            console.log('Cargando configuración de empresa');
             document.getElementById('companyName').value = companySettings.companyName || '';
             document.getElementById('companyCIF').value = companySettings.companyCIF || '';
             document.getElementById('companyAddress').value = companySettings.companyAddress || '';
@@ -2577,6 +2764,7 @@
         }
 
         function loadAdminCredentialsForm() {
+            console.log('Cargando credenciales de administrador');
             document.getElementById('adminUsername').value = adminCredentials.username || 'admin';
             document.getElementById('currentAdminPassword').value = '';
             document.getElementById('newAdminPassword').value = '';
@@ -2610,9 +2798,11 @@
             `;
         }
 
+        // Modal Functions
         function showEmployeeModal() {
             document.getElementById('employeeModal').classList.remove('hidden');
             
+            // Si no estamos editando, limpiar campos y resetear título
             if (!editingEmployeeId) {
                 document.getElementById('employeeName').value = '';
                 document.getElementById('employeeLastName').value = '';
@@ -2629,6 +2819,7 @@
                 }
             }
             
+            // Focus en el primer campo
             setTimeout(() => {
                 document.getElementById('employeeName').focus();
             }, 100);
@@ -2638,6 +2829,7 @@
             document.getElementById('employeeModal').classList.add('hidden');
             editingEmployeeId = null;
             
+            // Resetear título
             const modalTitle = document.querySelector('#employeeModal .gradient-bg h3');
             if (modalTitle) {
                 modalTitle.textContent = '👤 Nuevo Empleado';
@@ -2671,33 +2863,38 @@
             document.getElementById('helpModal').classList.add('hidden');
         }
 
+        // Save Functions
         function saveEmployee() {
+            console.log('Guardando empleado');
             const name = document.getElementById('employeeName').value.trim();
             const lastName = document.getElementById('employeeLastName').value.trim();
             const dni = document.getElementById('employeeDNI').value.trim().toUpperCase();
             const position = document.getElementById('employeePosition').value.trim();
             const accessCode = document.getElementById('employeeAccessCode').value.trim();
             
+            // Validaciones mejoradas
             if (!name || !lastName || !dni || !accessCode) {
-                UI.showNotification('⚠️ Complete todos los campos obligatorios', 'warning');
+                showNotification('⚠️ Complete todos los campos obligatorios', 'warning');
                 return;
             }
             
             if (name.length < 2 || lastName.length < 2) {
-                UI.showNotification('⚠️ Nombre y apellidos deben tener al menos 2 caracteres', 'warning');
+                showNotification('⚠️ Nombre y apellidos deben tener al menos 2 caracteres', 'warning');
                 return;
             }
             
+            // Validación DNI/NIE español
             if (!validateDNI(dni)) {
-                UI.showNotification('⚠️ DNI/NIE no válido. Formato: 12345678A o X1234567A', 'warning');
+                showNotification('⚠️ DNI/NIE no válido. Formato: 12345678A o X1234567A', 'warning');
                 return;
             }
             
             if (accessCode.length !== 4 || !/^\d{4}$/.test(accessCode)) {
-                UI.showNotification('⚠️ El código PIN debe tener exactamente 4 dígitos', 'warning');
+                showNotification('⚠️ El código PIN debe tener exactamente 4 dígitos', 'warning');
                 return;
             }
             
+            // Verificar duplicados (excluyendo el empleado que se está editando)
             const existingEmployee = employees.find(emp => 
                 (emp.accessCode === accessCode || emp.dni === dni) && 
                 emp.id !== editingEmployeeId
@@ -2705,20 +2902,21 @@
             
             if (existingEmployee) {
                 if (existingEmployee.accessCode === accessCode) {
-                    UI.showNotification('⚠️ Este código PIN ya está en uso', 'warning');
+                    showNotification('⚠️ Este código PIN ya está en uso', 'warning');
                 } else {
-                    UI.showNotification('⚠️ Este DNI/NIE ya está registrado', 'warning');
+                    showNotification('⚠️ Este DNI/NIE ya está registrado', 'warning');
                 }
                 return;
             }
             
+            // Obtener jornada laboral
             const workingHoursSelect = document.getElementById('employeeWorkingHours').value;
             let workingHours;
             
             if (workingHoursSelect === 'custom') {
                 const customHours = parseFloat(document.getElementById('employeeCustomHours').value);
                 if (!customHours || customHours < 0.5 || customHours > 12) {
-                    UI.showNotification('⚠️ Las horas personalizadas deben estar entre 0.5 y 12', 'warning');
+                    showNotification('⚠️ Las horas personalizadas deben estar entre 0.5 y 12', 'warning');
                     return;
                 }
                 workingHours = customHours;
@@ -2743,20 +2941,21 @@
                 const index = employees.findIndex(emp => emp.id === editingEmployeeId);
                 if (index !== -1) {
                     employees[index] = employeeData;
-                    UI.showNotification('✅ Empleado actualizado correctamente', 'success');
+                    showNotification('✅ Empleado actualizado correctamente', 'success');
                 }
             } else {
                 employees.push(employeeData);
-                UI.showNotification('✅ Empleado creado correctamente', 'success');
+                showNotification('✅ Empleado creado correctamente', 'success');
             }
             
-            setEmployees(employees);
+            saveEmployees();
             populateSelects();
             loadEmployees();
             hideEmployeeModal();
         }
 
         function saveManualRecord() {
+            console.log('Guardando registro manual');
             const employeeId = document.getElementById('manualRecordEmployee').value;
             const date = document.getElementById('manualRecordDate').value;
             const timeIn = document.getElementById('manualRecordTimeIn').value;
@@ -2764,40 +2963,43 @@
             const notes = document.getElementById('manualRecordNotes').value.trim();
             
             if (!employeeId || !date) {
-                UI.showNotification('⚠️ Complete los campos obligatorios', 'warning');
+                showNotification('⚠️ Complete los campos obligatorios', 'warning');
                 return;
             }
             
             if (!timeIn && !timeOut) {
-                UI.showNotification('⚠️ Debe especificar al menos una hora', 'warning');
+                showNotification('⚠️ Debe especificar al menos una hora', 'warning');
                 return;
             }
             
+            // Validar rango de tiempo
             if (timeIn && timeOut && !validateTimeRange(timeIn, timeOut)) {
-                UI.showNotification('⚠️ El rango de tiempo no es válido (máximo 16 horas)', 'warning');
+                showNotification('⚠️ El rango de tiempo no es válido (máximo 16 horas)', 'warning');
                 return;
             }
             
+            // Verificar si ya existe un registro para esa fecha
             const existingRecord = timeRecords.find(record => 
                 record.employeeId == employeeId && record.date === date
             );
             
             if (existingRecord) {
-                UI.showNotification('⚠️ Ya existe un registro para este empleado en esta fecha', 'warning');
+                showNotification('⚠️ Ya existe un registro para este empleado en esta fecha', 'warning');
                 return;
             }
             
+            // Validar fecha no futura
             const selectedDate = new Date(date);
             const today = new Date();
             today.setHours(23, 59, 59, 999);
             
             if (selectedDate > today) {
-                UI.showNotification('⚠️ No se pueden crear registros para fechas futuras', 'warning');
+                showNotification('⚠️ No se pueden crear registros para fechas futuras', 'warning');
                 return;
             }
             
             const employee = employees.find(emp => emp.id == employeeId);
-            const totalHours = (timeIn && timeOut) ? calculateFloatHours(timeIn, timeOut) : 0;
+            const totalHours = (timeIn && timeOut) ? calculateHours(timeIn, timeOut) : 0;
             
             const newRecord = {
                 id: Date.now(),
@@ -2814,14 +3016,15 @@
             };
             
             timeRecords.push(newRecord);
-            setTimeRecords(timeRecords);
+            saveTimeRecords();
             loadTimeRecords();
             loadDashboard();
             hideManualRecordModal();
-            UI.showNotification('✅ Registro manual creado correctamente', 'success');
+            showNotification('✅ Registro manual creado correctamente', 'success');
         }
 
         function saveEditRecord() {
+            console.log('Guardando edición de registro');
             if (!editingRecordId) return;
             
             const record = timeRecords.find(r => r.id === editingRecordId);
@@ -2835,63 +3038,66 @@
             record.date = date;
             record.timeIn = timeIn || null;
             record.timeOut = timeOut || null;
-            record.totalHours = (timeIn && timeOut) ? calculateFloatHours(timeIn, timeOut) : 0;
+            record.totalHours = (timeIn && timeOut) ? calculateHours(timeIn, timeOut) : 0;
             record.notes = notes;
             
-            setTimeRecords(timeRecords);
+            saveTimeRecords();
             loadTimeRecords();
             loadDashboard();
             hideEditRecordModal();
-            UI.showNotification('✅ Registro actualizado', 'success');
+            showNotification('✅ Registro actualizado', 'success');
         }
 
         function deleteRecord() {
+            console.log('Eliminando registro');
             if (!editingRecordId) return;
             
             if (showConfirmDialog('¿Está seguro de eliminar este registro?')) {
                 timeRecords = timeRecords.filter(r => r.id !== editingRecordId);
-                setTimeRecords(timeRecords); 
+                saveTimeRecords();
                 loadTimeRecords();
                 loadDashboard();
                 hideEditRecordModal();
-                UI.showNotification('✅ Registro eliminado', 'success');
+                showNotification('✅ Registro eliminado', 'success');
             }
         }
 
         function saveCompanySettingsForm() {
+            console.log('Guardando configuración de empresa');
             companySettings.companyName = document.getElementById('companyName').value;
             companySettings.companyCIF = document.getElementById('companyCIF').value;
             companySettings.companyAddress = document.getElementById('companyAddress').value;
             companySettings.companyPhone = document.getElementById('companyPhone').value;
             
-            setGlobalConfig('companySettings', companySettings); 
-            UI.showNotification('✅ Configuración guardada', 'success');
+            saveCompanySettings();
+            showNotification('✅ Configuración guardada', 'success');
         }
 
         function saveAdminCredentialsForm() {
+            console.log('Guardando credenciales de administrador');
             const currentPassword = document.getElementById('currentAdminPassword').value;
             const newUsername = document.getElementById('adminUsername').value.trim();
             const newPassword = document.getElementById('newAdminPassword').value;
             const confirmPassword = document.getElementById('confirmAdminPassword').value;
             
             if (currentPassword !== adminCredentials.password) {
-                UI.showNotification('❌ Contraseña actual incorrecta', 'error');
+                showNotification('❌ Contraseña actual incorrecta', 'error');
                 return;
             }
             
             if (!newUsername) {
-                UI.showNotification('⚠️ El nombre de usuario no puede estar vacío', 'warning');
+                showNotification('⚠️ El nombre de usuario no puede estar vacío', 'warning');
                 return;
             }
             
             if (newPassword) {
                 if (newPassword.length < 4) {
-                    UI.showNotification('⚠️ La nueva contraseña debe tener al menos 4 caracteres', 'warning');
+                    showNotification('⚠️ La nueva contraseña debe tener al menos 4 caracteres', 'warning');
                     return;
                 }
                 
                 if (newPassword !== confirmPassword) {
-                    UI.showNotification('⚠️ Las contraseñas no coinciden', 'warning');
+                    showNotification('⚠️ Las contraseñas no coinciden', 'warning');
                     return;
                 }
                 
@@ -2900,7 +3106,7 @@
             
             adminCredentials.username = newUsername;
             
-            DataManager.setAdminCredentials(adminCredentials);
+            saveAdminCredentialsData();
             
             document.getElementById('currentAdminPassword').value = '';
             document.getElementById('newAdminPassword').value = '';
@@ -2910,10 +3116,12 @@
                 currentUser.name = newUsername;
             }
             
-            UI.showNotification('🔐 Credenciales actualizadas correctamente', 'success');
+            showNotification('🔐 Credenciales actualizadas correctamente', 'success');
         }
 
+        // Edit Functions
         function editEmployee(id) {
+            console.log('Editando empleado:', id);
             const employee = employees.find(emp => emp.id === id);
             if (!employee) return;
             
@@ -2925,11 +3133,13 @@
             document.getElementById('employeePosition').value = employee.position || '';
             document.getElementById('employeeAccessCode').value = employee.accessCode;
             
+            // Configurar jornada laboral
             const workingHours = employee.workingHours || 8;
             const workingHoursSelect = document.getElementById('employeeWorkingHours');
             const customHoursContainer = document.getElementById('customHoursContainer');
             const customHoursInput = document.getElementById('employeeCustomHours');
             
+            // Verificar si es una jornada estándar
             const standardHours = ['8', '7', '6', '5', '4', '3', '2'];
             if (standardHours.includes(workingHours.toString())) {
                 workingHoursSelect.value = workingHours.toString();
@@ -2940,6 +3150,7 @@
                 customHoursContainer.classList.remove('hidden');
             }
             
+            // Cambiar título del modal
             const modalTitle = document.querySelector('#employeeModal .gradient-bg h3');
             if (modalTitle) {
                 modalTitle.textContent = '✏️ Editar Empleado';
@@ -2949,6 +3160,7 @@
         }
 
         function editRecord(id) {
+            console.log('Editando registro:', id);
             const record = timeRecords.find(r => r.id === id);
             if (!record) return;
             
@@ -2964,6 +3176,7 @@
         }
 
         function toggleEmployeeStatus(id) {
+            console.log('Cambiando estado de empleado:', id);
             const employee = employees.find(emp => emp.id === id);
             if (!employee) return;
             
@@ -2972,14 +3185,15 @@
             
             if (showConfirmDialog(`¿Está seguro de ${action} a ${employee.name} ${employee.lastName}?`)) {
                 employee.status = newStatus;
-                setEmployees(employees); 
+                saveEmployees();
                 loadEmployees();
                 populateSelects();
-                UI.showNotification(`✅ Empleado ${newStatus.toLowerCase()}`, 'success');
+                showNotification(`✅ Empleado ${newStatus.toLowerCase()}`, 'success');
             }
         }
 
         async function deleteEmployee(id) {
+            console.log('Eliminando empleado:', id);
             const employee = employees.find(emp => emp.id === id);
             if (!employee) return;
             
@@ -2991,44 +3205,49 @@
             }
             
             if (await showConfirmDialog(confirmMessage)) {
+                // Eliminar empleado
                 const employeeIndex = employees.findIndex(emp => emp.id === id);
                 if (employeeIndex !== -1) {
                     employees.splice(employeeIndex, 1);
                 }
                 
+                // Eliminar todos los registros del empleado
                 if (hasRecords) {
+                    const originalCount = timeRecords.length;
                     timeRecords = timeRecords.filter(record => record.employeeId !== id);
-                    setTimeRecords(timeRecords);
+                    const deletedRecords = originalCount - timeRecords.length;
+                    
+                    saveTimeRecords();
+                    showNotification(`🗑️ Empleado eliminado junto con ${deletedRecords} registros`, 'success');
+                } else {
+                    showNotification('🗑️ Empleado eliminado correctamente', 'success');
                 }
                 
-                setEmployees(employees);
-                
+                saveEmployees();
                 loadEmployees();
                 loadTimeRecords();
                 loadDashboard();
                 populateSelects();
                 updateDataStatistics();
-                
-                UI.showNotification('🗑️ Empleado y sus registros eliminados correctamente', 'success');
             }
         }
 
         // Report Functions
         function generateReport() {
+            console.log('Generando informe');
             const employeeId = document.getElementById('reportEmployee').value;
-            const startDateStr = document.getElementById('reportStartDate').value;
-            const endDateStr = document.getElementById('reportEndDate').value;
+            const startDate = document.getElementById('reportStartDate').value;
+            const endDate = document.getElementById('reportEndDate').value;
             
-            if (!startDateStr || !endDateStr) {
-                UI.showNotification('⚠️ Seleccione las fechas del informe', 'warning');
+            if (!startDate || !endDate) {
+                showNotification('⚠️ Seleccione las fechas del informe', 'warning');
                 return;
             }
             
             let filteredRecords = timeRecords.filter(record => {
                 const recordDate = new Date(record.date);
-                const start = new Date(startDateStr);
-                const end = new Date(endDateStr);
-                end.setHours(23, 59, 59, 999);
+                const start = new Date(startDate);
+                const end = new Date(endDate);
                 return recordDate >= start && recordDate <= end;
             });
             
@@ -3036,9 +3255,6 @@
                 filteredRecords = filteredRecords.filter(record => record.employeeId == employeeId);
             }
             
-            currentReportRecords = filteredRecords;
-            document.getElementById('exportReportBtn').classList.remove('hidden');
-
             const resultsElement = document.getElementById('reportResults');
             if (filteredRecords.length === 0) {
                 resultsElement.innerHTML = '<p class="text-gray-500 text-center py-8">No se encontraron registros para el período seleccionado</p>';
@@ -3057,15 +3273,15 @@
                             <div class="text-sm text-gray-600">Registros</div>
                         </div>
                         <div class="stat-card">
-                            <div class="text-2xl font-bold text-green-600">${formatHoursMinutes(totalHours)}</div>
+                            <div class="text-2xl font-bold text-green-600">${totalHours.toFixed(1)}h</div>
                             <div class="text-sm text-gray-600">Total Horas</div>
                         </div>
                         <div class="stat-card">
-                            <div class="text-2xl font-bold text-purple-600">${formatHoursMinutes(avgHours)}</div>
+                            <div class="text-2xl font-bold text-purple-600">${avgHours.toFixed(1)}h</div>
                             <div class="text-sm text-gray-600">Promedio</div>
                         </div>
                         <div class="stat-card">
-                            <div class="text-2xl font-bold text-orange-600">${formatDateDisplay(startDateStr)} - ${formatDateDisplay(endDateStr)}</div>
+                            <div class="text-2xl font-bold text-orange-600">${formatDateDisplay(startDate)} - ${formatDateDisplay(endDate)}</div>
                             <div class="text-sm text-gray-600">Período</div>
                         </div>
                     </div>
@@ -3090,7 +3306,7 @@
                                         <td class="px-6 py-4">${formatDateDisplay(record.date)}</td>
                                         <td class="px-6 py-4 font-mono">${record.timeIn || '--:--'}</td>
                                         <td class="px-6 py-4 font-mono">${record.timeOut || '--:--'}</td>
-                                        <td class="px-6 py-4 font-bold">${formatHoursMinutes(record.totalHours)}</td>
+                                        <td class="px-6 py-4 font-bold">${record.totalHours?.toFixed(1) || '0.0'}h</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
@@ -3099,37 +3315,190 @@
                 </div>
             `;
             
-            UI.showNotification('✅ Informe generado correctamente', 'success');
+            showNotification('✅ Informe generado correctamente', 'success');
         }
 
-        function exportReport() {
-            if (currentReportRecords.length === 0) {
-                UI.showNotification('⚠️ Genere un informe primero antes de exportar', 'warning');
-                return;
+        // Filter Functions
+        function applyFilters() {
+            console.log('Aplicando filtros');
+            loadTimeRecords();
+            showNotification('🔍 Filtros aplicados', 'success');
+        }
+
+        // Export Functions
+        function exportRecords() {
+            console.log('Exportando registros');
+            const csvContent = generateCSV(timeRecords);
+            downloadFile(csvContent, 'registros_fichaje.csv', 'text/csv');
+            showNotification('📊 Registros exportados', 'success');
+        }
+
+        function exportAllData() {
+            console.log('Exportando todos los datos');
+            const allData = {
+                employees,
+                timeRecords,
+                companySettings,
+                adminCredentials,
+                locationSettings,
+                exportDate: new Date().toISOString()
+            };
+            const jsonContent = JSON.stringify(allData, null, 2);
+            downloadFile(jsonContent, 'fichajemax_backup.json', 'application/json');
+            showNotification('💾 Backup completo exportado', 'success');
+        }
+
+        // Import Functions
+        function handleImportFile(event) {
+            console.log('Importando archivo');
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (data.employees) employees = data.employees;
+                    if (data.timeRecords) timeRecords = data.timeRecords;
+                    if (data.companySettings) companySettings = data.companySettings;
+                    if (data.adminCredentials) adminCredentials = data.adminCredentials;
+                    if (data.locationSettings) locationSettings = data.locationSettings;
+                    
+                    saveEmployees();
+                    saveTimeRecords();
+                    saveCompanySettings();
+                    saveAdminCredentialsData();
+                    localStorage.setItem('fichajemax_locationSettings', JSON.stringify(locationSettings));
+                    
+                    loadEmployees();
+                    loadTimeRecords();
+                    loadDashboard();
+                    populateSelects();
+                    updateDataStatistics();
+                    
+                    showNotification('✅ Datos importados correctamente', 'success');
+                } catch (error) {
+                    console.error('Error importing data:', error);
+                    showNotification('❌ Error al importar datos', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function clearAllData() {
+            console.log('Limpiando todos los datos');
+            if (showConfirmDialog('¿Está seguro de eliminar TODOS los datos? Esta acción no se puede deshacer.')) {
+                employees.length = 0;
+                timeRecords.length = 0;
+                
+                localStorage.removeItem('fichajemax_employees');
+                localStorage.removeItem('fichajemax_timeRecords');
+                
+                loadEmployees();
+                loadTimeRecords();
+                loadDashboard();
+                populateSelects();
+                updateDataStatistics();
+                
+                showNotification('🗑️ Todos los datos han sido eliminados', 'success');
             }
-            
-            const csvContent = generateCSV(currentReportRecords);
-            const startDate = document.getElementById('reportStartDate').value;
-            const endDate = document.getElementById('reportEndDate').value;
-            
-            const fileName = `informe_fichaje_${startDate}_a_${endDate}.csv`;
-            downloadFile(csvContent, fileName, 'text/csv');
-            UI.showNotification('📊 Informe exportado a CSV', 'success');
         }
 
-        // --- UTILITIES ---
-        
-        function calculateFloatHours(timeIn, timeOut) {
-            const [inHour, inMinute] = timeIn.split(':').map(Number);
-            const [outHour, outMinute] = timeOut.split(':').map(Number);
+        // Notification Functions
+        function showNotification(message, type = 'success') {
+            console.log('Mostrando notificación:', message, type);
             
-            const inMinutes = inHour * 60 + inMinute;
-            const outMinutes = outHour * 60 + outMinute;
+            // Remove existing notifications
+            const existingNotifications = document.querySelectorAll('.notification');
+            existingNotifications.forEach(notification => notification.remove());
             
-            let diffMinutes = outMinutes - inMinutes;
-            if (diffMinutes < 0) diffMinutes += 24 * 60; 
+            // Create new notification
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
             
-            return diffMinutes / 60;
+            document.body.appendChild(notification);
+            
+            // Auto remove after 4 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 4000);
+        }
+
+        function showConfirmDialog(message) {
+            // Create custom confirmation modal
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            overlay.style.zIndex = '9999';
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal-content';
+            modal.style.maxWidth = '400px';
+            modal.innerHTML = `
+                <div class="gradient-bg text-white p-6 rounded-t-2xl">
+                    <h3 class="text-xl font-bold">⚠️ Confirmación</h3>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-700 mb-6">${message}</p>
+                    <div class="flex justify-end space-x-3">
+                        <button id="confirmCancel" class="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors">
+                            ❌ Cancelar
+                        </button>
+                        <button id="confirmAccept" class="btn-primary text-white px-6 py-2 rounded-lg">
+                            ✅ Confirmar
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            overlay.appendChild(modal);
+            document.body.appendChild(overlay);
+            
+            return new Promise((resolve) => {
+                document.getElementById('confirmCancel').addEventListener('click', () => {
+                    overlay.remove();
+                    resolve(false);
+                });
+                
+                document.getElementById('confirmAccept').addEventListener('click', () => {
+                    overlay.remove();
+                    resolve(true);
+                });
+                
+                // Close on overlay click
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        overlay.remove();
+                        resolve(false);
+                    }
+                });
+            });
+        }
+
+        function updateSyncIndicator(status) {
+            const indicator = document.getElementById('syncIndicator');
+            if (!indicator) return;
+            
+            indicator.className = `sync-indicator ${status}`;
+            
+            switch(status) {
+                case 'success':
+                    if (cloudSettings.enabled) {
+                        indicator.textContent = '☁️ Sincronizado';
+                    } else {
+                        indicator.textContent = '💾 Sistema Listo';
+                    }
+                    break;
+                case 'syncing':
+                    indicator.innerHTML = '<div class="loading-spinner"></div> Sincronizando...';
+                    break;
+                case 'error':
+                    indicator.textContent = '❌ Error de Sync';
+                    break;
+            }
         }
 
         function generateCSV(records) {
@@ -3142,7 +3511,7 @@
                     record.date,
                     record.timeIn || '',
                     record.timeOut || '',
-                    formatHoursMinutes(record.totalHours).replace('h', ''),
+                    record.totalHours?.toFixed(1) || '0.0',
                     `"${record.notes || ''}"`
                 ];
                 csvRows.push(row.join(','));
@@ -3151,19 +3520,6 @@
             return csvRows.join('\n');
         }
 
-        function toggleEditMode() {
-            editModeEnabled = !editModeEnabled;
-            loadTimeRecords(); 
-            
-            const actionsHeader = document.getElementById('actionsHeader');
-            if (actionsHeader) {
-                actionsHeader.classList.toggle('actions-col-hidden', !editModeEnabled);
-                actionsHeader.textContent = editModeEnabled ? '⚙️ Acciones (ON)' : '⚙️ Acciones';
-            }
-
-            UI.showNotification(`Modo Edición ${editModeEnabled ? 'ACTIVADO' : 'DESACTIVADO'}`, editModeEnabled ? 'warning' : 'success');
-        }
-        
         function downloadFile(content, filename, mimeType) {
             const blob = new Blob([content], { type: mimeType });
             const url = URL.createObjectURL(blob);
@@ -3191,18 +3547,226 @@
             if (filterEndDate) filterEndDate.value = today;
         }
 
-        function testCloudConnection() {
-            UI.showNotification('✅ Conexión establecida con Firebase', 'success');
-            updateCloudStatus(true, 'Conexión activa y en tiempo real');
+        // Cloud Sync Functions
+        async function syncToCloud() {
+            if (!cloudSettings.enabled || !cloudSettings.apiKey || !cloudSettings.binId || syncInProgress) {
+                return;
+            }
+
+            syncInProgress = true;
+            updateSyncIndicator('syncing');
+
+            try {
+                const dataToSync = {
+                    employees,
+                    timeRecords,
+                    companySettings,
+                    locationSettings,
+                    lastSync: new Date().toISOString(),
+                    version: '1.0'
+                };
+
+                const response = await fetch(`https://api.jsonbin.io/v3/b/${cloudSettings.binId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': cloudSettings.apiKey,
+                        'X-Bin-Name': 'FichajeMax-Data'
+                    },
+                    body: JSON.stringify(dataToSync)
+                });
+
+                if (response.ok) {
+                    cloudSettings.lastSync = new Date().toISOString();
+                    saveCloudSettingsData();
+                    updateSyncIndicator('success');
+                    updateCloudSyncStatus();
+                    console.log('Datos sincronizados con la nube exitosamente');
+                } else {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Error sincronizando con la nube:', error);
+                updateSyncIndicator('error');
+                showNotification('❌ Error al sincronizar con la nube', 'error');
+            } finally {
+                syncInProgress = false;
+            }
         }
 
-        function syncNow() {
-            setEmployees(employees);
-            setTimeRecords(timeRecords);
-            setGlobalConfig('companySettings', companySettings);
-            setGlobalConfig('locationSettings', locationSettings);
+        async function syncFromCloud() {
+            // Always try to sync for universal access
+            if (!cloudSettings.apiKey || !cloudSettings.binId) {
+                return false;
+            }
+
+            try {
+                const response = await fetch(`https://api.jsonbin.io/v3/b/${cloudSettings.binId}/latest`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Master-Key': cloudSettings.apiKey
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    const cloudData = result.record;
+
+                    if (cloudData && cloudData.version) {
+                        // Check if cloud data is newer
+                        const cloudTimestamp = new Date(cloudData.lastSync || 0).getTime();
+                        const localTimestamp = new Date(cloudSettings.lastSync || 0).getTime();
+                        
+                        if (cloudTimestamp > localTimestamp) {
+                            // Update with newer cloud data
+                            employees = cloudData.employees || employees;
+                            timeRecords = cloudData.timeRecords || timeRecords;
+                            companySettings = cloudData.companySettings || companySettings;
+                            locationSettings = cloudData.locationSettings || locationSettings;
+
+                            // Save to local storage without triggering sync
+                            localStorage.setItem('fichajemax_employees', JSON.stringify(employees));
+                            localStorage.setItem('fichajemax_timeRecords', JSON.stringify(timeRecords));
+                            localStorage.setItem('fichajemax_companySettings', JSON.stringify(companySettings));
+                            localStorage.setItem('fichajemax_locationSettings', JSON.stringify(locationSettings));
+
+                            cloudSettings.lastSync = cloudData.lastSync;
+                            saveCloudSettingsData();
+
+                            // Refresh UI only if user is logged in
+                            if (currentUser) {
+                                loadEmployees();
+                                loadTimeRecords();
+                                loadDashboard();
+                                populateSelects();
+                            }
+
+                            updateSyncIndicator('success');
+                            console.log('Datos actualizados desde la nube');
+                        }
+                        return true;
+                    }
+                } else if (response.status === 404) {
+                    // Bin doesn't exist yet, create it with current data
+                    await syncToCloud();
+                    return true;
+                }
+            } catch (error) {
+                console.error('Error descargando desde la nube:', error);
+                // Don't show error notifications for background sync
+                return false;
+            }
+        }
+
+        async function testCloudConnection() {
+            const button = document.getElementById('testCloudConnection');
+            const originalText = button.innerHTML;
             
-            UI.showNotification('☁️ Sincronización manual completada (usando Firebase)', 'success');
+            try {
+                button.innerHTML = '<div class="loading-spinner"></div> Probando...';
+                button.disabled = true;
+                
+                if (!cloudSettings.apiKey || !cloudSettings.binId) {
+                    throw new Error('API Key o Bin ID no configurados');
+                }
+
+                const response = await fetch(`https://api.jsonbin.io/v3/b/${cloudSettings.binId}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Master-Key': cloudSettings.apiKey
+                    }
+                });
+
+                if (response.ok) {
+                    showNotification('✅ Conexión exitosa con JSONBin.io', 'success');
+                    updateCloudStatus(true, 'Conexión establecida correctamente');
+                } else {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Error testing cloud connection:', error);
+                showNotification('❌ Error de conexión: ' + error.message, 'error');
+                updateCloudStatus(false, 'Error: ' + error.message);
+            } finally {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
+
+        async function syncNow() {
+            const button = document.getElementById('syncNow');
+            const originalText = button.innerHTML;
+            
+            try {
+                button.innerHTML = '<div class="loading-spinner"></div> Sincronizando...';
+                button.disabled = true;
+                
+                await syncToCloud();
+                showNotification('☁️ Sincronización manual completada', 'success');
+            } catch (error) {
+                console.error('Error in manual sync:', error);
+                showNotification('❌ Error en sincronización manual', 'error');
+            } finally {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
+
+        function startCloudSync() {
+            // Always sync for universal access
+            
+            // Initial sync from cloud
+            setTimeout(() => syncFromCloud(), 1000);
+            
+            // Set up periodic sync every 2 seconds for instant updates
+            if (syncInterval) {
+                clearInterval(syncInterval);
+            }
+            
+            syncInterval = setInterval(() => {
+                // Alternate between uploading and downloading for real-time sync
+                if (Math.random() > 0.5) {
+                    syncToCloud();
+                } else {
+                    syncFromCloud();
+                }
+            }, 2000); // 2 seconds for instant sync
+            
+            // Additional frequent check for new data every 1 second
+            setInterval(() => {
+                syncFromCloud();
+            }, 1000); // 1 second for ultra-fast sync
+            
+            updateCloudSyncStatus();
+            console.log('Cloud sync ultra-rápido iniciado - Sincronización cada 2 segundos');
+        }
+
+        function stopCloudSync() {
+            if (syncInterval) {
+                clearInterval(syncInterval);
+                syncInterval = null;
+            }
+            console.log('Cloud sync detenido');
+        }
+
+        function saveCloudSettingsForm() {
+            cloudSettings.enabled = document.getElementById('enableCloudSync').checked;
+            cloudSettings.apiKey = document.getElementById('cloudApiKey').value.trim();
+            cloudSettings.binId = document.getElementById('cloudBinId').value.trim();
+            cloudSettings.autoSync = document.getElementById('enableAutoSync').checked;
+            cloudSettings.syncInterval = parseInt(document.getElementById('syncInterval').value) * 60000; // Convert to milliseconds
+            
+            saveCloudSettingsData();
+            showNotification('☁️ Configuración de nube guardada', 'success');
+            
+            updateCloudSyncStatus();
+            
+            if (cloudSettings.enabled) {
+                startCloudSync();
+            } else {
+                stopCloudSync();
+                updateSyncIndicator('success');
+            }
         }
 
         function updateCloudStatus(isConnected, message) {
@@ -3223,121 +3787,315 @@
             const statusElement = document.getElementById('cloudSyncStatus');
             if (!statusElement) return;
             
-            const lastSyncText = new Date().toLocaleTimeString('es-ES');
-                
-            statusElement.innerHTML = `
-                <div class="text-green-700">
-                    <strong>Estado:</strong> 🚀 Sincronización Ultra-Rápida Activa (Firebase)<br>
-                    <strong>Última verificación:</strong> ${lastSyncText}<br>
-                    <strong>Frecuencia:</strong> **En tiempo real** (Instantánea)<br>
-                    <strong>Dispositivos:</strong> Cambios instantáneos en móviles, tablets y ordenadores<br>
-                    <strong>Rendimiento:</strong> Optimizado para múltiples dispositivos simultáneos
-                </div>
-            `;
-            statusElement.className = 'p-3 rounded-lg bg-green-100 text-sm';
+            if (cloudSettings.apiKey && cloudSettings.binId) {
+                const lastSyncText = cloudSettings.lastSync 
+                    ? new Date(cloudSettings.lastSync).toLocaleString('es-ES')
+                    : 'Iniciando...';
+                    
+                statusElement.innerHTML = `
+                    <div class="text-green-700">
+                        <strong>Estado:</strong> 🚀 Sincronización Ultra-Rápida Activa<br>
+                        <strong>Última sincronización:</strong> ${lastSyncText}<br>
+                        <strong>Frecuencia:</strong> Cada 1-2 segundos (tiempo real)<br>
+                        <strong>Dispositivos:</strong> Cambios instantáneos en móviles, tablets y ordenadores<br>
+                        <strong>Rendimiento:</strong> Optimizado para múltiples dispositivos simultáneos
+                    </div>
+                `;
+                statusElement.className = 'p-3 rounded-lg bg-green-100 text-sm';
+            } else {
+                statusElement.innerHTML = '<div class="text-yellow-700"><strong>Estado:</strong> ⚠️ Configuración de nube requerida</div>';
+                statusElement.className = 'p-3 rounded-lg bg-yellow-100 text-sm';
+            }
         }
 
         function loadCloudSettings() {
-            document.getElementById('cloudApiKey').value = '********';
-            document.getElementById('cloudBinId').value = '********';
+            document.getElementById('enableCloudSync').checked = true; // Always enabled
+            document.getElementById('cloudApiKey').value = cloudSettings.apiKey || '';
+            document.getElementById('cloudBinId').value = cloudSettings.binId || '';
+            document.getElementById('enableAutoSync').checked = true; // Always enabled
+            document.getElementById('syncInterval').value = 0.03; // 2 seconds (0.03 minutes)
             
-            document.getElementById('cloudApiKey').disabled = true;
-            document.getElementById('cloudBinId').disabled = true;
-            document.getElementById('enableAutoSync').checked = true;
-            document.getElementById('enableAutoSync').disabled = true;
-            document.getElementById('syncInterval').disabled = true;
-            document.getElementById('saveCloudSettings').disabled = true;
-            document.getElementById('syncIntervalValue').textContent = 'Tiempo Real';
-
+            document.getElementById('syncIntervalValue').textContent = '0.03';
+            
             updateCloudSyncStatus();
         }
 
-        function saveCloudSettingsForm() {
-            UI.showNotification('⚠️ La sincronización usa Firebase y se configura automáticamente. Los campos de JSONBin ya no se usan.', 'warning');
+        function saveCloudSettingsData() {
+            localStorage.setItem('fichajemax_cloudSettings', JSON.stringify(cloudSettings));
+        }
+
+        // Data persistence functions with instant cloud sync
+        function saveEmployees() {
+            localStorage.setItem('fichajemax_employees', JSON.stringify(employees));
+            
+            // Immediate cloud sync for instant universal access
+            setTimeout(() => syncToCloud(), 100);
+        }
+
+        function saveTimeRecords() {
+            localStorage.setItem('fichajemax_timeRecords', JSON.stringify(timeRecords));
+            
+            // Immediate cloud sync for instant universal access
+            setTimeout(() => syncToCloud(), 100);
+        }
+
+        function saveCompanySettings() {
+            localStorage.setItem('fichajemax_companySettings', JSON.stringify(companySettings));
+            
+            // Immediate cloud sync for instant universal access
+            setTimeout(() => syncToCloud(), 100);
         }
 
         function saveAdminCredentialsData() {
             localStorage.setItem('fichajemax_adminCredentials', JSON.stringify(adminCredentials));
         }
 
-        function loadLocationSettings() {
-            document.getElementById('enableLocationControl').checked = locationSettings.enabled;
-            document.getElementById('workLatitude').value = locationSettings.workLatitude || '';
-            document.getElementById('workLongitude').value = locationSettings.workLongitude || '';
-            document.getElementById('allowedRadius').value = locationSettings.allowedRadius || 100;
-            document.getElementById('workAddress').value = locationSettings.workAddress || '';
+        // Utility Functions
+        function updateDateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('es-ES', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit' 
+            });
+            const dateString = now.toLocaleDateString('es-ES', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
             
-            document.getElementById('radiusValue').textContent = locationSettings.allowedRadius || 100;
-            
-            updateLocationControlStatus();
+            document.getElementById('currentTime').textContent = timeString;
+            document.getElementById('currentDate').textContent = dateString;
+            document.getElementById('mainClock').textContent = timeString;
+            document.getElementById('mainDate').textContent = dateString;
         }
 
-        function startLocationMonitoring() {
-            if (!locationSettings.enabled || currentUser.type !== 'employee') return;
-            
-            const statusElement = document.getElementById('employeeLocationStatus');
-            if (statusElement) {
-                statusElement.classList.remove('hidden');
-            }
-            
-            locationMonitoringInterval = setInterval(async () => {
-                try {
-                    const locationCheck = await getCurrentPosition().then(position => 
-                        checkLocationPermission({coords: position.coords})
-                    );
-                    updateEmployeeLocationStatus(locationCheck);
-                } catch (error) {
-                    console.error('Location monitoring error:', error);
-                }
-            }, 30000);
-            
-            setTimeout(async () => {
-                try {
-                    const position = await getCurrentPosition();
-                    const locationCheck = await checkLocationPermission({coords: position.coords});
-                    updateEmployeeLocationStatus(locationCheck);
-                } catch (error) {
-                    console.error('Initial location check error:', error);
-                }
-            }, 2000);
+        function formatDate(date) {
+            return date.toISOString().split('T')[0];
         }
 
-        function stopLocationMonitoring() {
-            if (locationMonitoringInterval) {
-                clearInterval(locationMonitoringInterval);
-                locationMonitoringInterval = null;
-            }
-            
-            const statusElement = document.getElementById('employeeLocationStatus');
-            if (statusElement) {
-                statusElement.classList.add('hidden');
-            }
-        }
-        
-        function getCurrentPosition() {
-            return new Promise((resolve, reject) => {
-                if (!navigator.geolocation) {
-                    reject({ code: 0, message: 'Geolocalización no soportada en este dispositivo' });
-                    return;
-                }
-
-                const options = {
-                    enableHighAccuracy: true,
-                    timeout: 15000,
-                    maximumAge: 30000
-                };
-
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        resolve(position);
-                    },
-                    (error) => {
-                        reject(error);
-                    },
-                    options
-                );
+        function formatDateDisplay(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-ES', { 
+                weekday: 'short', 
+                day: 'numeric', 
+                month: 'short' 
             });
         }
+
+        function calculateHours(timeIn, timeOut) {
+            const [inHour, inMinute] = timeIn.split(':').map(Number);
+            const [outHour, outMinute] = timeOut.split(':').map(Number);
+            
+            const inMinutes = inHour * 60 + inMinute;
+            const outMinutes = outHour * 60 + outMinute;
+            
+            let diffMinutes = outMinutes - inMinutes;
+            if (diffMinutes < 0) diffMinutes += 24 * 60; // Handle overnight shifts
+            
+            return diffMinutes / 60;
+        }
+
+        function populateSelects() {
+            const activeEmployees = employees.filter(emp => emp.status === 'Activo');
+            
+            // Clock employee select
+            const clockSelect = document.getElementById('clockEmployeeSelect');
+            if (clockSelect) {
+                clockSelect.innerHTML = '<option value="">Seleccionar empleado</option>' +
+                    activeEmployees.map(emp => 
+                        `<option value="${emp.id}">${emp.name} ${emp.lastName}</option>`
+                    ).join('');
+            }
+            
+            // Manual record employee select
+            const manualSelect = document.getElementById('manualRecordEmployee');
+            if (manualSelect) {
+                manualSelect.innerHTML = '<option value="">Seleccionar empleado</option>' +
+                    activeEmployees.map(emp => 
+                        `<option value="${emp.id}">${emp.name} ${emp.lastName}</option>`
+                    ).join('');
+            }
+            
+            // Report employee select
+            const reportSelect = document.getElementById('reportEmployee');
+            if (reportSelect) {
+                reportSelect.innerHTML = '<option value="">Todos los empleados</option>' +
+                    activeEmployees.map(emp => 
+                        `<option value="${emp.id}">${emp.name} ${emp.lastName}</option>`
+                    ).join('');
+            }
+            
+            // Filter employee select
+            const filterSelect = document.getElementById('filterEmployee');
+            if (filterSelect) {
+                filterSelect.innerHTML = '<option value="">Todos los empleados</option>' +
+                    activeEmployees.map(emp => 
+                        `<option value="${emp.id}">${emp.name} ${emp.lastName}</option>`
+                    ).join('');
+            }
+        }
+
+        function populateManualRecordEmployees() {
+            const select = document.getElementById('manualRecordEmployee');
+            const activeEmployees = employees.filter(emp => emp.status === 'Activo');
+            
+            select.innerHTML = '<option value="">Seleccionar empleado</option>' +
+                activeEmployees.map(emp => 
+                    `<option value="${emp.id}">${emp.name} ${emp.lastName}</option>`
+                ).join('');
+        }
+
+        // Nuevas funciones de utilidad
+        function validateDNI(dni) {
+            // Validación DNI/NIE español
+            const dniRegex = /^[0-9]{8}[TRWAGMYFPDXBNJZSQVHLCKE]$/;
+            const nieRegex = /^[XYZ][0-9]{7}[TRWAGMYFPDXBNJZSQVHLCKE]$/;
+            
+            if (!dniRegex.test(dni) && !nieRegex.test(dni)) {
+                return false;
+            }
+            
+            const letters = 'TRWAGMYFPDXBNJZSQVHLCKE';
+            let number;
+            
+            if (nieRegex.test(dni)) {
+                // NIE
+                const nieMap = { 'X': '0', 'Y': '1', 'Z': '2' };
+                number = nieMap[dni[0]] + dni.substring(1, 8);
+            } else {
+                // DNI
+                number = dni.substring(0, 8);
+            }
+            
+            const expectedLetter = letters[parseInt(number) % 23];
+            return dni[dni.length - 1] === expectedLetter;
+        }
+
+        function setupActivityMonitoring() {
+            const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutos
+            
+            function resetActivity() {
+                lastActivity = Date.now();
+            }
+            
+            function checkInactivity() {
+                if (currentUser && Date.now() - lastActivity > INACTIVITY_TIMEOUT) {
+                    showNotification('⏰ Sesión cerrada por inactividad', 'warning');
+                    logout();
+                }
+            }
+            
+            // Eventos que resetean la actividad
+            ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'].forEach(event => {
+                document.addEventListener(event, resetActivity, true);
+            });
+            
+            // Verificar inactividad cada minuto
+            setInterval(checkInactivity, 60000);
+            
+            // Configurar auto-guardado
+            setupAutoSave();
+        }
+
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', function(e) {
+                if (!currentUser) return;
+                
+                // Ctrl/Cmd + shortcuts
+                if (e.ctrlKey || e.metaKey) {
+                    switch(e.key) {
+                        case 'e':
+                            e.preventDefault();
+                            if (currentUser.type === 'admin') {
+                                showEmployeeModal();
+                            }
+                            break;
+                        case 'r':
+                            e.preventDefault();
+                            if (currentUser.type === 'admin') {
+                                showManualRecordModal();
+                            }
+                            break;
+                        case 's':
+                            e.preventDefault();
+                            // Guardar datos
+                            syncToCloud();
+                            showNotification('💾 Datos guardados', 'success');
+                            break;
+                    }
+                }
+                
+                // Escape para cerrar modales
+                if (e.key === 'Escape') {
+                    const modals = document.querySelectorAll('.modal-overlay:not(.hidden)');
+                    modals.forEach(modal => modal.classList.add('hidden'));
+                    editingRecordId = null;
+                    editingEmployeeId = null;
+                }
+                
+                // F1 para entrada, F2 para salida (solo empleados)
+                if (currentUser.type === 'employee') {
+                    if (e.key === 'F1') {
+                        e.preventDefault();
+                        clockAction('in');
+                    } else if (e.key === 'F2') {
+                        e.preventDefault();
+                        clockAction('out');
+                    }
+                }
+            });
+        }
+
+        function setupAutoSave() {
+            // Auto-guardar cada 2 minutos
+            autoSaveTimer = setInterval(() => {
+                if (currentUser) {
+                    syncToCloud();
+                }
+            }, 120000);
+        }
+
+        function formatTimeAgo(dateString) {
+            const now = new Date();
+            const date = new Date(dateString);
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+            
+            if (diffMins < 1) return 'Ahora mismo';
+            if (diffMins < 60) return `Hace ${diffMins} min`;
+            if (diffHours < 24) return `Hace ${diffHours}h`;
+            if (diffDays < 7) return `Hace ${diffDays} días`;
+            return formatDateDisplay(dateString);
+        }
+
+        function generateRandomPIN() {
+            let pin;
+            do {
+                pin = Math.floor(1000 + Math.random() * 9000).toString();
+            } while (employees.some(emp => emp.accessCode === pin));
+            return pin;
+        }
+
+        function validateTimeRange(timeIn, timeOut) {
+            if (!timeIn || !timeOut) return true;
+            
+            const [inHour, inMinute] = timeIn.split(':').map(Number);
+            const [outHour, outMinute] = timeOut.split(':').map(Number);
+            
+            const inMinutes = inHour * 60 + inMinute;
+            const outMinutes = outHour * 60 + outMinute;
+            
+            // Permitir turnos nocturnos
+            if (outMinutes < inMinutes) {
+                return (outMinutes + 24 * 60) - inMinutes <= 16 * 60; // Máximo 16 horas
+            }
+            
+            return outMinutes - inMinutes <= 16 * 60; // Máximo 16 horas
+        }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9907ba73137aec95',t:'MTc2MDc4NzI4NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99326ec322afcfe4',t:'MTc2MTIzNTA3Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
