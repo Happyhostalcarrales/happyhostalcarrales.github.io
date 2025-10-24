@@ -3143,6 +3143,7 @@
             console.log('Editando registro:', id);
             
             if (!isEditModeActive) {
+                // Este código es un respaldo, la lógica principal ahora está en el atajo.
                 UI.showNotification('⚠️ Modo de Edición Desactivado. Active con Ctrl + Alt + E', 'warning');
                 return;
             }
@@ -3659,9 +3660,9 @@
             return dni[dni.length - 1] === expectedLetter;
         }
         
-        // Función para alternar el modo de edición
+        // Función corregida para alternar el modo de edición
         function toggleEditMode() {
-            if (currentUser?.type !== 'admin') {
+            if (currentUser?.type !== 'admin' && !isEditModeActive) {
                 UI.showNotification('⚠️ Esta función solo está disponible para administradores', 'error');
                 return;
             }
@@ -3708,23 +3709,35 @@
             
             setupAutoSave();
         }
-
+        
+        // Función corregida para detectar el atajo Ctrl + Alt + E
         function setupKeyboardShortcuts() {
             document.addEventListener('keydown', function(e) {
                 if (!currentUser) return;
                 
-                // Atajo para alternar el modo de edición: Ctrl + Alt + E
-                if ((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'e' || e.key === 'E')) {
+                // === Atajo para alternar el modo de edición: Ctrl/Cmd + Alt + E ===
+                // Usamos (e.key === 'e' || e.key === 'E') para asegurar la detección
+                const isEditShortcut = (e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'e' || e.key === 'E');
+                
+                if (isEditShortcut) {
                     e.preventDefault();
-                    toggleEditMode();
+                    if (currentUser.type === 'admin') {
+                        toggleEditMode();
+                    } else {
+                        UI.showNotification('⚠️ Esta función es exclusiva del Administrador.', 'error');
+                    }
                 }
+                // ===================================================================
 
                 if (e.ctrlKey || e.metaKey) {
                     switch(e.key) {
                         case 'e':
-                            e.preventDefault();
-                            if (currentUser.type === 'admin') {
-                                showEmployeeModal();
+                            // Prevenir conflicto con el atajo de edición si solo es Ctrl + E
+                            if (!e.altKey) {
+                                e.preventDefault();
+                                if (currentUser.type === 'admin') {
+                                    showEmployeeModal();
+                                }
                             }
                             break;
                         case 'r':
