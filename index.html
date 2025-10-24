@@ -710,7 +710,13 @@
                 </div>
 
                 <div class="mt-8 bg-white rounded-2xl card-shadow p-6">
-                    <h3 class="text-xl font-bold text-gray-800 mb-6">📋 Resultados del Informe</h3>
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-800">📋 Resultados del Informe</h3>
+                        
+                        <button id="exportReportBtn" onclick="exportReportData()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors admin-only hidden">
+                            📊 Exportar Informe
+                        </button>
+                    </div>
                     <div id="reportResults">
                         <p class="text-gray-500 text-center py-12">📊 Genere un informe para ver los resultados aquí</p>
                     </div>
@@ -1058,7 +1064,7 @@
                     <h4 class="font-bold text-gray-800 mb-3">⌨️ Atajos de Teclado</h4>
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                            <span>**Modo Edición** (Acceso con PIN: 1010)</span>
+                            <span>**Modo Edición** (PIN: 1010)</span>
                             <kbd class="px-2 py-1 bg-gray-200 rounded text-xs">Login Admin</kbd>
                         </div>
                         <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
@@ -1229,6 +1235,8 @@
                 this.lastActivity = Date.now();
                 this.syncInProgress = false;
                 this.locationMonitoringInterval = null;
+                // Almacenar los resultados del último informe generado
+                this.lastReportData = []; 
             }
             
             reset() {
@@ -1373,9 +1381,9 @@
         let lastActivity = Date.now();
         let autoSaveTimer = null;
         
-        // NUEVA VARIABLE DE ESTADO para el modo edición.
-        // Se activa con la contraseña de administrador '1010'
+        // VARIABLE CLAVE: Controla la visibilidad de los botones de edición de registros
         let isEditModeActive = false;
+        const ADMIN_EDIT_PASSWORD = '1010';
         
         // Configuration Management
         const ConfigManager = {
@@ -1421,8 +1429,6 @@
         let cloudSettings = ConfigManager.getCloudSettings(); 
         let adminCredentials = DataManager.getAdminCredentials();
         
-        // Contraseña alternativa (Modo Edición)
-        const ADMIN_EDIT_PASSWORD = '1010';
         
         // =========================================================================
         // FUNCIÓN CLAVE: ESCUCHADORES DE FIREBASE EN TIEMPO REAL
@@ -1691,6 +1697,12 @@
             document.getElementById('closeHelp').addEventListener('click', hideHelpModal);
             document.getElementById('logoutBtn').addEventListener('click', logout);
             
+            // Event listener para el nuevo botón de Exportar Informe
+            const exportReportBtn = document.getElementById('exportReportBtn');
+            if (exportReportBtn) {
+                exportReportBtn.addEventListener('click', exportReportData);
+            }
+            
             console.log('Event listeners configurados');
         }
 
@@ -1807,7 +1819,7 @@
                 element.style.display = 'block';
             });
 
-            // NUEVA LÓGICA: Mostrar el nombre del empleado en grande al entrar
+            // Mostrar el nombre del empleado en grande al entrar
             const nameDisplay = document.getElementById('employeeNameDisplay');
             if (nameDisplay && currentUser && currentUser.type === 'employee') {
                 nameDisplay.textContent = `${currentUser.name} ${currentUser.lastName}`;
@@ -1874,6 +1886,9 @@
             });
             document.getElementById(`${tabName}Tab`).classList.add('active');
             
+            // Ocultar botón de exportar informe al cambiar de pestaña
+            document.getElementById('exportReportBtn').classList.add('hidden');
+            
             switch(tabName) {
                 case 'employees':
                     loadEmployees();
@@ -1883,6 +1898,7 @@
                     break;
                 case 'reports':
                     loadStatistics();
+                    // Al generar informe, este se cargará y el botón se hará visible
                     break;
                 case 'settings':
                     loadCompanySettings();
@@ -2657,6 +2673,8 @@
                 
                 // Determina si el botón de edición debe ser visible según la variable global
                 const editButtonVisibilityClass = isEditModeActive ? 'visible' : '';
+                
+                const totalHoursDisplay = record.totalHours ? formatHoursToHHMM(record.totalHours) : '00:00';
 
                 return `
                     <tr class="hover:bg-gray-50">
@@ -2676,7 +2694,7 @@
                         <td class="px-6 py-4">${formatDateDisplay(record.date)}</td>
                         <td class="px-6 py-4 font-mono">${record.timeIn || '--:--'}</td>
                         <td class="px-6 py-4 font-mono">${record.timeOut || '--:--'}</td>
-                        <td class="px-6 py-4 font-bold">${record.totalHours?.toFixed(1) || '0.0'}h</td>
+                        <td class="px-6 py-4 font-bold">${totalHoursDisplay}</td>
                         <td class="px-6 py-4">
                             <span class="px-2 py-1 text-xs rounded-full ${statusClass}">
                                 ${statusText}
@@ -2712,11 +2730,11 @@
                         <div class="text-sm text-gray-600">Total Registros</div>
                     </div>
                     <div class="stat-card">
-                        <div class="text-2xl font-bold text-green-600">${totalHours.toFixed(1)}h</div>
+                        <div class="text-2xl font-bold text-green-600">${formatHoursToHHMM(totalHours)}</div>
                         <div class="text-sm text-gray-600">Total Horas</div>
                     </div>
                     <div class="stat-card">
-                        <div class="text-2xl font-bold text-purple-600">${avgHours.toFixed(1)}h</div>
+                        <div class="text-2xl font-bold text-purple-600">${formatHoursToHHMM(avgHours)}</div>
                         <div class="text-sm text-gray-600">Promedio por Día</div>
                     </div>
                     <div class="stat-card">
@@ -2769,6 +2787,140 @@
                 </div>
             `;
         }
+        
+        // Función para almacenar los datos del informe y exportarlos
+        let currentReportData = [];
+
+        function generateReport() {
+            console.log('Generando informe');
+            const employeeId = document.getElementById('reportEmployee').value;
+            const startDate = document.getElementById('reportStartDate').value;
+            const endDate = document.getElementById('reportEndDate').value;
+            
+            const exportBtn = document.getElementById('exportReportBtn');
+            exportBtn.classList.add('hidden');
+            
+            if (!startDate || !endDate) {
+                UI.showNotification('⚠️ Seleccione las fechas del informe', 'warning');
+                return;
+            }
+            
+            let filteredRecords = timeRecords.filter(record => {
+                const recordDate = new Date(record.date);
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                return recordDate >= start && recordDate <= end;
+            });
+            
+            if (employeeId) {
+                filteredRecords = filteredRecords.filter(record => record.employeeId == employeeId);
+            }
+            
+            // Almacenar los datos filtrados para la exportación
+            currentReportData = filteredRecords;
+            
+            const resultsElement = document.getElementById('reportResults');
+            if (filteredRecords.length === 0) {
+                resultsElement.innerHTML = '<p class="text-gray-500 text-center py-12">No se encontraron registros para el período seleccionado</p>';
+                return;
+            }
+            
+            const totalHoursDecimal = filteredRecords.reduce((sum, record) => sum + (record.totalHours || 0), 0);
+            const totalHoursDisplay = formatHoursToHHMM(totalHoursDecimal);
+            const avgHoursDecimal = totalHoursDecimal / filteredRecords.length;
+            const avgHoursDisplay = formatHoursToHHMM(avgHoursDecimal);
+            
+            resultsElement.innerHTML = `
+                <div class="mb-6">
+                    <h4 class="text-lg font-bold text-gray-800 mb-4">📊 Resumen del Informe</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div class="stat-card">
+                            <div class="text-2xl font-bold text-blue-600">${filteredRecords.length}</div>
+                            <div class="text-sm text-gray-600">Registros</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-2xl font-bold text-green-600">${totalHoursDisplay}</div>
+                            <div class="text-sm text-gray-600">Total Horas</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-2xl font-bold text-purple-600">${avgHoursDisplay}</div>
+                            <div class="text-sm text-gray-600">Promedio</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-2xl font-bold text-orange-600">${formatDateDisplay(startDate)} - ${formatDateDisplay(endDate)}</div>
+                            <div class="text-sm text-gray-600">Período</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-modern overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead class="gradient-bg text-white">
+                                <tr>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold">👤 Empleado</th>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold">📅 Fecha</th>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold">🕐 Entrada</th>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold">🕕 Salida</th>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold">⏱️ Total (HH:MM)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                ${filteredRecords.map(record => `
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 font-medium">${record.employeeName}</td>
+                                        <td class="px-6 py-4">${formatDateDisplay(record.date)}</td>
+                                        <td class="px-6 py-4 font-mono">${record.timeIn || '--:--'}</td>
+                                        <td class="px-6 py-4 font-mono">${record.timeOut || '--:--'}</td>
+                                        <td class="px-6 py-4 font-bold">${formatHoursToHHMM(record.totalHours)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            exportBtn.classList.remove('hidden');
+            UI.showNotification('✅ Informe generado correctamente', 'success');
+        }
+        
+        function exportReportData() {
+            console.log('Exportando datos del informe actual');
+            
+            if (currentReportData.length === 0) {
+                UI.showNotification('⚠️ Genere un informe primero', 'warning');
+                return;
+            }
+
+            const csvContent = generateReportCSV(currentReportData);
+            downloadFile(csvContent, 'informe_fichaje.csv', 'text/csv');
+            UI.showNotification('📊 Informe exportado', 'success');
+        }
+        
+        function generateReportCSV(records) {
+            const headers = ['Empleado', 'Fecha', 'Entrada', 'Salida', 'Total Horas (decimal)', 'Total Horas (HH:MM)', 'Notas'];
+            const csvRows = [headers.join(',')];
+            
+            records.forEach(record => {
+                const totalHoursDecimal = record.totalHours || 0;
+                const totalHoursHHMM = formatHoursToHHMM(totalHoursDecimal);
+                
+                const row = [
+                    `"${record.employeeName}"`,
+                    record.date,
+                    record.timeIn || '',
+                    record.timeOut || '',
+                    totalHoursDecimal.toFixed(2),
+                    totalHoursHHMM,
+                    `"${record.notes || ''}"`
+                ];
+                csvRows.push(row.join(','));
+            });
+            
+            return csvRows.join('\n');
+        }
+
 
         // Modal Functions
         function showEmployeeModal() {
@@ -3200,6 +3352,9 @@
             const startDate = document.getElementById('reportStartDate').value;
             const endDate = document.getElementById('reportEndDate').value;
             
+            const exportBtn = document.getElementById('exportReportBtn');
+            exportBtn.classList.add('hidden');
+            
             if (!startDate || !endDate) {
                 UI.showNotification('⚠️ Seleccione las fechas del informe', 'warning');
                 return;
@@ -3216,14 +3371,19 @@
                 filteredRecords = filteredRecords.filter(record => record.employeeId == employeeId);
             }
             
+            // Almacenar los datos filtrados para la exportación
+            appState.lastReportData = filteredRecords;
+            
             const resultsElement = document.getElementById('reportResults');
             if (filteredRecords.length === 0) {
-                resultsElement.innerHTML = '<p class="text-gray-500 text-center py-8">No se encontraron registros para el período seleccionado</p>';
+                resultsElement.innerHTML = '<p class="text-gray-500 text-center py-12">No se encontraron registros para el período seleccionado</p>';
                 return;
             }
             
-            const totalHours = filteredRecords.reduce((sum, record) => sum + (record.totalHours || 0), 0);
-            const avgHours = totalHours / filteredRecords.length;
+            const totalHoursDecimal = filteredRecords.reduce((sum, record) => sum + (record.totalHours || 0), 0);
+            const totalHoursDisplay = formatHoursToHHMM(totalHoursDecimal);
+            const avgHoursDecimal = totalHoursDecimal / filteredRecords.length;
+            const avgHoursDisplay = formatHoursToHHMM(avgHoursDecimal);
             
             resultsElement.innerHTML = `
                 <div class="mb-6">
@@ -3234,11 +3394,11 @@
                             <div class="text-sm text-gray-600">Registros</div>
                         </div>
                         <div class="stat-card">
-                            <div class="text-2xl font-bold text-green-600">${totalHours.toFixed(1)}h</div>
+                            <div class="text-2xl font-bold text-green-600">${totalHoursDisplay}</div>
                             <div class="text-sm text-gray-600">Total Horas</div>
                         </div>
                         <div class="stat-card">
-                            <div class="text-2xl font-bold text-purple-600">${avgHours.toFixed(1)}h</div>
+                            <div class="text-2xl font-bold text-purple-600">${avgHoursDisplay}</div>
                             <div class="text-sm text-gray-600">Promedio</div>
                         </div>
                         <div class="stat-card">
@@ -3257,7 +3417,7 @@
                                     <th class="px-6 py-4 text-left text-sm font-semibold">📅 Fecha</th>
                                     <th class="px-6 py-4 text-left text-sm font-semibold">🕐 Entrada</th>
                                     <th class="px-6 py-4 text-left text-sm font-semibold">🕕 Salida</th>
-                                    <th class="px-6 py-4 text-left text-sm font-semibold">⏱️ Total</th>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold">⏱️ Total (HH:MM)</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200">
@@ -3267,7 +3427,7 @@
                                         <td class="px-6 py-4">${formatDateDisplay(record.date)}</td>
                                         <td class="px-6 py-4 font-mono">${record.timeIn || '--:--'}</td>
                                         <td class="px-6 py-4 font-mono">${record.timeOut || '--:--'}</td>
-                                        <td class="px-6 py-4 font-bold">${record.totalHours?.toFixed(1) || '0.0'}h</td>
+                                        <td class="px-6 py-4 font-bold">${formatHoursToHHMM(record.totalHours)}</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
@@ -3276,7 +3436,468 @@
                 </div>
             `;
             
+            exportBtn.classList.remove('hidden');
             UI.showNotification('✅ Informe generado correctamente', 'success');
+        }
+        
+        function exportReportData() {
+            console.log('Exportando datos del informe actual');
+            
+            if (appState.lastReportData.length === 0) {
+                UI.showNotification('⚠️ Genere un informe primero', 'warning');
+                return;
+            }
+
+            const csvContent = generateReportCSV(appState.lastReportData);
+            downloadFile(csvContent, 'informe_fichaje.csv', 'text/csv');
+            UI.showNotification('📊 Informe exportado', 'success');
+        }
+        
+        function generateReportCSV(records) {
+            const headers = ['Empleado', 'Fecha', 'Entrada', 'Salida', 'Total Horas (decimal)', 'Total Horas (HH:MM)', 'Notas'];
+            const csvRows = [headers.join(',')];
+            
+            records.forEach(record => {
+                const totalHoursDecimal = record.totalHours || 0;
+                const totalHoursHHMM = formatHoursToHHMM(totalHoursDecimal);
+                
+                const row = [
+                    `"${record.employeeName}"`,
+                    record.date,
+                    record.timeIn || '',
+                    record.timeOut || '',
+                    totalHoursDecimal.toFixed(2),
+                    totalHoursHHMM,
+                    `"${record.notes || ''}"`
+                ];
+                csvRows.push(row.join(','));
+            });
+            
+            return csvRows.join('\n');
+        }
+
+
+        // Modal Functions
+        function showEmployeeModal() {
+            document.getElementById('employeeModal').classList.remove('hidden');
+            
+            if (!editingEmployeeId) {
+                document.getElementById('employeeName').value = '';
+                document.getElementById('employeeLastName').value = '';
+                document.getElementById('employeeDNI').value = '';
+                document.getElementById('employeePosition').value = '';
+                document.getElementById('employeeAccessCode').value = '';
+                document.getElementById('employeeWorkingHours').value = '8';
+                document.getElementById('employeeCustomHours').value = '';
+                document.getElementById('customHoursContainer').classList.add('hidden');
+                
+                const modalTitle = document.querySelector('#employeeModal .gradient-bg h3');
+                if (modalTitle) {
+                    modalTitle.textContent = '👤 Nuevo Empleado';
+                }
+            }
+            
+            setTimeout(() => {
+                document.getElementById('employeeName').focus();
+            }, 100);
+        }
+
+        function hideEmployeeModal() {
+            document.getElementById('employeeModal').classList.add('hidden');
+            editingEmployeeId = null;
+            
+            const modalTitle = document.querySelector('#employeeModal .gradient-bg h3');
+            if (modalTitle) {
+                modalTitle.textContent = '👤 Nuevo Empleado';
+            }
+        }
+
+        function showManualRecordModal() {
+            document.getElementById('manualRecordModal').classList.remove('hidden');
+            document.getElementById('manualRecordEmployee').value = '';
+            document.getElementById('manualRecordDate').value = formatDate(new Date());
+            document.getElementById('manualRecordTimeIn').value = '';
+            document.getElementById('manualRecordTimeOut').value = '';
+            document.getElementById('manualRecordNotes').value = '';
+            populateManualRecordEmployees();
+        }
+
+        function hideManualRecordModal() {
+            document.getElementById('manualRecordModal').classList.add('hidden');
+        }
+
+        function hideEditRecordModal() {
+            document.getElementById('editRecordModal').classList.add('hidden');
+            editingRecordId = null;
+        }
+
+        function showHelpModal() {
+            document.getElementById('helpModal').classList.remove('hidden');
+        }
+
+        function hideHelpModal() {
+            document.getElementById('helpModal').classList.add('hidden');
+        }
+
+        // Save Functions
+        function saveEmployee() {
+            console.log('Guardando empleado');
+            const name = document.getElementById('employeeName').value.trim();
+            const lastName = document.getElementById('employeeLastName').value.trim();
+            const dni = document.getElementById('employeeDNI').value.trim().toUpperCase();
+            const position = document.getElementById('employeePosition').value.trim();
+            const accessCode = document.getElementById('employeeAccessCode').value.trim();
+            
+            if (!name || !lastName || !dni || !accessCode) {
+                UI.showNotification('⚠️ Complete todos los campos obligatorios', 'warning');
+                return;
+            }
+            
+            if (name.length < 2 || lastName.length < 2) {
+                UI.showNotification('⚠️ Nombre y apellidos deben tener al menos 2 caracteres', 'warning');
+                return;
+            }
+            
+            if (!validateDNI(dni)) {
+                UI.showNotification('⚠️ DNI/NIE no válido. Formato: 12345678A o X1234567A', 'warning');
+                return;
+            }
+            
+            if (accessCode.length !== 4 || !/^\d{4}$/.test(accessCode)) {
+                UI.showNotification('⚠️ El código PIN debe tener exactamente 4 dígitos', 'warning');
+                return;
+            }
+            
+            const existingEmployee = employees.find(emp => 
+                (emp.accessCode === accessCode || emp.dni === dni) && 
+                emp.id !== editingEmployeeId
+            );
+            
+            if (existingEmployee) {
+                if (existingEmployee.accessCode === accessCode) {
+                    UI.showNotification('⚠️ Este código PIN ya está en uso', 'warning');
+                } else {
+                    UI.showNotification('⚠️ Este DNI/NIE ya está registrado', 'warning');
+                }
+                return;
+            }
+            
+            const workingHoursSelect = document.getElementById('employeeWorkingHours').value;
+            let workingHours;
+            
+            if (workingHoursSelect === 'custom') {
+                const customHours = parseFloat(document.getElementById('employeeCustomHours').value);
+                if (!customHours || customHours < 0.5 || customHours > 12) {
+                    UI.showNotification('⚠️ Las horas personalizadas deben estar entre 0.5 y 12', 'warning');
+                    return;
+                }
+                workingHours = customHours;
+            } else {
+                workingHours = parseFloat(workingHoursSelect);
+            }
+            
+            const employeeData = {
+                id: editingEmployeeId || Date.now(),
+                name,
+                lastName,
+                dni,
+                position: position || 'Sin especificar',
+                status: 'Activo',
+                accessCode,
+                workingHours,
+                createdAt: editingEmployeeId ? employees.find(e => e.id === editingEmployeeId)?.createdAt : new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            if (editingEmployeeId) {
+                const index = employees.findIndex(emp => emp.id === editingEmployeeId);
+                if (index !== -1) {
+                    employees[index] = employeeData;
+                    UI.showNotification('✅ Empleado actualizado correctamente', 'success');
+                }
+            } else {
+                employees.push(employeeData);
+                UI.showNotification('✅ Empleado creado correctamente', 'success');
+            }
+            
+            saveEmployees();
+            populateSelects();
+            loadEmployees();
+            hideEmployeeModal();
+        }
+
+        function saveManualRecord() {
+            console.log('Guardando registro manual');
+            const employeeId = document.getElementById('manualRecordEmployee').value;
+            const date = document.getElementById('manualRecordDate').value;
+            const timeIn = document.getElementById('manualRecordTimeIn').value;
+            const timeOut = document.getElementById('manualRecordTimeOut').value;
+            const notes = document.getElementById('manualRecordNotes').value.trim();
+            
+            if (!employeeId || !date) {
+                UI.showNotification('⚠️ Complete los campos obligatorios', 'warning');
+                return;
+            }
+            
+            if (!timeIn && !timeOut) {
+                UI.showNotification('⚠️ Debe especificar al menos una hora', 'warning');
+                return;
+            }
+            
+            if (timeIn && timeOut && !validateTimeRange(timeIn, timeOut)) {
+                UI.showNotification('⚠️ El rango de tiempo no es válido (máximo 16 horas)', 'warning');
+                return;
+            }
+            
+            const existingRecord = timeRecords.find(record => 
+                record.employeeId == employeeId && record.date === date
+            );
+            
+            if (existingRecord) {
+                UI.showNotification('⚠️ Ya existe un registro para este empleado en esta fecha', 'warning');
+                return;
+            }
+            
+            const selectedDate = new Date(date);
+            const today = new Date();
+            today.setHours(23, 59, 59, 999);
+            
+            if (selectedDate > today) {
+                UI.showNotification('⚠️ No se pueden crear registros para fechas futuras', 'warning');
+                return;
+            }
+            
+            const employee = employees.find(emp => emp.id == employeeId);
+            const totalHours = (timeIn && timeOut) ? calculateHours(timeIn, timeOut) : 0;
+            
+            const newRecord = {
+                id: Date.now(),
+                employeeId: parseInt(employeeId),
+                employeeName: employee.name + ' ' + employee.lastName,
+                date,
+                timeIn: timeIn || null,
+                timeOut: timeOut || null,
+                totalHours,
+                method: 'manual',
+                notes: notes || 'Registro manual',
+                createdAt: new Date().toISOString(),
+                createdBy: currentUser.name || 'Admin'
+            };
+            
+            timeRecords.push(newRecord);
+            saveTimeRecords();
+            loadTimeRecords();
+            loadDashboard();
+            hideManualRecordModal();
+            UI.showNotification('✅ Registro manual creado correctamente', 'success');
+        }
+
+        function saveEditRecord() {
+            console.log('Guardando edición de registro');
+            if (!editingRecordId) return;
+            
+            const record = timeRecords.find(r => r.id === editingRecordId);
+            if (!record) return;
+            
+            const date = document.getElementById('editRecordDate').value;
+            const timeIn = document.getElementById('editRecordTimeIn').value;
+            const timeOut = document.getElementById('editRecordTimeOut').value;
+            const notes = document.getElementById('editRecordNotes').value.trim();
+            
+            record.date = date;
+            record.timeIn = timeIn || null;
+            record.timeOut = timeOut || null;
+            record.totalHours = (timeIn && timeOut) ? calculateHours(timeIn, timeOut) : 0;
+            record.notes = notes;
+            
+            saveTimeRecords();
+            loadTimeRecords();
+            loadDashboard();
+            hideEditRecordModal();
+            UI.showNotification('✅ Registro actualizado', 'success');
+        }
+
+        function deleteRecord() {
+            console.log('Eliminando registro');
+            if (!editingRecordId) return;
+            
+            if (showConfirmDialog('¿Está seguro de eliminar este registro?')) {
+                timeRecords = timeRecords.filter(r => r.id !== editingRecordId);
+                saveTimeRecords(); 
+                loadTimeRecords();
+                loadDashboard();
+                hideEditRecordModal();
+                UI.showNotification('✅ Registro eliminado', 'success');
+            }
+        }
+
+        function saveCompanySettingsForm() {
+            console.log('Guardando configuración de empresa');
+            companySettings.companyName = document.getElementById('companyName').value;
+            companySettings.companyCIF = document.getElementById('companyCIF').value;
+            companySettings.companyAddress = document.getElementById('companyAddress').value;
+            companySettings.companyPhone = document.getElementById('companyPhone').value;
+            
+            ConfigManager.setCompanySettings(companySettings); 
+            UI.showNotification('✅ Configuración guardada', 'success');
+        }
+
+        function saveAdminCredentialsForm() {
+            console.log('Guardando credenciales de administrador');
+            const currentPassword = document.getElementById('currentAdminPassword').value;
+            const newUsername = document.getElementById('adminUsername').value.trim();
+            const newPassword = document.getElementById('newAdminPassword').value;
+            const confirmPassword = document.getElementById('confirmAdminPassword').value;
+            
+            if (currentPassword !== adminCredentials.password) {
+                UI.showNotification('❌ Contraseña actual incorrecta', 'error');
+                return;
+            }
+            
+            if (!newUsername) {
+                UI.showNotification('⚠️ El nombre de usuario no puede estar vacío', 'warning');
+                return;
+            }
+            
+            if (newPassword) {
+                if (newPassword.length < 4) {
+                    UI.showNotification('⚠️ La nueva contraseña debe tener al menos 4 caracteres', 'warning');
+                    return;
+                }
+                
+                if (newPassword !== confirmPassword) {
+                    UI.showNotification('⚠️ Las contraseñas no coinciden', 'warning');
+                    return;
+                }
+                
+                adminCredentials.password = newPassword;
+            }
+            
+            adminCredentials.username = newUsername;
+            
+            DataManager.setAdminCredentials(adminCredentials);
+            
+            document.getElementById('currentAdminPassword').value = '';
+            document.getElementById('newAdminPassword').value = '';
+            document.getElementById('confirmAdminPassword').value = '';
+            
+            if (currentUser && currentUser.type === 'admin') {
+                currentUser.name = newUsername;
+            }
+            
+            UI.showNotification('🔐 Credenciales actualizadas correctamente', 'success');
+        }
+
+        // Edit Functions
+        function editEmployee(id) {
+            console.log('Editando empleado:', id);
+            const employee = employees.find(emp => emp.id === id);
+            if (!employee) return;
+            
+            editingEmployeeId = id;
+            
+            document.getElementById('employeeName').value = employee.name;
+            document.getElementById('employeeLastName').value = employee.lastName;
+            document.getElementById('employeeDNI').value = employee.dni;
+            document.getElementById('employeePosition').value = employee.position || '';
+            document.getElementById('employeeAccessCode').value = employee.accessCode;
+            
+            const workingHours = employee.workingHours || 8;
+            const workingHoursSelect = document.getElementById('employeeWorkingHours');
+            const customHoursContainer = document.getElementById('customHoursContainer');
+            const customHoursInput = document.getElementById('employeeCustomHours');
+            
+            const standardHours = ['8', '7', '6', '5', '4', '3', '2'];
+            if (standardHours.includes(workingHours.toString())) {
+                workingHoursSelect.value = workingHours.toString();
+                customHoursContainer.classList.add('hidden');
+            } else {
+                workingHoursSelect.value = 'custom';
+                customHoursInput.value = workingHours;
+                customHoursContainer.classList.remove('hidden');
+            }
+            
+            const modalTitle = document.querySelector('#employeeModal .gradient-bg h3');
+            if (modalTitle) {
+                modalTitle.textContent = '✏️ Editar Empleado';
+            }
+            
+            showEmployeeModal();
+        }
+
+        function editRecord(id) {
+            console.log('Editando registro:', id);
+            
+            // RESTRICCIÓN DE EDICIÓN EN BASE A isEditModeActive
+            if (!isEditModeActive) {
+                UI.showNotification('⚠️ Solo disponible en Modo Edición.', 'warning');
+                return;
+            }
+            
+            const record = timeRecords.find(r => r.id === id);
+            if (!record) return;
+            
+            editingRecordId = id;
+            
+            document.getElementById('editRecordEmployeeName').value = record.employeeName;
+            document.getElementById('editRecordDate').value = record.date;
+            document.getElementById('editRecordTimeIn').value = record.timeIn || '';
+            document.getElementById('editRecordTimeOut').value = record.timeOut || '';
+            document.getElementById('editRecordNotes').value = record.notes || '';
+            
+            document.getElementById('editRecordModal').classList.remove('hidden');
+        }
+
+        function toggleEmployeeStatus(id) {
+            console.log('Cambiando estado de empleado:', id);
+            const employee = employees.find(emp => emp.id === id);
+            if (!employee) return;
+            
+            const newStatus = employee.status === 'Activo' ? 'Inactivo' : 'Activo';
+            const action = newStatus === 'Activo' ? 'activar' : 'desactivar';
+            
+            if (showConfirmDialog(`¿Está seguro de ${action} a ${employee.name} ${employee.lastName}?`)) {
+                employee.status = newStatus;
+                saveEmployees(); 
+                loadEmployees();
+                populateSelects();
+                UI.showNotification(`✅ Empleado ${newStatus.toLowerCase()}`, 'success');
+            }
+        }
+
+        async function deleteEmployee(id) {
+            console.log('Eliminando empleado:', id);
+            const employee = employees.find(emp => emp.id === id);
+            if (!employee) return;
+            
+            const hasRecords = timeRecords.some(record => record.employeeId === id);
+            let confirmMessage = `¿Está seguro de eliminar permanentemente a ${employee.name} ${employee.lastName}?`;
+            
+            if (hasRecords) {
+                confirmMessage += '\n\n⚠️ ATENCIÓN: Este empleado tiene registros de fichaje. Al eliminarlo también se eliminarán TODOS sus registros históricos.\n\nEsta acción NO se puede deshacer.';
+            }
+            
+            if (await showConfirmDialog(confirmMessage)) {
+                const employeeIndex = employees.findIndex(emp => emp.id === id);
+                if (employeeIndex !== -1) {
+                    employees.splice(employeeIndex, 1);
+                }
+                
+                if (hasRecords) {
+                    timeRecords = timeRecords.filter(record => record.employeeId !== id);
+                    saveTimeRecords();
+                }
+                
+                saveEmployees();
+                
+                loadEmployees();
+                loadTimeRecords();
+                loadDashboard();
+                populateSelects();
+                updateDataStatistics();
+                
+                UI.showNotification('🗑️ Empleado y sus registros eliminados correctamente', 'success');
+            }
         }
 
         // Filter Functions
@@ -3416,16 +4037,20 @@
         }
 
         function generateCSV(records) {
-            const headers = ['Empleado', 'Fecha', 'Entrada', 'Salida', 'Total Horas', 'Notas'];
+            const headers = ['Empleado', 'Fecha', 'Entrada', 'Salida', 'Total Horas (decimal)', 'Total Horas (HH:MM)', 'Notas'];
             const csvRows = [headers.join(',')];
             
             records.forEach(record => {
+                const totalHoursDecimal = record.totalHours || 0;
+                const totalHoursHHMM = formatHoursToHHMM(totalHoursDecimal);
+                
                 const row = [
                     `"${record.employeeName}"`,
                     record.date,
                     record.timeIn || '',
                     record.timeOut || '',
-                    record.totalHours?.toFixed(1) || '0.0',
+                    totalHoursDecimal.toFixed(2),
+                    totalHoursHHMM,
                     `"${record.notes || ''}"`
                 ];
                 csvRows.push(row.join(','));
@@ -3557,6 +4182,24 @@
                 month: 'short' 
             });
         }
+        
+        // Convierte horas decimales a formato HH:MM
+        function formatHoursToHHMM(hoursDecimal) {
+            if (hoursDecimal === null || hoursDecimal === undefined || isNaN(hoursDecimal)) {
+                return '00:00';
+            }
+            const totalMinutes = Math.round(hoursDecimal * 60);
+            const sign = totalMinutes < 0 ? "-" : "";
+            const absTotalMinutes = Math.abs(totalMinutes);
+            const hours = Math.floor(absTotalMinutes / 60);
+            const minutes = absTotalMinutes % 60;
+            
+            const hoursStr = String(hours).padStart(2, '0');
+            const minutesStr = String(minutes).padStart(2, '0');
+            
+            return `${sign}${hoursStr}:${minutesStr}`;
+        }
+
 
         function calculateHours(timeIn, timeOut) {
             const [inHour, inMinute] = timeIn.split(':').map(Number);
@@ -3665,8 +4308,6 @@
         function setupKeyboardShortcuts() {
             document.addEventListener('keydown', function(e) {
                 if (!currentUser) return;
-                
-                // Se elimina la lógica de edición de teclado para evitar conflictos.
 
                 if (e.ctrlKey || e.metaKey) {
                     switch(e.key) {
