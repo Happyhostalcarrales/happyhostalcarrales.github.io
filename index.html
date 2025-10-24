@@ -398,7 +398,7 @@
             background: var(--danger-gradient);
         }
         
-        /* Modificaciones del Modo Edición */
+        /* Modificaciones Modo Edición */
         .admin-edit-action { /* Oculta el botón de editar por defecto */
             display: none !important; 
         }
@@ -660,6 +660,11 @@
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-xl font-bold text-gray-800">📋 Registros de Fichaje</h3>
                         <div class="flex space-x-2">
+                            
+                            <button id="toggleEditModeBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors admin-only">
+                                ✏️ Activar Edición
+                            </button>
+                            
                             <button id="addManualRecord" class="btn-primary text-white px-4 py-2 rounded-lg admin-only">
                                 ➕ Registro Manual
                             </button>
@@ -1085,8 +1090,8 @@
                     <h4 class="font-bold text-gray-800 mb-3">⌨️ Atajos de Teclado</h4>
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                            <span>**Activar/Desactivar Edición**</span>
-                            <kbd class="px-2 py-1 bg-gray-200 rounded text-xs">Ctrl + Alt + E</kbd>
+                            <span>**Activar/Desactivar Edición** (PIN: 1010)</span>
+                            <kbd class="px-2 py-1 bg-gray-200 rounded text-xs">Botón ✏️</kbd>
                         </div>
                         <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
                             <span>Nuevo empleado</span>
@@ -1400,8 +1405,9 @@
         let lastActivity = Date.now();
         let autoSaveTimer = null;
         
-        // NUEVA VARIABLE DE ESTADO para el modo edición
+        // NUEVA VARIABLE DE ESTADO para el modo edición.
         let isEditModeActive = false;
+        const EDIT_PIN = '1010'; // PIN secreto para activar la edición
         
         // Configuration Management
         const ConfigManager = {
@@ -1714,6 +1720,12 @@
             document.getElementById('closeHelp').addEventListener('click', hideHelpModal);
             document.getElementById('logoutBtn').addEventListener('click', logout);
             
+            // NUEVO EVENT LISTENER para el botón de alternar edición
+            const toggleEditBtn = document.getElementById('toggleEditModeBtn');
+            if (toggleEditBtn) {
+                toggleEditBtn.addEventListener('click', toggleEditMode);
+            }
+            
             console.log('Event listeners configurados');
         }
 
@@ -1855,6 +1867,9 @@
             document.querySelectorAll('.admin-edit-action').forEach(btn => {
                 btn.classList.remove('visible');
             });
+            
+            // Asegura que el modo edición se desactive al cambiar de admin/empleado
+            isEditModeActive = false;
         }
 
         function logout() {
@@ -2657,6 +2672,7 @@
         function loadTimeRecords() {
             console.log('Cargando registros de tiempo');
             const tableElement = document.getElementById('timeRecordsTable');
+            const toggleEditBtn = document.getElementById('toggleEditModeBtn');
             if (!tableElement) return;
             
             let recordsToShow = timeRecords;
@@ -2672,11 +2688,26 @@
                 return;
             }
             
+            // Actualizar el texto y estilo del botón al cargar la tabla si es admin
+            if (currentUser?.type === 'admin' && toggleEditBtn) {
+                if (isEditModeActive) {
+                    toggleEditBtn.textContent = '🔒 Desactivar Edición';
+                    toggleEditBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+                    toggleEditBtn.classList.add('bg-gray-500', 'hover:bg-gray-600');
+                    document.getElementById('editModeIndicator').classList.remove('hidden');
+                } else {
+                    toggleEditBtn.textContent = '✏️ Activar Edición';
+                    toggleEditBtn.classList.remove('bg-gray-500', 'hover:bg-gray-600');
+                    toggleEditBtn.classList.add('bg-red-500', 'hover:bg-red-600');
+                    document.getElementById('editModeIndicator').classList.add('hidden');
+                }
+            }
+            
             tableElement.innerHTML = recordsToShow.map(record => {
                 const statusClass = record.timeOut ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
                 const statusText = record.timeOut ? '✅ Completo' : '⏳ En curso';
                 
-                // Determina si el botón de edición debe ser visible al cargar (solo si el modo está activo)
+                // Determina si el botón de edición debe ser visible al cargar
                 const editButtonVisibilityClass = isEditModeActive ? 'visible' : '';
 
                 return `
@@ -3140,11 +3171,10 @@
         }
 
         function editRecord(id) {
-            console.log('Editando registro:', id);
+            console.log('Intentando editar registro:', id);
             
             if (!isEditModeActive) {
-                // Este código es un respaldo, la lógica principal ahora está en el atajo.
-                UI.showNotification('⚠️ Modo de Edición Desactivado. Active con Ctrl + Alt + E', 'warning');
+                UI.showNotification('⚠️ Active el Modo Edición primero', 'warning');
                 return;
             }
             
@@ -3660,31 +3690,116 @@
             return dni[dni.length - 1] === expectedLetter;
         }
         
-        // Función corregida para alternar el modo de edición
+        // Función para alternar el modo de edición (Solución con PIN)
         function toggleEditMode() {
-            if (currentUser?.type !== 'admin' && !isEditModeActive) {
+            const toggleEditBtn = document.getElementById('toggleEditModeBtn');
+            
+            if (currentUser?.type !== 'admin') {
                 UI.showNotification('⚠️ Esta función solo está disponible para administradores', 'error');
                 return;
             }
-            
-            isEditModeActive = !isEditModeActive;
-            const indicator = document.getElementById('editModeIndicator');
-            
+
             if (isEditModeActive) {
-                indicator.classList.remove('hidden');
-                UI.showNotification('⚠️ Modo de Edición de Registros ACTIVADO (Ctrl + Alt + E para desactivar)', 'warning');
-                document.querySelectorAll('.admin-edit-action').forEach(btn => {
-                    btn.classList.add('visible');
-                });
-            } else {
-                indicator.classList.add('hidden');
-                UI.showNotification('✅ Modo de Edición de Registros DESACTIVADO', 'success');
+                // Desactivar el modo de edición
+                isEditModeActive = false;
+                document.getElementById('editModeIndicator').classList.add('hidden');
                 document.querySelectorAll('.admin-edit-action').forEach(btn => {
                     btn.classList.remove('visible');
                 });
+                if (toggleEditBtn) {
+                    toggleEditBtn.textContent = '✏️ Activar Edición';
+                    toggleEditBtn.classList.remove('bg-gray-500', 'hover:bg-gray-600');
+                    toggleEditBtn.classList.add('bg-red-500', 'hover:bg-red-600');
+                }
+                UI.showNotification('✅ Modo de Edición Desactivado', 'success');
+            } else {
+                // Activar el modo de edición (solicitar PIN)
+                showEditPinModal();
             }
             
             console.log('Modo de Edición:', isEditModeActive ? 'ACTIVO' : 'INACTIVO');
+        }
+
+        function showEditPinModal() {
+            const existingModal = document.getElementById('editPinModal');
+            if (existingModal) existingModal.remove();
+
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            overlay.style.zIndex = '9999';
+            overlay.id = 'editPinModal';
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal-content slide-up';
+            modal.style.maxWidth = '400px';
+            modal.innerHTML = `
+                <div class="gradient-bg text-white p-6 rounded-t-2xl">
+                    <h3 class="text-xl font-bold">🔐 PIN de Edición</h3>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-700 mb-6">Ingrese el PIN de seguridad de 4 dígitos para activar el modo de edición (PIN: ${EDIT_PIN}).</p>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">PIN Secreto</label>
+                        <input type="password" id="editPinInput" class="input-modern w-full text-center text-2xl tracking-widest" placeholder="••••" maxlength="4" autofocus>
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button id="cancelEditPin" class="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors">
+                            ❌ Cancelar
+                        </button>
+                        <button id="confirmEditPin" class="btn-primary text-white px-6 py-2 rounded-lg">
+                            ✅ Activar
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+
+            const pinInput = document.getElementById('editPinInput');
+            
+            document.getElementById('cancelEditPin').addEventListener('click', () => {
+                overlay.remove();
+            });
+            
+            document.getElementById('confirmEditPin').addEventListener('click', () => {
+                checkEditPin(pinInput.value.trim());
+            });
+
+            pinInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    checkEditPin(pinInput.value.trim());
+                }
+            });
+            
+            // Usar setTimeout para asegurar el focus después de la animación
+            setTimeout(() => pinInput.focus(), 300);
+        }
+
+        function checkEditPin(pin) {
+            const toggleEditBtn = document.getElementById('toggleEditModeBtn');
+            if (pin === EDIT_PIN) {
+                const modal = document.getElementById('editPinModal');
+                if (modal) modal.remove();
+                
+                isEditModeActive = true;
+                document.getElementById('editModeIndicator').classList.remove('hidden');
+                document.querySelectorAll('.admin-edit-action').forEach(btn => {
+                    btn.classList.add('visible');
+                });
+                if (toggleEditBtn) {
+                    toggleEditBtn.textContent = '🔒 Desactivar Edición';
+                    toggleEditBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+                    toggleEditBtn.classList.add('bg-gray-500', 'hover:bg-gray-600');
+                }
+                UI.showNotification('✅ Modo de Edición ACTIVADO. Los botones son visibles.', 'success');
+            } else {
+                UI.showNotification('❌ PIN incorrecto.', 'error');
+                const pinInput = document.getElementById('editPinInput');
+                if (pinInput) {
+                    pinInput.value = '';
+                    pinInput.focus();
+                }
+            }
         }
 
         function setupActivityMonitoring() {
@@ -3709,35 +3824,20 @@
             
             setupAutoSave();
         }
-        
-        // Función corregida para detectar el atajo Ctrl + Alt + E
+
+        // Se mantienen los atajos principales (Ctrl+E, Ctrl+R, etc.) pero se elimina el conflictivo.
         function setupKeyboardShortcuts() {
             document.addEventListener('keydown', function(e) {
                 if (!currentUser) return;
                 
-                // === Atajo para alternar el modo de edición: Ctrl/Cmd + Alt + E ===
-                // Usamos (e.key === 'e' || e.key === 'E') para asegurar la detección
-                const isEditShortcut = (e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'e' || e.key === 'E');
-                
-                if (isEditShortcut) {
-                    e.preventDefault();
-                    if (currentUser.type === 'admin') {
-                        toggleEditMode();
-                    } else {
-                        UI.showNotification('⚠️ Esta función es exclusiva del Administrador.', 'error');
-                    }
-                }
-                // ===================================================================
+                // Se elimina la lógica de Ctrl+Alt+E para evitar conflictos.
 
                 if (e.ctrlKey || e.metaKey) {
                     switch(e.key) {
                         case 'e':
-                            // Prevenir conflicto con el atajo de edición si solo es Ctrl + E
-                            if (!e.altKey) {
-                                e.preventDefault();
-                                if (currentUser.type === 'admin') {
-                                    showEmployeeModal();
-                                }
+                            e.preventDefault();
+                            if (currentUser.type === 'admin') {
+                                showEmployeeModal();
                             }
                             break;
                         case 'r':
@@ -3755,8 +3855,11 @@
                 }
                 
                 if (e.key === 'Escape') {
+                    // Cerrar todos los modales, incluyendo el de PIN de edición
                     const modals = document.querySelectorAll('.modal-overlay:not(.hidden)');
-                    modals.forEach(modal => modal.classList.add('hidden'));
+                    modals.forEach(modal => modal.remove()); 
+                    
+                    // Si el modo edición estaba activo, se mantiene activo, pero se cierra el modal.
                     editingRecordId = null;
                     editingEmployeeId = null;
                 }
