@@ -407,7 +407,48 @@
             display: inline-block !important;
         }
         
-        /* Responsive Design Improvements */
+        /* ================================================= */
+        /* MEJORAS DE DISEÑO RESPONSIVO (MOBILE FIRST)       */
+        /* ================================================= */
+
+        /* Dashboard y Empleados: Ajuste para que las columnas no se rompan demasiado */
+        .employee-card .space-y-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        /* Encabezado: Compactar en móvil */
+        header .flex {
+            flex-wrap: wrap;
+        }
+
+        /* Tablet (md: 768px) */
+        @media (min-width: 768px) {
+            .employee-card .space-y-2 {
+                display: block; /* Vuelve al diseño de pila en tablet para tener espacio */
+            }
+
+            /* Dashboard: Aumentar el tamaño de la fuente para el reloj en tablet */
+            .clock-container #mainClock {
+                font-size: 5rem;
+            }
+
+            /* Dashboard: 2 columnas en lugar de 4 en el resumen (opcional) */
+            #todaySummary {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* Desktop (lg: 1024px) */
+        @media (min-width: 1024px) {
+            /* Dashboard: Vuelve al diseño de 4 columnas en desktop */
+            #todaySummary {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+        }
+        
+        /* Ajustes generales de posición */
         @media (max-width: 768px) {
             .sync-indicator,
             .location-status {
@@ -424,6 +465,38 @@
                 right: 16px;
                 top: 16px;
                 max-width: calc(100vw - 32px);
+            }
+
+            /* Encabezado compacto en móvil */
+            header .flex {
+                padding-top: 1rem;
+                padding-bottom: 1rem;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            header .flex > div:last-child {
+                margin-top: 0.75rem;
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            /* Ocultar la fecha en el encabezado para ahorrar espacio */
+            header #currentDate {
+                display: none;
+            }
+
+            /* Ajuste de padding en el contenedor principal */
+            .max-w-7xl.mx-auto.px-4 {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            /* Forzar que el grid de empleados tenga una columna en móvil si el contenido es denso */
+            #employeesGrid {
+                 grid-template-columns: 1fr;
             }
         }
     </style>
