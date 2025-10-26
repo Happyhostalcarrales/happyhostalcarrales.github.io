@@ -1447,13 +1447,13 @@
                 const firebaseEmployees = snapshot.val();
                 
                 // --- LÓGICA DE CORRECCIÓN DE SINCRONIZACIÓN DE EMPLEADOS ---
-                const isFirebaseEmpty = !firebaseEmployees || Object.keys(firebaseEmployees).length === 0;
+                const isFirebaseEmpty = !firebaseEmployees || (typeof firebaseEmployees === 'object' && Object.keys(firebaseEmployees).length === 0);
 
                 if (!defaultEmployeesLoaded && isFirebaseEmpty) {
-                    // Si Firebase está vacío Y es la primera vez que cargamos (no se ha marcado la bandera)
+                    // Si Firebase está vacío Y es la primera vez que cargamos, inicializamos
                     console.log('⚠️ Firebase vacío. Inicializando empleados por defecto y forzando sync.');
                     employees = DataManager.getDefaultEmployees();
-                    DataManager.setEmployees(employees); 
+                    DataManager.setEmployees(employees); // Forzar el push a Firebase
                     localStorage.setItem('fichajemax_defaultEmployeesLoaded', 'true');
                     defaultEmployeesLoaded = true;
                     
@@ -1462,7 +1462,7 @@
                     employees = firebaseEmployees;
                     localStorage.setItem('fichajemax_employees', JSON.stringify(employees));
                     console.log('✅ Empleados sincronizados desde Firebase');
-                    localStorage.setItem('fichajemax_defaultEmployeesLoaded', 'true'); // Asegurar la bandera
+                    localStorage.setItem('fichajemax_defaultEmployeesLoaded', 'true'); // Asegurar la bandera si se cargó algo de Firebase
                 }
                 
                 // Actualizar UI con la versión final de la lista de empleados
@@ -1506,7 +1506,7 @@
                         loadCompanySettings();
                     }
                     if (JSON.stringify(config.locationSettings) !== JSON.stringify(locationSettings)) {
-                        locationSettings = config.locationSettings || locationSettings;
+                        locationSettings = config.locationSettings || config.locationSettings;
                         localStorage.setItem('fichajemax_locationSettings', JSON.stringify(locationSettings));
                         loadLocationSettings();
                     }
@@ -2629,7 +2629,7 @@
                         <div class="space-y-2 text-sm text-gray-600 mb-4">
                             <div class="flex justify-between">
                                 <span>🆔 DNI:</span>
-                                <span class="font-mono">${employee.dni}</span>
+                                <span class="font-mono">••••</span>
                             </div>
                             <div class="flex justify-between">
                                 <span>📱 PIN:</span>
