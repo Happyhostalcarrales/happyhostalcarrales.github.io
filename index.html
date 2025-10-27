@@ -1029,43 +1029,54 @@
             <div class="gradient-bg text-white p-6 rounded-t-2xl">
                 <h3 class="text-xl font-bold">👤 Nuevo Empleado</h3>
             </div>
-            <div class="p-6 space-y-4">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">👤 Nombre *</label>
-                    <input type="text" id="employeeName" class="input-modern w-full" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">👤 Apellidos *</label>
-                    <input type="text" id="employeeLastName" class="input-modern w-full" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">🆔 DNI/NIE *</label>
-                    <input type="text" id="employeeDNI" class="input-modern w-full" placeholder="12345678A" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">💼 Puesto</label>
-                    <input type="text" id="employeePosition" class="input-modern w-full">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
+            <div class="p-6 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">⏰ Jornada Diaria</label>
-                        <select id="employeeWorkingHours" class="input-modern w-full">
-                            <option value="8">8 horas (Completa)</option>
-                            <option value="7">7 horas</option>
-                            <option value="6">6 horas</option>
-                            <option value="5">5 horas</option>
-                            <option value="4">4 horas (Media jornada)</option>
-                            <option value="3">3 horas</option>
-                            <option value="2">2 horas</option>
-                            <option value="custom">Personalizada</option>
-                        </select>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">👤 Nombre *</label>
+                        <input type="text" id="employeeName" class="input-modern w-full" required>
                     </div>
-                    <div id="customHoursContainer" class="hidden">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">🕐 Horas Personalizadas</label>
-                        <input type="number" id="employeeCustomHours" class="input-modern w-full" min="0.5" max="12" step="0.5" placeholder="Ej: 6.5">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">👤 Apellidos *</label>
+                        <input type="text" id="employeeLastName" class="input-modern w-full" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">🆔 DNI/NIE/Pasaporte *</label>
+                        <input type="text" id="employeeDNI" class="input-modern w-full" placeholder="12345678A / Y1234567Z / Pasaporte" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">💼 Puesto</label>
+                        <input type="text" id="employeePosition" class="input-modern w-full">
                     </div>
                 </div>
-                <div>
+
+                <div class="border-t pt-4">
+                    <h4 class="text-lg font-bold text-gray-800 mb-3">⏰ Horario y Jornada</h4>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">⏰ Jornada Estándar (Horas/día)</label>
+                            <select id="employeeWorkingHours" class="input-modern w-full">
+                                <option value="8">8 horas (Completa)</option>
+                                <option value="7">7 horas</option>
+                                <option value="6">6 horas</option>
+                                <option value="5">5 horas</option>
+                                <option value="4">4 horas (Media jornada)</option>
+                                <option value="3">3 horas</option>
+                                <option value="2">2 horas</option>
+                                <option value="custom">Personalizada</option>
+                            </select>
+                        </div>
+                        <div id="customHoursContainer" class="hidden">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">🕐 Horas Personalizadas</label>
+                            <input type="number" id="employeeCustomHours" class="input-modern w-full" min="0.5" max="12" step="0.5" placeholder="Ej: 6.5">
+                        </div>
+                    </div>
+
+                    <div id="employeeScheduleContainer" class="space-y-2 max-h-64 overflow-y-auto pr-2">
+                        </div>
+                </div>
+
+                <div class="border-t pt-4">
                     <label class="block text-sm font-semibold text-gray-700 mb-2">📱 Código PIN *</label>
                     <div class="flex space-x-2">
                         <input type="text" id="employeeAccessCode" class="input-modern flex-1 text-center text-lg tracking-widest" placeholder="1234" maxlength="4" pattern="[0-9]{4}" required>
@@ -1368,6 +1379,9 @@
             },
             
             getDefaultEmployees() {
+                // Nuevo formato de jornada:
+                // - schedule: Objeto con horarios de entrada/salida por día (Lunes a Domingo).
+                // - daysOff: Array de días de la semana que libra (ej: ["Sábado", "Domingo"]).
                 return [
                     {
                         id: 1,
@@ -1377,7 +1391,17 @@
                         position: 'Recepcionista',
                         status: 'Activo',
                         accessCode: '1234',
-                        workingHours: 8,
+                        workingHours: 8, // Se mantiene para compatibilidad y cálculo rápido
+                        schedule: {
+                            Lunes: { timeIn: '09:00', timeOut: '17:00' },
+                            Martes: { timeIn: '09:00', timeOut: '17:00' },
+                            Miércoles: { timeIn: '09:00', timeOut: '17:00' },
+                            Jueves: { timeIn: '09:00', timeOut: '17:00' },
+                            Viernes: { timeIn: '09:00', timeOut: '17:00' },
+                            Sábado: { timeIn: null, timeOut: null },
+                            Domingo: { timeIn: null, timeOut: null }
+                        },
+                        daysOff: ["Sábado", "Domingo"],
                         createdAt: new Date().toISOString()
                     },
                     {
@@ -1389,6 +1413,16 @@
                         status: 'Activo',
                         accessCode: '5678',
                         workingHours: 8,
+                        schedule: {
+                            Lunes: { timeIn: '15:00', timeOut: '23:00' },
+                            Martes: { timeIn: '15:00', timeOut: '23:00' },
+                            Miércoles: { timeIn: '15:00', timeOut: '23:00' },
+                            Jueves: { timeIn: null, timeOut: null },
+                            Viernes: { timeIn: null, timeOut: null },
+                            Sábado: { timeIn: '10:00', timeOut: '18:00' },
+                            Domingo: { timeIn: '10:00', timeOut: '18:00' }
+                        },
+                        daysOff: ["Jueves", "Viernes"],
                         createdAt: new Date().toISOString()
                     },
                     {
@@ -1400,6 +1434,16 @@
                         status: 'Activo',
                         accessCode: '9012',
                         workingHours: 6,
+                        schedule: {
+                            Lunes: { timeIn: '12:00', timeOut: '18:00' },
+                            Martes: { timeIn: '12:00', timeOut: '18:00' },
+                            Miércoles: { timeIn: '12:00', timeOut: '18:00' },
+                            Jueves: { timeIn: '12:00', timeOut: '18:00' },
+                            Viernes: { timeIn: '12:00', timeOut: '18:00' },
+                            Sábado: { timeIn: '08:00', timeOut: '14:00' },
+                            Domingo: { timeIn: null, timeOut: null }
+                        },
+                        daysOff: ["Domingo"],
                         createdAt: new Date().toISOString()
                     },
                     {
@@ -1411,6 +1455,16 @@
                         status: 'Activo',
                         accessCode: '3456',
                         workingHours: 8,
+                        schedule: {
+                            Lunes: { timeIn: '08:00', timeOut: '16:00' },
+                            Martes: { timeIn: '08:00', timeOut: '16:00' },
+                            Miércoles: { timeIn: '08:00', timeOut: '16:00' },
+                            Jueves: { timeIn: '08:00', timeOut: '16:00' },
+                            Viernes: { timeIn: '08:00', timeOut: '16:00' },
+                            Sábado: { timeIn: null, timeOut: null },
+                            Domingo: { timeIn: null, timeOut: null }
+                        },
+                        daysOff: ["Sábado", "Domingo"],
                         createdAt: new Date().toISOString()
                     }
                 ];
@@ -2231,7 +2285,7 @@
         }
 
         async function testDistance() {
-            if (!locationSettings.workLatitude || !locationSettings.workLongitude) {
+            if (!locationSettings.enabled || !locationSettings.workLatitude || !locationSettings.workLongitude) {
                 UI.showNotification('⚠️ Configure primero la ubicación del trabajo', 'warning');
                 return;
             }
@@ -2705,7 +2759,7 @@
                         
                         <div class="space-y-2 text-sm text-gray-600 mb-4">
                             <div class="flex justify-between">
-                                <span>🆔 DNI:</span>
+                                <span>🆔 Documento:</span>
                                 <span class="font-mono">••••••••</span>
                             </div>
                             <div class="flex justify-between">
@@ -2728,6 +2782,10 @@
                                     <span class="${todayRecord.totalHours >= (employee.workingHours || 8) ? 'text-green-600 font-bold' : 'text-orange-600'}">${todayRecord.totalHours?.toFixed(1) || '0.0'}h</span>
                                 </div>
                             ` : ''}
+                            <div class="flex justify-between">
+                                <span>Días Libres:</span>
+                                <span class="font-semibold text-gray-600">${employee.daysOff?.join(', ') || 'Ninguno'}</span>
+                            </div>
                         </div>
                         
                         <div class="grid grid-cols-3 gap-2">
@@ -3058,6 +3116,15 @@
         function showEmployeeModal() {
             document.getElementById('employeeModal').classList.remove('hidden');
             
+            // Datos por defecto para el nuevo empleado
+            const defaultSchedule = {
+                Lunes: { timeIn: '09:00', timeOut: '17:00' }, Martes: { timeIn: '09:00', timeOut: '17:00' }, Miércoles: { timeIn: '09:00', timeOut: '17:00' },
+                Jueves: { timeIn: '09:00', timeOut: '17:00' }, Viernes: { timeIn: '09:00', timeOut: '17:00' }, Sábado: { timeIn: null, timeOut: null },
+                Domingo: { timeIn: null, timeOut: null }
+            };
+            const defaultDaysOff = ["Sábado", "Domingo"];
+
+
             if (!editingEmployeeId) {
                 document.getElementById('employeeName').value = '';
                 document.getElementById('employeeLastName').value = '';
@@ -3068,6 +3135,9 @@
                 document.getElementById('employeeCustomHours').value = '';
                 document.getElementById('customHoursContainer').classList.add('hidden');
                 
+                // Renderizar el horario por defecto
+                renderEmployeeSchedule(defaultSchedule, defaultDaysOff);
+
                 const modalTitle = document.querySelector('#employeeModal .gradient-bg h3');
                 if (modalTitle) {
                     modalTitle.textContent = '👤 Nuevo Empleado';
@@ -3135,8 +3205,9 @@
                 return;
             }
             
-            if (!validateDNI(dni)) {
-                UI.showNotification('⚠️ DNI/NIE no válido. Formato: 12345678A o X1234567A', 'warning');
+            // VALIDACIÓN MEJORADA DE DOCUMENTOS (DNI, NIE, Pasaporte Europeo)
+            if (!validateDNI_NIE_Passport(dni)) {
+                UI.showNotification('⚠️ DNI/NIE/Pasaporte no válido. Verifique el formato.', 'warning');
                 return;
             }
             
@@ -3154,7 +3225,7 @@
                 if (existingEmployee.accessCode === accessCode) {
                     UI.showNotification('⚠️ Este código PIN ya está en uso', 'warning');
                 } else {
-                    UI.showNotification('⚠️ Este DNI/NIE ya está registrado', 'warning');
+                    UI.showNotification('⚠️ Este documento (DNI/NIE) ya está registrado', 'warning');
                 }
                 return;
             }
@@ -3172,6 +3243,36 @@
             } else {
                 workingHours = parseFloat(workingHoursSelect);
             }
+
+            // --- LÓGICA DE RECOPILACIÓN DE HORARIOS ---
+            const newSchedule = {};
+            const newDaysOff = [];
+            const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+            let validationError = false;
+
+            days.forEach(day => {
+                const dayOffCheckbox = document.getElementById(`dayOff-${day}`);
+                if (dayOffCheckbox && dayOffCheckbox.checked) {
+                    newDaysOff.push(day);
+                    newSchedule[day] = { timeIn: null, timeOut: null };
+                } else {
+                    const timeInInput = document.getElementById(`timeIn-${day}`);
+                    const timeOutInput = document.getElementById(`timeOut-${day}`);
+                    
+                    const timeIn = timeInInput ? timeInInput.value : null;
+                    const timeOut = timeOutInput ? timeOutInput.value : null;
+                    
+                    if (timeIn && timeOut && !validateTimeRange(timeIn, timeOut, true)) {
+                         UI.showNotification(`⚠️ El turno del ${day} no es válido (máximo 16 horas)`, 'warning');
+                         validationError = true;
+                    }
+                    
+                    newSchedule[day] = { timeIn, timeOut };
+                }
+            });
+            
+            if (validationError) return;
+            // --- FIN LÓGICA DE RECOPILACIÓN DE HORARIOS ---
             
             const employeeData = {
                 id: editingEmployeeId || Date.now(),
@@ -3181,7 +3282,9 @@
                 position: position || 'Sin especificar',
                 status: 'Activo',
                 accessCode,
-                workingHours,
+                workingHours, // Horas totales por día
+                schedule: newSchedule, // Nuevo: Horario semanal específico
+                daysOff: newDaysOff, // Nuevo: Días libres
                 createdAt: editingEmployeeId ? employees.find(e => e.id === editingEmployeeId)?.createdAt : new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             };
@@ -3189,7 +3292,7 @@
             if (editingEmployeeId) {
                 const index = employees.findIndex(emp => emp.id === editingEmployeeId);
                 if (index !== -1) {
-                    employees[index] = employeeData;
+                    employees[index] = { ...employees[index], ...employeeData };
                     UI.showNotification('✅ Empleado actualizado correctamente', 'success');
                 }
             } else {
@@ -3221,6 +3324,7 @@
                 return;
             }
             
+            // Validar rango de tiempo (máximo 16 horas)
             if (timeIn && timeOut && !validateTimeRange(timeIn, timeOut)) {
                 UI.showNotification('⚠️ El rango de tiempo no es válido (máximo 16 horas)', 'warning');
                 return;
@@ -3379,6 +3483,7 @@
             document.getElementById('employeePosition').value = employee.position || '';
             document.getElementById('employeeAccessCode').value = employee.accessCode;
             
+            // --- Lógica de Horario ---
             const workingHours = employee.workingHours || 8;
             const workingHoursSelect = document.getElementById('employeeWorkingHours');
             const customHoursContainer = document.getElementById('customHoursContainer');
@@ -3393,6 +3498,12 @@
                 customHoursInput.value = workingHours;
                 customHoursContainer.classList.remove('hidden');
             }
+            
+            // Renderizar el horario específico del empleado
+            const employeeSchedule = employee.schedule || {};
+            const employeeDaysOff = employee.daysOff || [];
+            renderEmployeeSchedule(employeeSchedule, employeeDaysOff);
+            // --- Fin Lógica de Horario ---
             
             const modalTitle = document.querySelector('#employeeModal .gradient-bg h3');
             if (modalTitle) {
@@ -3790,7 +3901,7 @@
             const [outHour, outMinute] = timeOut.split(':').map(Number);
             
             const inMinutes = inHour * 60 + inMinute;
-            const outMinutes = outHour * 60 + outMinute;
+            let outMinutes = outHour * 60 + outMinute;
             
             let diffMinutes = outMinutes - inMinutes;
             if (diffMinutes < 0) diffMinutes += 24 * 60; 
@@ -3843,27 +3954,104 @@
                     `<option value="${emp.id}">${emp.name} ${emp.lastName}</option>`
                 ).join('');
         }
+        
+        // Función de Validación de Documentos Mejorada (DNI/NIE/Pasaporte)
+        function validateDNI_NIE_Passport(doc) {
+            doc = doc.toUpperCase().replace(/\s/g, ''); // Limpia espacios y convierte a mayúsculas
 
-        function validateDNI(dni) {
-            const dniRegex = /^[0-9]{8}[TRWAGMYFPDXBNJZSQVHLCKE]$/;
-            const nieRegex = /^[XYZ][0-9]{7}[TRWAGMYFPDXBNJZSQVHLCKE]$/;
-            
-            if (!dniRegex.test(dni) && !nieRegex.test(dni)) {
-                return false;
+            // 1. DNI (8 dígitos + 1 letra)
+            const dniRegex = /^(\d{8})([A-Z])$/;
+            const dniLetters = 'TRWAGMYFPDXBNJZSQVHLCKE';
+            if (dniRegex.test(doc)) {
+                const parts = doc.match(dniRegex);
+                const number = parseInt(parts[1]);
+                const letter = parts[2];
+                return letter === dniLetters[number % 23];
+            }
+
+            // 2. NIE (X/Y/Z + 7 dígitos + 1 letra)
+            const nieRegex = /^([XYZ])(\d{7})([A-Z])$/;
+            if (nieRegex.test(doc)) {
+                const parts = doc.match(nieRegex);
+                const prefix = parts[1];
+                const numberStr = parts[2];
+                const letter = parts[3];
+                const prefixMap = { 'X': '0', 'Y': '1', 'Z': '2' };
+                const number = parseInt(prefixMap[prefix] + numberStr);
+                return letter === dniLetters[number % 23];
             }
             
-            const letters = 'TRWAGMYFPDXBNJZSQVHLCKE';
-            let number;
-            
-            if (nieRegex.test(dni)) {
-                const nieMap = { 'X': '0', 'Y': '1', 'Z': '2' };
-                number = nieMap[dni[0]] + dni.substring(1, 8);
-            } else {
-                number = dni.substring(0, 8);
+            // 3. Validación de Pasaporte/ID Europeo (Más flexible para documentos que no son DNI/NIE)
+            // Acepta documentos alfanuméricos comunes de 6 a 12 caracteres.
+            const passportRegex = /^[A-Z0-9]{6,12}$/;
+            if (passportRegex.test(doc)) {
+                return true;
             }
+
+            return false;
+        }
+
+        // Renombrar la antigua función validateDNI para usar la nueva
+        function validateDNI(dni) { 
+            return validateDNI_NIE_Passport(dni); 
+        }
+
+        // Utility function to render schedule form fields
+        function renderEmployeeSchedule(schedule, daysOff) {
+            const container = document.getElementById('employeeScheduleContainer');
+            if (!container) return;
             
-            const expectedLetter = letters[parseInt(number) % 23];
-            return dni[dni.length - 1] === expectedLetter;
+            const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+            container.innerHTML = days.map(day => {
+                const dayKey = day;
+                const timeIn = schedule[dayKey]?.timeIn || '';
+                const timeOut = schedule[dayKey]?.timeOut || '';
+                const isDayOff = daysOff.includes(day);
+                
+                return `
+                    <div class="grid grid-cols-5 gap-3 items-center p-2 rounded-lg ${isDayOff ? 'bg-gray-100' : 'bg-white border'}">
+                        <div class="col-span-2 flex items-center space-x-2">
+                            <input type="checkbox" id="dayOff-${dayKey}" data-day="${dayKey}" onchange="toggleDayOff('${dayKey}')" ${isDayOff ? 'checked' : ''} class="rounded text-purple-600 focus:ring-purple-500">
+                            <label for="dayOff-${dayKey}" class="text-sm font-medium text-gray-700">${day}</label>
+                        </div>
+                        <input type="time" id="timeIn-${dayKey}" value="${timeIn}" data-day="${dayKey}" class="input-modern col-span-1 text-sm ${isDayOff ? 'bg-gray-200' : 'bg-white'}" ${isDayOff ? 'disabled' : ''}>
+                        <span class="text-center text-gray-500 text-sm">-</span>
+                        <input type="time" id="timeOut-${dayKey}" value="${timeOut}" data-day="${dayKey}" class="input-modern col-span-1 text-sm ${isDayOff ? 'bg-gray-200' : 'bg-white'}" ${isDayOff ? 'disabled' : ''}>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleDayOff(dayKey) {
+            const isChecked = document.getElementById(`dayOff-${dayKey}`).checked;
+            document.getElementById(`timeIn-${dayKey}`).disabled = isChecked;
+            document.getElementById(`timeOut-${dayKey}`).disabled = isChecked;
+            
+            // Opcional: limpiar los valores si es día libre
+            if (isChecked) {
+                document.getElementById(`timeIn-${dayKey}`).value = '';
+                document.getElementById(`timeOut-${dayKey}`).value = '';
+            }
+        }
+        
+        function validateTimeRange(timeIn, timeOut, isScheduleCheck = false) {
+            if (!timeIn || !timeOut) return true;
+            
+            const [inHour, inMinute] = timeIn.split(':').map(Number);
+            const [outHour, outMinute] = timeOut.split(':').map(Number);
+            
+            const inMinutes = inHour * 60 + inMinute;
+            let outMinutes = outHour * 60 + outMinute;
+            
+            let diffMinutes = outMinutes - inMinutes;
+            
+            // Si el tiempo de salida es anterior al de entrada, asume que es un turno nocturno (pasa al día siguiente)
+            if (diffMinutes < 0) {
+                diffMinutes += 24 * 60; // Añadimos un día entero para calcular las horas correctamente.
+            }
+
+            // Máximo de 16 horas (960 minutos) por turno o registro
+            return diffMinutes <= 16 * 60;
         }
 
         function setupActivityMonitoring() {
@@ -3964,22 +4152,6 @@
                 pin = Math.floor(1000 + Math.random() * 9000).toString();
             } while (employees.some(emp => emp.accessCode === pin));
             return pin;
-        }
-
-        function validateTimeRange(timeIn, timeOut) {
-            if (!timeIn || !timeOut) return true;
-            
-            const [inHour, inMinute] = timeIn.split(':').map(Number);
-            const [outHour, outMinute] = timeOut.split(':').map(Number);
-            
-            const inMinutes = inHour * 60 + inMinute;
-            const outMinutes = outHour * 60 + outMinute;
-            
-            if (outMinutes < inMinutes) {
-                return (outMinutes + 24 * 60) - inMinutes <= 16 * 60;
-            }
-            
-            return outMinutes - inMinutes <= 16 * 60;
         }
     </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9907ba73137aec95',t:'MTc2MDc4NzI4NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
