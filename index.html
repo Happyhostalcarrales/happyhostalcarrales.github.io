@@ -447,13 +447,6 @@
                 grid-template-columns: repeat(4, minmax(0, 1fr));
             }
         }
-
-        /* Ajuste de Reloj para Móviles Pequeños */
-        @media (max-width: 640px) {
-            .clock-container #mainClock {
-                font-size: 3rem; /* Tamaño más pequeño para móviles */
-            }
-        }
         
         /* Ajustes generales de posición */
         @media (max-width: 768px) {
@@ -1057,7 +1050,7 @@
                 </div>
 
                 <div class="border-t pt-4">
-                    <h4 class="font-bold text-gray-800 mb-3">⏰ Horario y Jornada</h4>
+                    <h4 class="text-lg font-bold text-gray-800 mb-3">⏰ Horario y Jornada</h4>
                     
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div>
@@ -1117,17 +1110,9 @@
                         <option value="">Seleccionar empleado</option>
                     </select>
                 </div>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">📅 Fecha de Inicio *</label>
-                        <input type="date" id="manualRecordDate" class="input-modern w-full" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">📅 Fecha de Fin (Incluida)</label>
-                        <input type="date" id="manualRecordEndDate" class="input-modern w-full">
-                        <p class="text-xs text-gray-500 mt-1">Opcional. Registra el mismo horario en todo el rango.</p>
-                    </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">📅 Fecha *</label>
+                    <input type="date" id="manualRecordDate" class="input-modern w-full" required>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">🕐 Hora de Entrada</label>
@@ -1147,7 +1132,7 @@
                     ❌ Cancelar
                 </button>
                 <button id="saveManualRecord" class="btn-primary text-white px-6 py-2 rounded-lg">
-                    💾 Guardar Registro(s)
+                    💾 Guardar Registro
                 </button>
             </div>
         </div>
@@ -1529,7 +1514,7 @@
         
         // VARIABLE CLAVE: Controla la visibilidad de los botones de edición de registros
         let isEditModeActive = false;
-        const ADMIN_EDIT_PASSWORD = '1010'; // PIN de modo edición
+        const ADMIN_EDIT_PASSWORD = '1010';
         
         // Configuration Management
         const ConfigManager = {
@@ -1638,12 +1623,12 @@
                 const config = snapshot.val();
                 if (config) {
                     if (JSON.stringify(config.companySettings) !== JSON.stringify(companySettings)) {
-                        companySettings = config.companySettings || config.companySettings;
+                        companySettings = config.companySettings || companySettings;
                         localStorage.setItem('fichajemax_companySettings', JSON.stringify(companySettings));
                         if (currentUser) loadCompanySettings();
                     }
                     if (JSON.stringify(config.locationSettings) !== JSON.stringify(locationSettings)) {
-                        locationSettings = config.locationSettings || config.locationSettings;
+                        locationSettings = config.locationSettings || locationSettings;
                         localStorage.setItem('fichajemax_locationSettings', JSON.stringify(locationSettings));
                         if (currentUser) loadLocationSettings();
                     }
@@ -1982,7 +1967,6 @@
             });
             
             document.querySelectorAll('.employee-only').forEach(element => {
-                // Aseguramos que los elementos específicos del empleado se vean
                 element.style.display = 'block';
             });
 
@@ -1993,20 +1977,10 @@
                 nameDisplay.classList.remove('hidden'); 
             }
 
-            // LÓGICA DE VISIBILIDAD DEL BOTÓN DE UBICACIÓN
+            // Lógica existente para el botón de refresco de ubicación
             const locationRefreshContainer = document.getElementById('locationRefreshContainer');
-            const employeeLocationStatus = document.getElementById('employeeLocationStatus');
-            
-            if (locationRefreshContainer && locationSettings.enabled && currentUser.type === 'employee') {
-                locationRefreshContainer.classList.remove('hidden'); // Mostrar el botón
-                if (employeeLocationStatus) {
-                    employeeLocationStatus.classList.remove('hidden'); // Mostrar el indicador de estado
-                }
-            } else {
-                locationRefreshContainer.classList.add('hidden');
-                if (employeeLocationStatus) {
-                    employeeLocationStatus.classList.add('hidden');
-                }
+            if (locationRefreshContainer && locationSettings.enabled) {
+                locationRefreshContainer.classList.remove('hidden');
             }
         }
 
@@ -2034,28 +2008,18 @@
             isEditModeActive = false; // Resetear estado de edición
             stopLocationMonitoring();
 
-            // Asegurarse de que el mainApp se oculta y el login se muestra
             document.getElementById('mainApp').classList.add('hidden');
             document.getElementById('loginScreen').classList.remove('hidden');
             
-            // Limpiar y resetear los campos de login
             document.getElementById('adminPassword').value = '';
             document.getElementById('employeeCode').value = '';
-            
-            document.getElementById('adminLogin').classList.add('hidden');
-            document.getElementById('employeeLogin').classList.add('hidden');
-            
             document.querySelectorAll('.user-type-btn').forEach(btn => {
                 btn.classList.remove('border-purple-500', 'bg-purple-50');
                 btn.classList.add('border-gray-200');
             });
+            document.getElementById('adminLogin').classList.add('hidden');
+            document.getElementById('employeeLogin').classList.add('hidden');
             
-            // **CORRECCIÓN 2: Limpiar las variables de estado global del LocalStorage (el que bloquea)**
-            localStorage.removeItem('fichajemax_currentUser');
-            
-            // Forzar la recarga de la página (opcional, pero asegura el estado más limpio)
-            // window.location.reload(); // Si quieres forzar una recarga total
-
             UI.showNotification('👋 Sesión cerrada', 'success');
         }
 
@@ -2081,8 +2045,6 @@
                     loadEmployees();
                     break;
                 case 'records':
-                    // **CORRECCIÓN 1: Recargar la lista de empleados para el filtro**
-                    populateSelects(); 
                     loadTimeRecords();
                     break;
                 case 'reports':
@@ -3201,7 +3163,6 @@
             document.getElementById('manualRecordModal').classList.remove('hidden');
             document.getElementById('manualRecordEmployee').value = '';
             document.getElementById('manualRecordDate').value = formatDate(new Date());
-            document.getElementById('manualRecordEndDate').value = ''; // Campo nuevo
             document.getElementById('manualRecordTimeIn').value = '';
             document.getElementById('manualRecordTimeOut').value = '';
             document.getElementById('manualRecordNotes').value = '';
@@ -3301,7 +3262,6 @@
                     const timeIn = timeInInput ? timeInInput.value : null;
                     const timeOut = timeOutInput ? timeOutInput.value : null;
                     
-                    // Usamos el validador de rango con el flag de ScheduleCheck (true)
                     if (timeIn && timeOut && !validateTimeRange(timeIn, timeOut, true)) {
                          UI.showNotification(`⚠️ El turno del ${day} no es válido (máximo 16 horas)`, 'warning');
                          validationError = true;
@@ -3350,10 +3310,9 @@
             console.log('Guardando registro manual');
             const employeeId = document.getElementById('manualRecordEmployee').value;
             const date = document.getElementById('manualRecordDate').value;
-            const endDate = document.getElementById('manualRecordEndDate').value; // Nuevo: Fecha de fin
             const timeIn = document.getElementById('manualRecordTimeIn').value;
             const timeOut = document.getElementById('manualRecordTimeOut').value;
-            const notes = document.getElementById('manualRecordNotes').value.trim() || 'Registro manual (Admin)';
+            const notes = document.getElementById('manualRecordNotes').value.trim();
             
             if (!employeeId || !date) {
                 UI.showNotification('⚠️ Complete los campos obligatorios', 'warning');
@@ -3371,71 +3330,47 @@
                 return;
             }
             
-            const startDateObj = new Date(date);
-            // Si endDate está vacío, usamos startDate
-            const endDateObj = endDate ? new Date(endDate) : startDateObj;
+            const existingRecord = timeRecords.find(record => 
+                record.employeeId == employeeId && record.date === date
+            );
             
-            if (startDateObj > endDateObj) {
-                UI.showNotification('⚠️ La fecha de inicio no puede ser posterior a la fecha de fin', 'warning');
+            if (existingRecord) {
+                UI.showNotification('⚠️ Ya existe un registro para este empleado en esta fecha', 'warning');
                 return;
             }
-
+            
+            const selectedDate = new Date(date);
+            const today = new Date();
+            today.setHours(23, 59, 59, 999);
+            
+            if (selectedDate > today) {
+                UI.showNotification('⚠️ No se pueden crear registros para fechas futuras', 'warning');
+                return;
+            }
+            
             const employee = employees.find(emp => emp.id == employeeId);
             const totalHours = (timeIn && timeOut) ? calculateHours(timeIn, timeOut) : 0;
-            const today = new Date();
-            let recordsCreated = 0;
-            const recordsToSave = [];
-
-            // Iteración para el registro de múltiples días
-            // Clonar la fecha inicial para la iteración para evitar modificar la original
-            for (let d = new Date(startDateObj); d <= endDateObj; d.setDate(d.getDate() + 1)) {
-                const currentDate = formatDate(d);
-                const isFutureDate = d > today;
-
-                if (isFutureDate) {
-                    UI.showNotification(`⚠️ Se omitió el registro para fecha futura: ${currentDate}`, 'warning');
-                    continue;
-                }
-
-                const existingRecord = timeRecords.find(record => 
-                    record.employeeId == employeeId && record.date === currentDate
-                );
-                
-                if (existingRecord) {
-                    // Omitir si ya existe un registro para ese día
-                    continue; 
-                }
-
-                const newRecord = {
-                    id: Date.now() + recordsCreated, // Asegurar ID único
-                    employeeId: parseInt(employeeId),
-                    employeeName: employee.name + ' ' + employee.lastName,
-                    date: currentDate,
-                    timeIn: timeIn || null,
-                    timeOut: timeOut || null,
-                    totalHours,
-                    method: 'manual',
-                    notes: notes,
-                    // ESTANDARIZACIÓN: Si es manual (modo Admin/1010), se considera verificado.
-                    location: 'Ubicación verificada ✓ (Admin)', 
-                    createdAt: new Date().toISOString(),
-                    createdBy: currentUser.name || 'Admin'
-                };
-
-                recordsToSave.push(newRecord);
-                recordsCreated++;
-            }
-
-            if (recordsCreated > 0) {
-                timeRecords.push(...recordsToSave);
-                saveTimeRecords();
-                loadTimeRecords();
-                loadDashboard();
-                hideManualRecordModal();
-                UI.showNotification(`✅ ${recordsCreated} Registro(s) manual(es) creado(s) correctamente`, 'success');
-            } else {
-                UI.showNotification('⚠️ No se creó ningún registro (ya existían o hubo un error de fechas)', 'warning');
-            }
+            
+            const newRecord = {
+                id: Date.now(),
+                employeeId: parseInt(employeeId),
+                employeeName: employee.name + ' ' + employee.lastName,
+                date,
+                timeIn: timeIn || null,
+                timeOut: timeOut || null,
+                totalHours,
+                method: 'manual',
+                notes: notes || 'Registro manual',
+                createdAt: new Date().toISOString(),
+                createdBy: currentUser.name || 'Admin'
+            };
+            
+            timeRecords.push(newRecord);
+            saveTimeRecords();
+            loadTimeRecords();
+            loadDashboard();
+            hideManualRecordModal();
+            UI.showNotification('✅ Registro manual creado correctamente', 'success');
         }
 
         function saveEditRecord() {
@@ -3448,23 +3383,13 @@
             const date = document.getElementById('editRecordDate').value;
             const timeIn = document.getElementById('editRecordTimeIn').value;
             const timeOut = document.getElementById('editRecordTimeOut').value;
-            let notes = document.getElementById('editRecordNotes').value.trim();
-
-            if (!notes) {
-                 // Si el administrador edita sin notas, usa una nota estándar
-                notes = 'Registro editado por Admin';
-            }
+            const notes = document.getElementById('editRecordNotes').value.trim();
             
             record.date = date;
             record.timeIn = timeIn || null;
             record.timeOut = timeOut || null;
             record.totalHours = (timeIn && timeOut) ? calculateHours(timeIn, timeOut) : 0;
             record.notes = notes;
-            
-            // ESTANDARIZACIÓN: Si se edita en modo edición (código 1010), se considera verificado por Admin.
-            if (isEditModeActive) {
-                record.location = 'Ubicación verificada ✓ (Editado Admin)';
-            }
             
             saveTimeRecords();
             loadTimeRecords();
