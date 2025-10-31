@@ -828,6 +828,800 @@
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">🌍 Longitud del Trabajo</label>
                                     <input type="number" id="workLongitude" class="input-modern w-full" step="0.000001" placeholder="-3.703790">
+                                </di        
+        .card-shadow {
+            box-shadow: var(--shadow-md);
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+        }
+        
+        .card-shadow:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary {
+            background: var(--primary-gradient);
+            transition: var(--transition);
+            border-radius: var(--border-radius);
+            font-weight: 500;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-success {
+            background: var(--success-gradient);
+            transition: var(--transition);
+            border-radius: var(--border-radius);
+        }
+        
+        .btn-danger {
+            background: var(--danger-gradient);
+            transition: var(--transition);
+            border-radius: var(--border-radius);
+        }
+        
+        .time-display {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .status-badge {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.02); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-up {
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .scale-in {
+            animation: scaleIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes scaleIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        .clock-container {
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.08),
+                0 8px 16px rgba(0, 0, 0, 0.04),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .employee-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            transition: var(--transition);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .employee-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary-gradient);
+            opacity: 0;
+            transition: var(--transition);
+        }
+        
+        .employee-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: rgba(102, 126, 234, 0.2);
+        }
+        
+        .employee-card:hover::before {
+            opacity: 1;
+        }
+        
+        .nav-pill {
+            border-radius: 20px;
+            padding: 0.75rem 1.5rem;
+            transition: var(--transition);
+            cursor: pointer;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-pill.active {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .nav-pill:not(.active) {
+            background: rgba(243, 244, 246, 0.8);
+            color: #6b7280;
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-pill:not(.active):hover {
+            background: rgba(229, 231, 235, 0.9);
+            transform: translateY(-1px);
+        }
+        
+        .table-modern {
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        
+        .input-modern {
+            border: 2px solid rgba(226, 232, 240, 0.8);
+            border-radius: var(--border-radius);
+            padding: 0.875rem 1rem;
+            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            font-weight: 400;
+        }
+        
+        .input-modern:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.08);
+            outline: none;
+            background: white;
+        }
+        
+        .input-modern:hover:not(:focus) {
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 420px;
+            box-shadow: var(--shadow-lg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .notification.success {
+            background: var(--success-gradient);
+        }
+        
+        .notification.error {
+            background: var(--danger-gradient);
+        }
+        
+        .notification.warning {
+            background: var(--warning-gradient);
+        }
+        
+        @keyframes slideInRight {
+            from { 
+                transform: translateX(100%) scale(0.9); 
+                opacity: 0; 
+            }
+            to { 
+                transform: translateX(0) scale(1); 
+                opacity: 1; 
+            }
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            padding: 1rem;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 520px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .loading-spinner {
+            border: 3px solid rgba(243, 244, 246, 0.3);
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+            transition: var(--transition);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary-gradient);
+            transform: scaleX(0);
+            transition: var(--transition);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .stat-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .sync-indicator {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--success-gradient);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 24px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            z-index: 1000;
+            animation: pulse 3s ease-in-out infinite;
+            box-shadow: var(--shadow-md);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: var(--transition);
+        }
+        
+        .sync-indicator.syncing {
+            background: var(--warning-gradient);
+            animation: pulse 1s ease-in-out infinite;
+        }
+        
+        .sync-indicator.error {
+            background: var(--danger-gradient);
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+        
+        .location-status {
+            position: fixed;
+            bottom: 80px;
+            right: 24px;
+            padding: 0.75rem 1.25rem;
+            border-radius: 24px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            z-index: 1000;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            box-shadow: var(--shadow-md);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: var(--transition);
+        }
+        
+        .location-status.success {
+            background: var(--success-gradient);
+        }
+        
+        .location-status.error {
+            background: var(--danger-gradient);
+        }
+        
+        /* Ocultar acciones de edición solo si no están en modo edición */
+        .admin-edit-action { 
+            display: none !important; 
+        }
+
+        .admin-edit-action.visible { 
+            display: inline-block !important;
+        }
+        
+        /* Responsive Design Improvements */
+        @media (max-width: 768px) {
+            .sync-indicator,
+            .location-status {
+                right: 16px;
+                padding: 0.5rem 1rem;
+                font-size: 0.75rem;
+            }
+            
+            .location-status {
+                bottom: 70px;
+            }
+            
+            .notification {
+                right: 16px;
+                top: 16px;
+                max-width: calc(100vw - 32px);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-full" style="overflow-x: hidden;">
+    <div id="syncIndicator" class="sync-indicator">
+        💾 Sistema Listo
+    </div>
+
+    <div id="locationStatusIndicator" class="location-status hidden">
+        📍 Verificando ubicación...
+    </div>
+
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-white bg-opacity-20 p-3 rounded-full">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold">Horas Happy Hostal Carrales</h1>
+                        <p class="text-sm opacity-90">Sistema de Fichaje con Control de Ubicación</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <div id="currentTime" class="text-lg font-bold time-display"></div>
+                        <div id="currentDate" class="text-sm opacity-90"></div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button id="helpBtn" class="bg-white bg-opacity-20 hover:bg-opacity-30 p-2 rounded-full transition-all" title="Ayuda y atajos de teclado">
+                            ❓
+                        </button>
+                        <button id="logoutBtn" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-full transition-all">
+                            Salir
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="loginScreen" class="min-h-screen flex items-center justify-center py-12 px-4">
+        <div class="max-w-md w-full">
+            <div class="bg-white rounded-2xl card-shadow p-8 fade-in">
+                <div class="text-center mb-8">
+                    <div class="gradient-bg w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-3xl font-bold text-gray-900">Acceso al Sistema</h2>
+                    <p class="text-gray-600 mt-2">Seleccione su tipo de usuario</p>
+                </div>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Tipo de Usuario</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button type="button" id="adminBtn" class="user-type-btn p-4 border-2 border-gray-200 rounded-xl text-center hover:border-purple-500 transition-all">
+                                <svg class="w-8 h-8 mx-auto mb-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                </svg>
+                                <div class="font-medium">Administrador</div>
+                            </button>
+                            <button type="button" id="employeeBtn" class="user-type-btn p-4 border-2 border-gray-200 rounded-xl text-center hover:border-purple-500 transition-all">
+                                <svg class="w-8 h-8 mx-auto mb-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"></path>
+                                </svg>
+                                <div class="font-medium">Empleado</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="adminLogin" class="hidden">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Contraseña de Administrador</label>
+                        <input type="password" id="adminPassword" class="input-modern w-full" placeholder="Ingrese su contraseña">
+                    </div>
+
+                    <div id="employeeLogin" class="hidden">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">📱 Código PIN</label>
+                            <input type="password" id="employeeCode" class="input-modern w-full text-center text-2xl tracking-widest" placeholder="••••" maxlength="4">
+                        </div>
+                    </div>
+
+                    <button id="loginButton" class="w-full btn-primary text-white font-bold py-3 px-6 rounded-xl">
+                        🚀 Iniciar Sesión
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainApp" class="hidden">
+        <nav class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex space-x-2 py-4 overflow-x-auto">
+                    <button class="nav-tab nav-pill active" data-tab="dashboard">
+                        ⏰ Fichaje
+                    </button>
+                    <button class="nav-tab nav-pill admin-only" data-tab="employees">
+                        👥 Empleados
+                    </button>
+                    <button class="nav-tab nav-pill" data-tab="records">
+                        📋 Registros
+                    </button>
+                    <button class="nav-tab nav-pill admin-only" data-tab="reports">
+                        📈 Informes
+                    </button>
+                    <button class="nav-tab nav-pill admin-only" data-tab="settings">
+                        ⚙️ Configuración
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            
+            <div id="dashboardTab" class="tab-content active fade-in">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-1">
+                        <div class="clock-container text-center">
+                            <h3 class="text-xl font-bold text-gray-800 mb-6">🕐 Reloj de Fichaje</h3>
+                            <div id="mainClock" class="text-4xl font-bold text-purple-600 mb-2 time-display"></div>
+                            <div id="mainDate" class="text-gray-600 mb-6"></div>
+                            
+                            <div id="employeeLocationStatus" class="employee-only mb-4 p-3 rounded-xl bg-blue-50 border border-blue-200 hidden">
+                                <div class="text-sm font-semibold text-blue-800 mb-1">📍 Estado de Ubicación:</div>
+                                <div id="locationStatusText" class="text-sm text-blue-600">Verificando...</div>
+                            </div>
+                            
+                            <div id="employeeStatus" class="employee-only mb-6 p-4 rounded-xl bg-gradient-to-r from-blue-50 to-purple-50" style="display: none;">
+                                <div class="text-lg font-semibold mb-2">Estado Actual:</div>
+                                <div id="currentStatus" class="text-2xl font-bold mb-2"></div>
+                                <div id="statusTime" class="text-sm text-gray-600"></div>
+                            </div>
+                            
+                            <div class="admin-only mb-4">
+                                <select id="clockEmployeeSelect" class="input-modern w-full">
+                                    <option value="">Seleccionar empleado</option>
+                                </select>
+                            </div>
+                            
+                            <div id="locationRefreshContainer" class="employee-only mb-4 hidden">
+                                <button id="refreshLocationBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-xl transition-colors">
+                                    📍 Actualizar Ubicación
+                                </button>
+                            </div>
+
+                            <div id="employeeNameDisplay" class="employee-only text-4xl font-extrabold text-purple-700 mb-6 hidden">
+                                </div>
+                            
+                            <div class="grid grid-cols-2 gap-3">
+                                <button id="clockInBtn" class="btn-success text-white font-bold py-4 px-6 rounded-xl">
+                                    ✅ ENTRADA
+                                </button>
+                                <button id="clockOutBtn" class="btn-danger text-white font-bold py-4 px-6 rounded-xl">
+                                    🏁 SALIDA
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-2xl card-shadow p-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-6">📊 Resumen de Hoy</h3>
+                            <div id="todaySummary" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                </div>
+                        </div>
+                        
+                        <div id="workingHoursProgress" class="employee-only mt-6 bg-white rounded-2xl card-shadow p-6 hidden">
+                            <h3 class="text-xl font-bold text-gray-800 mb-6">⏰ Progreso de Jornada</h3>
+                            <div id="progressContent">
+                                </div>
+                        </div>
+                        
+                        <div class="mt-6 bg-white rounded-2xl card-shadow p-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-6">🔄 Actividad Reciente</h3>
+                            <div id="recentActivity" class="space-y-3">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="employeesTab" class="tab-content">
+                <div class="bg-white rounded-2xl card-shadow p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-800">👥 Gestión de Empleados</h3>
+                        <button id="addEmployeeBtn" class="btn-primary text-white px-4 py-2 rounded-lg">
+                            ➕ Nuevo Empleado
+                        </button>
+                    </div>
+
+                    <div id="employeesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        </div>
+                </div>
+            </div>
+
+            <div id="recordsTab" class="tab-content">
+                <div class="bg-white rounded-2xl card-shadow p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-800">📋 Registros de Fichaje</h3>
+                        <div class="flex space-x-2">
+                            
+                            <button id="addManualRecord" class="btn-primary text-white px-4 py-2 rounded-lg admin-only">
+                                ➕ Registro Manual
+                            </button>
+                            <button id="exportRecords" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors admin-only">
+                                📊 Exportar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 admin-only">
+                        <select id="filterEmployee" class="input-modern">
+                            <option value="">Todos los empleados</option>
+                        </select>
+                        <input type="date" id="filterStartDate" class="input-modern">
+                        <input type="date" id="filterEndDate" class="input-modern">
+                        <button id="applyFilters" class="btn-primary text-white px-4 py-2 rounded-lg">
+                            🔍 Filtrar
+                        </button>
+                    </div>
+
+                    <div class="table-modern overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead class="gradient-bg text-white">
+                                    <tr>
+                                        <th class="px-6 py-4 text-left text-sm font-semibold">👤 Empleado</th>
+                                        <th class="px-6 py-4 text-left text-sm font-semibold">📅 Fecha</th>
+                                        <th class="px-6 py-4 text-left text-sm font-semibold">🕐 Entrada</th>
+                                        <th class="px-6 py-4 text-left text-sm font-semibold">🕕 Salida</th>
+                                        <th class="px-6 py-4 text-left text-sm font-semibold">⏱️ Total</th>
+                                        <th class="px-6 py-4 text-left text-sm font-semibold">📊 Estado</th>
+                                        <th class="px-6 py-4 text-left text-sm font-semibold admin-only">⚙️ Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="timeRecordsTable" class="divide-y divide-gray-200">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="reportsTab" class="tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-2xl card-shadow p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-6">📊 Generador de Informes</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">👤 Empleado</label>
+                                <select id="reportEmployee" class="input-modern w-full">
+                                    <option value="">Todos los empleados</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">📅 Fecha Inicio</label>
+                                    <input type="date" id="reportStartDate" class="input-modern w-full">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">📅 Fecha Fin</label>
+                                    <input type="date" id="reportEndDate" class="input-modern w-full">
+                                </div>
+                            </div>
+                            <button id="generateReport" class="w-full btn-primary text-white font-bold py-3 px-6 rounded-xl">
+                                🚀 Generar Informe
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl card-shadow p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-6">📈 Estadísticas</h3>
+                        <div id="statisticsContainer" class="space-y-4">
+                            </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-white rounded-2xl card-shadow p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-800">📋 Resultados del Informe</h3>
+                        
+                        <button id="exportReportBtn" onclick="exportReportData()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors admin-only hidden">
+                            📊 Exportar Informe
+                        </button>
+                    </div>
+                    <div id="reportResults">
+                        <p class="text-gray-500 text-center py-12">📊 Genere un informe para ver los resultados aquí</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="settingsTab" class="tab-content">
+                <div class="space-y-8">
+                    <div class="bg-white rounded-2xl card-shadow p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-6">🏢 Configuración de la Empresa</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">🏢 Nombre de la Empresa</label>
+                                <input type="text" id="companyName" class="input-modern w-full" value="Happy Hostal Carrales">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">🆔 CIF/NIF</label>
+                                <input type="text" id="companyCIF" class="input-modern w-full" value="B12345678">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">📍 Dirección</label>
+                                <input type="text" id="companyAddress" class="input-modern w-full" value="Calle Ejemplo, 123, 28001 Madrid">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">📞 Teléfono</label>
+                                <input type="text" id="companyPhone" class="input-modern w-full" value="+34 912 345 678">
+                            </div>
+                        </div>
+                        
+                        <button id="saveCompanySettings" class="mt-6 btn-primary text-white px-6 py-2 rounded-lg">
+                            💾 Guardar Configuración
+                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-2xl card-shadow p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-6">🔐 Credenciales de Administrador</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">👤 Nombre de Usuario</label>
+                                <input type="text" id="adminUsername" class="input-modern w-full" value="admin">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">🔒 Contraseña Actual</label>
+                                <input type="password" id="currentAdminPassword" class="input-modern w-full" placeholder="Contraseña actual">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">🔑 Nueva Contraseña</label>
+                                <input type="password" id="newAdminPassword" class="input-modern w-full" placeholder="Nueva contraseña">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">🔑 Confirmar Contraseña</label>
+                                <input type="password" id="confirmAdminPassword" class="input-modern w-full" placeholder="Confirmar nueva contraseña">
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                            <p class="text-sm text-yellow-800">
+                                <strong>⚠️ Importante:</strong> Guarde sus nuevas credenciales en un lugar seguro. Si las olvida, no podrá acceder como administrador.
+                            </p>
+                        </div>
+                        
+                        <button id="saveAdminCredentials" class="mt-6 btn-primary text-white px-6 py-2 rounded-lg">
+                            🔐 Actualizar Credenciales
+                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-2xl card-shadow p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-6">📍 Control de Ubicación</h3>
+                        
+                        <div class="space-y-4">
+                            <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                <h4 class="font-bold text-blue-800 mb-2">ℹ️ Información</h4>
+                                <p class="text-sm text-blue-700 mb-2">
+                                    El control de ubicación permite que los empleados solo puedan fichar cuando estén físicamente en el lugar de trabajo.
+                                </p>
+                                <ul class="text-xs text-blue-600 space-y-1 ml-4">
+                                    <li>• Los administradores pueden fichar desde cualquier ubicación</li>
+                                    <li>• Los empleados necesitan estar dentro del radio configurado</li>
+                                    <li>• Se requieren permisos de ubicación en el navegador</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="flex items-center space-x-4">
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" id="enableLocationControl" class="rounded">
+                                    <span class="text-sm font-semibold">Activar Control de Ubicación para Empleados</span>
+                                </label>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">📍 Dirección del Trabajo</label>
+                                <input type="text" id="workAddress" class="input-modern w-full" placeholder="Dirección del lugar de trabajo">
+                                <p class="text-xs text-gray-500 mt-1">Descripción opcional del lugar de trabajo</p>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">🌍 Latitud del Trabajo</label>
+                                    <input type="number" id="workLatitude" class="input-modern w-full" step="0.000001" placeholder="40.416775">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">🌍 Longitud del Trabajo</label>
+                                    <input type="number" id="workLongitude" class="input-modern w-full" step="0.000001" placeholder="-3.703790">
                                 </div>
                             </div>
                             
