@@ -2034,18 +2034,28 @@
             isEditModeActive = false; // Resetear estado de edición
             stopLocationMonitoring();
 
+            // Asegurarse de que el mainApp se oculta y el login se muestra
             document.getElementById('mainApp').classList.add('hidden');
             document.getElementById('loginScreen').classList.remove('hidden');
             
+            // Limpiar y resetear los campos de login
             document.getElementById('adminPassword').value = '';
             document.getElementById('employeeCode').value = '';
+            
+            document.getElementById('adminLogin').classList.add('hidden');
+            document.getElementById('employeeLogin').classList.add('hidden');
+            
             document.querySelectorAll('.user-type-btn').forEach(btn => {
                 btn.classList.remove('border-purple-500', 'bg-purple-50');
                 btn.classList.add('border-gray-200');
             });
-            document.getElementById('adminLogin').classList.add('hidden');
-            document.getElementById('employeeLogin').classList.add('hidden');
             
+            // **CORRECCIÓN 2: Limpiar las variables de estado global del LocalStorage (el que bloquea)**
+            localStorage.removeItem('fichajemax_currentUser');
+            
+            // Forzar la recarga de la página (opcional, pero asegura el estado más limpio)
+            // window.location.reload(); // Si quieres forzar una recarga total
+
             UI.showNotification('👋 Sesión cerrada', 'success');
         }
 
@@ -2071,6 +2081,8 @@
                     loadEmployees();
                     break;
                 case 'records':
+                    // **CORRECCIÓN 1: Recargar la lista de empleados para el filtro**
+                    populateSelects(); 
                     loadTimeRecords();
                     break;
                 case 'reports':
@@ -2311,7 +2323,7 @@
         }
 
         async function testDistance() {
-            if (!locationSettings.workLatitude || !locationSettings.workLongitude) {
+            if (!locationSettings.enabled || !locationSettings.workLatitude || !locationSettings.workLongitude) {
                 UI.showNotification('⚠️ Configure primero la ubicación del trabajo', 'warning');
                 return;
             }
