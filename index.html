@@ -1365,7 +1365,15 @@
         // Data Storage con Firebase 
         const DataManager = {
             getAdminCredentials() {
-                return JSON.parse(localStorage.getItem('fichajemax_adminCredentials')) || {
+                const storedCredentials = localStorage.getItem('fichajemax_adminCredentials');
+                if (storedCredentials && storedCredentials !== 'undefined') {
+                    try {
+                        return JSON.parse(storedCredentials);
+                    } catch (e) {
+                         console.error("Error al parsear adminCredentials:", e);
+                    }
+                }
+                return {
                     username: 'admin',
                     password: 'Octubre2012'
                 };
@@ -1376,7 +1384,15 @@
             },
             
             getEmployees() {
-                return JSON.parse(localStorage.getItem('fichajemax_employees')) || this.getDefaultEmployees();
+                const storedEmployees = localStorage.getItem('fichajemax_employees');
+                if (storedEmployees && storedEmployees !== 'undefined') {
+                    try {
+                        return JSON.parse(storedEmployees);
+                    } catch (e) {
+                        console.error("Error al parsear employees:", e);
+                    }
+                }
+                return this.getDefaultEmployees();
             },
             
             // MODIFICACIÓN CLAVE: Quitamos la actualización de la variable global (employees = newEmployees)
@@ -1486,13 +1502,21 @@
             },
             
             getTimeRecords() {
-                return JSON.parse(localStorage.getItem('fichajemax_timeRecords')) || [];
+                const storedRecords = localStorage.getItem('fichajemax_timeRecords');
+                if (storedRecords && storedRecords !== 'undefined') {
+                    try {
+                        return JSON.parse(storedRecords);
+                    } catch (e) {
+                        console.error("Error al parsear timeRecords:", e);
+                    }
+                }
+                return [];
             },
             
             // MODIFICACIÓN CLAVE: Quitamos la actualización de la variable global (timeRecords = newRecords)
             // porque Firebase lo hará. Solo guardamos en local y sincronizamos a la nube.
             setTimeRecords(newRecords) {
-                // 1. Guardar localmente 
+                // 1. Guardar localmente (como fallback/backup)
                 localStorage.setItem('fichajemax_timeRecords', JSON.stringify(newRecords));
 
                 // 2. Sincronizar con Firebase
@@ -1534,7 +1558,16 @@
         // Configuration Management
         const ConfigManager = {
             getCompanySettings() {
-                return JSON.parse(localStorage.getItem('fichajemax_companySettings')) || {
+                const storedSettings = localStorage.getItem('fichajemax_companySettings');
+                // Asegura que no se intente parsear 'undefined'
+                if (storedSettings && storedSettings !== 'undefined') {
+                    try {
+                        return JSON.parse(storedSettings);
+                    } catch (e) {
+                        console.error("Error al parsear companySettings:", e);
+                    }
+                }
+                return {
                     companyName: 'Happy Hostal Carrales',
                     companyCIF: 'B09539271',
                     companyAddress: 'Calle Puente Gasset 4º 1º drch',
@@ -1547,7 +1580,16 @@
             },
             
             getLocationSettings() {
-                return JSON.parse(localStorage.getItem('fichajemax_locationSettings')) || {
+                const storedSettings = localStorage.getItem('fichajemax_locationSettings');
+                // Asegura que no se intente parsear 'undefined'
+                if (storedSettings && storedSettings !== 'undefined') {
+                    try {
+                        return JSON.parse(storedSettings);
+                    } catch (e) {
+                        console.error("Error al parsear locationSettings:", e);
+                    }
+                }
+                return {
                     enabled: true,
                     workLatitude: 42.341646,
                     workLongitude: -3.694808,
