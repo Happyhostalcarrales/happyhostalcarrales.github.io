@@ -2045,32 +2045,36 @@
         }
 
         function logout() {
-            console.log('Cerrando sesión');
+            console.log('Cerrando sesión y eliminando caché de sesión.');
+            
+            // 1. Limpiar el estado de las variables globales
             currentUser = null;
             selectedUserType = null;
             isEditModeActive = false; // Resetear estado de edición
             stopLocationMonitoring();
 
-            // Asegurarse de que el mainApp se oculta y el login se muestra
+            // 2. Limpiar datos residuales de la sesión en LocalStorage
+            localStorage.removeItem('fichajemax_currentUser');
+            localStorage.removeItem('fichajemax_selectedUserType');
+            
+            // 3. Forzar el estado de la interfaz (ocultar mainApp, mostrar login)
             document.getElementById('mainApp').classList.add('hidden');
             document.getElementById('loginScreen').classList.remove('hidden');
             
-            // Limpiar y resetear los campos de login
+            // 4. Limpiar campos y botones
             document.getElementById('adminPassword').value = '';
             document.getElementById('employeeCode').value = '';
-            
             document.getElementById('adminLogin').classList.add('hidden');
             document.getElementById('employeeLogin').classList.add('hidden');
-            
             document.querySelectorAll('.user-type-btn').forEach(btn => {
                 btn.classList.remove('border-purple-500', 'bg-purple-50');
                 btn.classList.add('border-gray-200');
             });
             
-            // **CORRECCIÓN 2: Limpiar las variables de estado global del LocalStorage (el que bloquea)**
-            localStorage.removeItem('fichajemax_currentUser');
+            UI.showNotification('👋 Sesión cerrada y caché local limpiado.', 'success');
             
-            UI.showNotification('👋 Sesión cerrada', 'success');
+            // 5. Forzar la recarga total para asegurar que no se restaure el estado antiguo de JS.
+            window.location.reload(true); 
         }
 
         // Navigation
