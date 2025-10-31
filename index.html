@@ -407,55 +407,7 @@
             display: inline-block !important;
         }
         
-        /* ================================================= */
-        /* MEJORAS DE DISEÑO RESPONSIVO (MOBILE FIRST)       */
-        /* ================================================= */
-
-        /* Dashboard y Empleados: Ajuste para que las columnas no se rompan demasiado */
-        .employee-card .space-y-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-        }
-
-        /* Encabezado: Compactar en móvil */
-        header .flex {
-            flex-wrap: wrap;
-        }
-
-        /* Tablet (md: 768px) */
-        @media (min-width: 768px) {
-            .employee-card .space-y-2 {
-                display: block; /* Vuelve al diseño de pila en tablet para tener espacio */
-            }
-
-            /* Dashboard: Aumentar el tamaño de la fuente para el reloj en tablet */
-            .clock-container #mainClock {
-                font-size: 5rem;
-            }
-
-            /* Dashboard: 2 columnas en lugar de 4 en el resumen (opcional) */
-            #todaySummary {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        /* Desktop (lg: 1024px) */
-        @media (min-width: 1024px) {
-            /* Dashboard: Vuelve al diseño de 4 columnas en desktop */
-            #todaySummary {
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-            }
-        }
-
-        /* Ajuste de Reloj para Móviles Pequeños */
-        @media (max-width: 640px) {
-            .clock-container #mainClock {
-                font-size: 3rem; /* Tamaño más pequeño para móviles */
-            }
-        }
-        
-        /* Ajustes generales de posición */
+        /* Responsive Design Improvements */
         @media (max-width: 768px) {
             .sync-indicator,
             .location-status {
@@ -472,38 +424,6 @@
                 right: 16px;
                 top: 16px;
                 max-width: calc(100vw - 32px);
-            }
-
-            /* Encabezado compacto en móvil */
-            header .flex {
-                padding-top: 1rem;
-                padding-bottom: 1rem;
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            header .flex > div:last-child {
-                margin-top: 0.75rem;
-                width: 100%;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-            
-            /* Ocultar la fecha en el encabezado para ahorrar espacio */
-            header #currentDate {
-                display: none;
-            }
-
-            /* Ajuste de padding en el contenedor principal */
-            .max-w-7xl.mx-auto.px-4 {
-                padding-left: 1rem;
-                padding-right: 1rem;
-            }
-            
-            /* Forzar que el grid de empleados tenga una columna en móvil si el contenido es denso */
-            #employeesGrid {
-                 grid-template-columns: 1fr;
             }
         }
     </style>
@@ -1036,54 +956,43 @@
             <div class="gradient-bg text-white p-6 rounded-t-2xl">
                 <h3 class="text-xl font-bold">👤 Nuevo Empleado</h3>
             </div>
-            <div class="p-6 space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">👤 Nombre *</label>
+                    <input type="text" id="employeeName" class="input-modern w-full" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">👤 Apellidos *</label>
+                    <input type="text" id="employeeLastName" class="input-modern w-full" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">🆔 DNI/NIE *</label>
+                    <input type="text" id="employeeDNI" class="input-modern w-full" placeholder="12345678A" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">💼 Puesto</label>
+                    <input type="text" id="employeePosition" class="input-modern w-full">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">👤 Nombre *</label>
-                        <input type="text" id="employeeName" class="input-modern w-full" required>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">⏰ Jornada Diaria</label>
+                        <select id="employeeWorkingHours" class="input-modern w-full">
+                            <option value="8">8 horas (Completa)</option>
+                            <option value="7">7 horas</option>
+                            <option value="6">6 horas</option>
+                            <option value="5">5 horas</option>
+                            <option value="4">4 horas (Media jornada)</option>
+                            <option value="3">3 horas</option>
+                            <option value="2">2 horas</option>
+                            <option value="custom">Personalizada</option>
+                        </select>
                     </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">👤 Apellidos *</label>
-                        <input type="text" id="employeeLastName" class="input-modern w-full" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">🆔 DNI/NIE/Pasaporte *</label>
-                        <input type="text" id="employeeDNI" class="input-modern w-full" placeholder="12345678A / Y1234567Z / Pasaporte" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">💼 Puesto</label>
-                        <input type="text" id="employeePosition" class="input-modern w-full">
+                    <div id="customHoursContainer" class="hidden">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">🕐 Horas Personalizadas</label>
+                        <input type="number" id="employeeCustomHours" class="input-modern w-full" min="0.5" max="12" step="0.5" placeholder="Ej: 6.5">
                     </div>
                 </div>
-
-                <div class="border-t pt-4">
-                    <h4 class="font-bold text-gray-800 mb-3">⏰ Horario y Jornada</h4>
-                    
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">⏰ Jornada Estándar (Horas/día)</label>
-                            <select id="employeeWorkingHours" class="input-modern w-full">
-                                <option value="8">8 horas (Completa)</option>
-                                <option value="7">7 horas</option>
-                                <option value="6">6 horas</option>
-                                <option value="5">5 horas</option>
-                                <option value="4">4 horas (Media jornada)</option>
-                                <option value="3">3 horas</option>
-                                <option value="2">2 horas</option>
-                                <option value="custom">Personalizada</option>
-                            </select>
-                        </div>
-                        <div id="customHoursContainer" class="hidden">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">🕐 Horas Personalizadas</label>
-                            <input type="number" id="employeeCustomHours" class="input-modern w-full" min="0.5" max="12" step="0.5" placeholder="Ej: 6.5">
-                        </div>
-                    </div>
-
-                    <div id="employeeScheduleContainer" class="space-y-2 max-h-64 overflow-y-auto pr-2">
-                        </div>
-                </div>
-
-                <div class="border-t pt-4">
+                <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">📱 Código PIN *</label>
                     <div class="flex space-x-2">
                         <input type="text" id="employeeAccessCode" class="input-modern flex-1 text-center text-lg tracking-widest" placeholder="1234" maxlength="4" pattern="[0-9]{4}" required>
@@ -1117,17 +1026,9 @@
                         <option value="">Seleccionar empleado</option>
                     </select>
                 </div>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">📅 Fecha de Inicio *</label>
-                        <input type="date" id="manualRecordDate" class="input-modern w-full" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">📅 Fecha de Fin (Incluida)</label>
-                        <input type="date" id="manualRecordEndDate" class="input-modern w-full">
-                        <p class="text-xs text-gray-500 mt-1">Opcional. Registra el mismo horario en todo el rango.</p>
-                    </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">📅 Fecha *</label>
+                    <input type="date" id="manualRecordDate" class="input-modern w-full" required>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">🕐 Hora de Entrada</label>
@@ -1147,7 +1048,7 @@
                     ❌ Cancelar
                 </button>
                 <button id="saveManualRecord" class="btn-primary text-white px-6 py-2 rounded-lg">
-                    💾 Guardar Registro(s)
+                    💾 Guardar Registro
                 </button>
             </div>
         </div>
@@ -1366,6 +1267,7 @@
         const DataManager = {
             getAdminCredentials() {
                 const storedCredentials = localStorage.getItem('fichajemax_adminCredentials');
+                // Se agregó manejo de errores para el JSON.parse
                 if (storedCredentials && storedCredentials !== 'undefined') {
                     try {
                         return JSON.parse(storedCredentials);
@@ -1395,12 +1297,11 @@
                 return this.getDefaultEmployees();
             },
             
-            // MODIFICACIÓN CLAVE: Quitamos la actualización de la variable global (employees = newEmployees)
-            // porque Firebase lo hará. Solo guardamos en local y sincronizamos a la nube.
             setEmployees(newEmployees) {
-                // 1. Guardar localmente (como fallback/backup)
+                // 1. Guardar localmente
                 localStorage.setItem('fichajemax_employees', JSON.stringify(newEmployees));
-
+                employees = newEmployees; // Actualizar la variable global
+                
                 // 2. Sincronizar con Firebase
                 refEmpleados.set(newEmployees)
                     .catch(error => {
@@ -1410,9 +1311,6 @@
             },
             
             getDefaultEmployees() {
-                // Nuevo formato de jornada:
-                // - schedule: Objeto con horarios de entrada/salida por día (Lunes a Domingo).
-                // - daysOff: Array de días de la semana que libra (ej: ["Sábado", "Domingo"]).
                 return [
                     {
                         id: 1,
@@ -1422,17 +1320,7 @@
                         position: 'Recepcionista',
                         status: 'Activo',
                         accessCode: '1234',
-                        workingHours: 8, // Se mantiene para compatibilidad y cálculo rápido
-                        schedule: {
-                            Lunes: { timeIn: '09:00', timeOut: '17:00' },
-                            Martes: { timeIn: '09:00', timeOut: '17:00' },
-                            Miércoles: { timeIn: '09:00', timeOut: '17:00' },
-                            Jueves: { timeIn: '09:00', timeOut: '17:00' },
-                            Viernes: { timeIn: '09:00', timeOut: '17:00' },
-                            Sábado: { timeIn: null, timeOut: null },
-                            Domingo: { timeIn: null, timeOut: null }
-                        },
-                        daysOff: ["Sábado", "Domingo"],
+                        workingHours: 8,
                         createdAt: new Date().toISOString()
                     },
                     {
@@ -1444,16 +1332,6 @@
                         status: 'Activo',
                         accessCode: '5678',
                         workingHours: 8,
-                        schedule: {
-                            Lunes: { timeIn: '15:00', timeOut: '23:00' },
-                            Martes: { timeIn: '15:00', timeOut: '23:00' },
-                            Miércoles: { timeIn: '15:00', timeOut: '23:00' },
-                            Jueves: { timeIn: null, timeOut: null },
-                            Viernes: { timeIn: null, timeOut: null },
-                            Sábado: { timeIn: '10:00', timeOut: '18:00' },
-                            Domingo: { timeIn: '10:00', timeOut: '18:00' }
-                        },
-                        daysOff: ["Jueves", "Viernes"],
                         createdAt: new Date().toISOString()
                     },
                     {
@@ -1465,16 +1343,6 @@
                         status: 'Activo',
                         accessCode: '9012',
                         workingHours: 6,
-                        schedule: {
-                            Lunes: { timeIn: '12:00', timeOut: '18:00' },
-                            Martes: { timeIn: '12:00', timeOut: '18:00' },
-                            Miércoles: { timeIn: '12:00', timeOut: '18:00' },
-                            Jueves: { timeIn: '12:00', timeOut: '18:00' },
-                            Viernes: { timeIn: '12:00', timeOut: '18:00' },
-                            Sábado: { timeIn: '08:00', timeOut: '14:00' },
-                            Domingo: { timeIn: null, timeOut: null }
-                        },
-                        daysOff: ["Domingo"],
                         createdAt: new Date().toISOString()
                     },
                     {
@@ -1486,16 +1354,6 @@
                         status: 'Activo',
                         accessCode: '3456',
                         workingHours: 8,
-                        schedule: {
-                            Lunes: { timeIn: '08:00', timeOut: '16:00' },
-                            Martes: { timeIn: '08:00', timeOut: '16:00' },
-                            Miércoles: { timeIn: '08:00', timeOut: '16:00' },
-                            Jueves: { timeIn: '08:00', timeOut: '16:00' },
-                            Viernes: { timeIn: '08:00', timeOut: '16:00' },
-                            Sábado: { timeIn: null, timeOut: null },
-                            Domingo: { timeIn: null, timeOut: null }
-                        },
-                        daysOff: ["Sábado", "Domingo"],
                         createdAt: new Date().toISOString()
                     }
                 ];
@@ -1513,11 +1371,10 @@
                 return [];
             },
             
-            // MODIFICACIÓN CLAVE: Quitamos la actualización de la variable global (timeRecords = newRecords)
-            // porque Firebase lo hará. Solo guardamos en local y sincronizamos a la nube.
             setTimeRecords(newRecords) {
-                // 1. Guardar localmente (como fallback/backup)
+                // 1. Guardar localmente 
                 localStorage.setItem('fichajemax_timeRecords', JSON.stringify(newRecords));
+                timeRecords = newRecords; // Actualizar la variable global
 
                 // 2. Sincronizar con Firebase
                 refRegistros.set(newRecords)
@@ -1553,7 +1410,7 @@
         
         // VARIABLE CLAVE: Controla la visibilidad de los botones de edición de registros
         let isEditModeActive = false;
-        const ADMIN_EDIT_PASSWORD = '1010'; // PIN de modo edición
+        const ADMIN_EDIT_PASSWORD = '1010';
         
         // Configuration Management
         const ConfigManager = {
@@ -1619,7 +1476,7 @@
         
         
         // =========================================================================
-        // FUNCIÓN CLAVE: ESCUCHADORES DE FIREBASE EN TIEMPO REAL (MODIFICADO)
+        // FUNCIÓN CLAVE: ESCUCHADORES DE FIREBASE EN TIEMPO REAL
         // =========================================================================
 
         function startRealtimeListeners() {
@@ -1628,11 +1485,9 @@
             // Escuchador de Empleados
             refEmpleados.on('value', (snapshot) => {
                 const firebaseEmployees = snapshot.val();
-                
                 if (firebaseEmployees) {
-                    // CAMBIO CLAVE 1: Sobrescribir la variable global con los datos de Firebase
                     employees = firebaseEmployees;
-                    localStorage.setItem('fichajemax_employees', JSON.stringify(employees)); // Guardar en local como caché
+                    localStorage.setItem('fichajemax_employees', JSON.stringify(employees));
                     console.log('✅ Empleados sincronizados desde Firebase');
                     
                     if (currentUser) {
@@ -1641,11 +1496,6 @@
                         loadDashboard();
                     }
                     UI.updateSyncIndicator('success');
-                } else if (!localStorage.getItem('fichajemax_employees') || employees.length === 0) {
-                    // Si no hay datos en Firebase y el array global está vacío (o no hay local), 
-                    // se inicializa con el array por defecto y se sube a Firebase.
-                    console.log('⚠️ No hay empleados en Firebase. Subiendo los empleados por defecto.');
-                    DataManager.setEmployees(DataManager.getDefaultEmployees());
                 }
             }, (error) => {
                 console.error("Error en escuchador de Empleados:", error);
@@ -1656,9 +1506,8 @@
             refRegistros.on('value', (snapshot) => {
                 const firebaseRecords = snapshot.val();
                 if (firebaseRecords) {
-                    // CAMBIO CLAVE 2: Sobrescribir la variable global con los datos de Firebase
                     timeRecords = firebaseRecords;
-                    localStorage.setItem('fichajemax_timeRecords', JSON.stringify(timeRecords)); // Guardar en local como caché
+                    localStorage.setItem('fichajemax_timeRecords', JSON.stringify(timeRecords));
                     console.log('✅ Registros sincronizados desde Firebase');
                     
                     if (currentUser) {
@@ -1666,9 +1515,6 @@
                         loadDashboard();
                     }
                     UI.updateSyncIndicator('success');
-                } else if (!localStorage.getItem('fichajemax_timeRecords') || timeRecords.length === 0) {
-                    console.log('⚠️ No hay registros en Firebase.');
-                    // Si no hay registros en Firebase ni en el caché local, no hace nada (empieza vacío)
                 }
             }, (error) => {
                 console.error("Error en escuchador de Registros:", error);
@@ -1680,14 +1526,14 @@
                 const config = snapshot.val();
                 if (config) {
                     if (JSON.stringify(config.companySettings) !== JSON.stringify(companySettings)) {
-                        companySettings = config.companySettings || config.companySettings;
+                        companySettings = config.companySettings || companySettings;
                         localStorage.setItem('fichajemax_companySettings', JSON.stringify(companySettings));
-                        if (currentUser) loadCompanySettings();
+                        loadCompanySettings();
                     }
                     if (JSON.stringify(config.locationSettings) !== JSON.stringify(locationSettings)) {
-                        locationSettings = config.locationSettings || config.locationSettings;
+                        locationSettings = config.locationSettings || locationSettings;
                         localStorage.setItem('fichajemax_locationSettings', JSON.stringify(locationSettings));
-                        if (currentUser) loadLocationSettings();
+                        loadLocationSettings();
                     }
                 }
             });
@@ -1785,10 +1631,12 @@
             }
             
             initializeData() {
-                // NOTA: Se ha quitado la inicialización de employees aquí. Ahora la 
-                // lógica de carga/inicialización de datos la manejan los escuchadores 
-                // de Firebase en 'startRealtimeListeners' para asegurar la bidireccionalidad.
-                
+                if (!localStorage.getItem('fichajemax_employees')) {
+                    DataManager.setEmployees(DataManager.getDefaultEmployees());
+                }
+                if (!localStorage.getItem('fichajemax_companySettings')) {
+                    ConfigManager.setCompanySettings(companySettings);
+                }
                 if (!localStorage.getItem('fichajemax_adminCredentials')) {
                     DataManager.setAdminCredentials(adminCredentials);
                 }
@@ -1824,20 +1672,7 @@
             }
         }
         
-        // Función de inicialización de datos para asegurar que las variables globales
-        // se cargan desde el caché o los valores por defecto al inicio.
-        function ensureInitialDataLoad() {
-            employees = DataManager.getEmployees();
-            timeRecords = DataManager.getTimeRecords();
-            companySettings = ConfigManager.getCompanySettings();
-            locationSettings = ConfigManager.getLocationSettings();
-            adminCredentials = DataManager.getAdminCredentials();
-        }
-        
-        ensureInitialDataLoad(); // Ejecutar antes de inicializar la app
-
-        // Initialize when DOM is ready (Esta es la línea que soluciona el problema de "null" si el script se carga en el body)
-        // La ejecución de App() está dentro de DOMContentLoaded para asegurar que todos los elementos HTML existen.
+        // Initialize when DOM is ready
         document.addEventListener('DOMContentLoaded', () => new App());
 
         // Event Listeners
@@ -1957,14 +1792,14 @@
                     // CONTRASENA NORMAL (SIN EDICIÓN)
                     isEditModeActive = false;
                     currentUser = { type: 'admin', name: adminCredentials.username };
-                    UI.showNotification(`✅ Bienvenido ${adminCredentials.username}`, 'success');
                     showMainApp();
+                    UI.showNotification(`✅ Bienvenido ${adminCredentials.username}`, 'success');
                 } else if (password === ADMIN_EDIT_PASSWORD) {
                     // CONTRASENA SECRETA (CON EDICIÓN)
                     isEditModeActive = true;
                     currentUser = { type: 'admin', name: adminCredentials.username + ' (Modo Edición)' };
-                    UI.showNotification(`✅ Bienvenido ${adminCredentials.username} (Modo Edición)`, 'warning');
                     showMainApp();
+                    UI.showNotification(`✅ Bienvenido ${adminCredentials.username} (Modo Edición)`, 'warning');
                 } else {
                     UI.showNotification('❌ Contraseña incorrecta', 'error');
                     console.log('Login fallido - contraseña incorrecta');
@@ -1986,8 +1821,8 @@
             if (employee) {
                 isEditModeActive = false; 
                 currentUser = { type: 'employee', ...employee };
-                UI.showNotification(`✅ Bienvenido/a ${employee.name}`, 'success');
                 showMainApp();
+                UI.showNotification(`✅ Bienvenido/a ${employee.name}`, 'success');
             } else {
                 UI.showNotification('❌ Código incorrecto o empleado inactivo', 'error');
                 document.getElementById('employeeCode').value = '';
@@ -1996,23 +1831,6 @@
 
         function showMainApp() {
             console.log('Mostrando aplicación principal para:', currentUser);
-
-            // CORRECCIÓN CLAVE: Verificar si la sesión es válida al intentar mostrar la APP
-            if (!currentUser || !currentUser.type) {
-                console.warn('⚠️ Intento de acceder a mainApp sin usuario válido. Forzando pantalla de Login.');
-                
-                // Asegurar que la pantalla de login esté visible y la principal oculta
-                document.getElementById('loginScreen').classList.remove('hidden');
-                document.getElementById('mainApp').classList.add('hidden');
-                
-                // Forzar el estado de la interfaz de login (limpiar campos)
-                document.getElementById('adminLogin').classList.add('hidden');
-                document.getElementById('employeeLogin').classList.add('hidden');
-                document.getElementById('adminPassword').value = '';
-                document.getElementById('employeeCode').value = '';
-                return; // Detener la ejecución si no hay usuario válido
-            }
-            
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
             
@@ -2041,7 +1859,6 @@
             });
             
             document.querySelectorAll('.employee-only').forEach(element => {
-                // Aseguramos que los elementos específicos del empleado se vean
                 element.style.display = 'block';
             });
 
@@ -2052,20 +1869,10 @@
                 nameDisplay.classList.remove('hidden'); 
             }
 
-            // LÓGICA DE VISIBILIDAD DEL BOTÓN DE UBICACIÓN
+            // Lógica existente para el botón de refresco de ubicación
             const locationRefreshContainer = document.getElementById('locationRefreshContainer');
-            const employeeLocationStatus = document.getElementById('employeeLocationStatus');
-            
-            if (locationRefreshContainer && locationSettings.enabled && currentUser.type === 'employee') {
-                locationRefreshContainer.classList.remove('hidden'); // Mostrar el botón
-                if (employeeLocationStatus) {
-                    employeeLocationStatus.classList.remove('hidden'); // Mostrar el indicador de estado
-                }
-            } else {
-                locationRefreshContainer.classList.add('hidden');
-                if (employeeLocationStatus) {
-                    employeeLocationStatus.classList.add('hidden');
-                }
+            if (locationRefreshContainer && locationSettings.enabled) {
+                locationRefreshContainer.classList.remove('hidden');
             }
         }
 
@@ -2087,36 +1894,25 @@
         }
 
         function logout() {
-            console.log('Cerrando sesión y eliminando caché de sesión.');
-            
-            // 1. Limpiar el estado de las variables globales
+            console.log('Cerrando sesión');
             currentUser = null;
             selectedUserType = null;
             isEditModeActive = false; // Resetear estado de edición
             stopLocationMonitoring();
 
-            // 2. Limpiar datos residuales de la sesión en LocalStorage
-            localStorage.removeItem('fichajemax_currentUser');
-            localStorage.removeItem('fichajemax_selectedUserType');
-            
-            // 3. Forzar el estado de la interfaz (ocultar mainApp, mostrar login)
             document.getElementById('mainApp').classList.add('hidden');
             document.getElementById('loginScreen').classList.remove('hidden');
             
-            // 4. Limpiar campos y botones
             document.getElementById('adminPassword').value = '';
             document.getElementById('employeeCode').value = '';
-            document.getElementById('adminLogin').classList.add('hidden');
-            document.getElementById('employeeLogin').classList.add('hidden');
             document.querySelectorAll('.user-type-btn').forEach(btn => {
                 btn.classList.remove('border-purple-500', 'bg-purple-50');
                 btn.classList.add('border-gray-200');
             });
+            document.getElementById('adminLogin').classList.add('hidden');
+            document.getElementById('employeeLogin').classList.add('hidden');
             
-            UI.showNotification('👋 Sesión cerrada y caché local limpiado.', 'success');
-            
-            // 5. Forzar la recarga total para asegurar que no se restaure el estado antiguo de JS.
-            window.location.reload(true); 
+            UI.showNotification('👋 Sesión cerrada', 'success');
         }
 
         // Navigation
@@ -2141,8 +1937,6 @@
                     loadEmployees();
                     break;
                 case 'records':
-                    // **CORRECCIÓN 1: Recargar la lista de empleados para el filtro**
-                    populateSelects(); 
                     loadTimeRecords();
                     break;
                 case 'reports':
@@ -2857,8 +2651,8 @@
                         
                         <div class="space-y-2 text-sm text-gray-600 mb-4">
                             <div class="flex justify-between">
-                                <span>🆔 Documento:</span>
-                                <span class="font-mono">••••••••</span>
+                                <span>🆔 DNI:</span>
+                                <span class="font-mono">${employee.dni}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span>📱 PIN:</span>
@@ -2880,10 +2674,6 @@
                                     <span class="${todayRecord.totalHours >= (employee.workingHours || 8) ? 'text-green-600 font-bold' : 'text-orange-600'}">${todayRecord.totalHours?.toFixed(1) || '0.0'}h</span>
                                 </div>
                             ` : ''}
-                            <div class="flex justify-between">
-                                <span>Días Libres:</span>
-                                <span class="font-semibold text-gray-600">${employee.daysOff?.join(', ') || 'Ninguno'}</span>
-                            </div>
                         </div>
                         
                         <div class="grid grid-cols-3 gap-2">
@@ -3214,15 +3004,6 @@
         function showEmployeeModal() {
             document.getElementById('employeeModal').classList.remove('hidden');
             
-            // Datos por defecto para el nuevo empleado
-            const defaultSchedule = {
-                Lunes: { timeIn: '09:00', timeOut: '17:00' }, Martes: { timeIn: '09:00', timeOut: '17:00' }, Miércoles: { timeIn: '09:00', timeOut: '17:00' },
-                Jueves: { timeIn: '09:00', timeOut: '17:00' }, Viernes: { timeIn: '09:00', timeOut: '17:00' }, Sábado: { timeIn: null, timeOut: null },
-                Domingo: { timeIn: null, timeOut: null }
-            };
-            const defaultDaysOff = ["Sábado", "Domingo"];
-
-
             if (!editingEmployeeId) {
                 document.getElementById('employeeName').value = '';
                 document.getElementById('employeeLastName').value = '';
@@ -3233,9 +3014,6 @@
                 document.getElementById('employeeCustomHours').value = '';
                 document.getElementById('customHoursContainer').classList.add('hidden');
                 
-                // Renderizar el horario por defecto
-                renderEmployeeSchedule(defaultSchedule, defaultDaysOff);
-
                 const modalTitle = document.querySelector('#employeeModal .gradient-bg h3');
                 if (modalTitle) {
                     modalTitle.textContent = '👤 Nuevo Empleado';
@@ -3261,7 +3039,6 @@
             document.getElementById('manualRecordModal').classList.remove('hidden');
             document.getElementById('manualRecordEmployee').value = '';
             document.getElementById('manualRecordDate').value = formatDate(new Date());
-            document.getElementById('manualRecordEndDate').value = ''; // Campo nuevo
             document.getElementById('manualRecordTimeIn').value = '';
             document.getElementById('manualRecordTimeOut').value = '';
             document.getElementById('manualRecordNotes').value = '';
@@ -3304,9 +3081,8 @@
                 return;
             }
             
-            // VALIDACIÓN MEJORADA DE DOCUMENTOS (DNI, NIE, Pasaporte Europeo)
-            if (!validateDNI_NIE_Passport(dni)) {
-                UI.showNotification('⚠️ DNI/NIE/Pasaporte no válido. Verifique el formato.', 'warning');
+            if (!validateDNI(dni)) {
+                UI.showNotification('⚠️ DNI/NIE no válido. Formato: 12345678A o X1234567A', 'warning');
                 return;
             }
             
@@ -3324,7 +3100,7 @@
                 if (existingEmployee.accessCode === accessCode) {
                     UI.showNotification('⚠️ Este código PIN ya está en uso', 'warning');
                 } else {
-                    UI.showNotification('⚠️ Este documento (DNI/NIE) ya está registrado', 'warning');
+                    UI.showNotification('⚠️ Este DNI/NIE ya está registrado', 'warning');
                 }
                 return;
             }
@@ -3342,37 +3118,6 @@
             } else {
                 workingHours = parseFloat(workingHoursSelect);
             }
-
-            // --- LÓGICA DE RECOPILACIÓN DE HORARIOS ---
-            const newSchedule = {};
-            const newDaysOff = [];
-            const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-            let validationError = false;
-
-            days.forEach(day => {
-                const dayOffCheckbox = document.getElementById(`dayOff-${day}`);
-                if (dayOffCheckbox && dayOffCheckbox.checked) {
-                    newDaysOff.push(day);
-                    newSchedule[day] = { timeIn: null, timeOut: null };
-                } else {
-                    const timeInInput = document.getElementById(`timeIn-${day}`);
-                    const timeOutInput = document.getElementById(`timeOut-${day}`);
-                    
-                    const timeIn = timeInInput ? timeInInput.value : null;
-                    const timeOut = timeOutInput ? timeOutInput.value : null;
-                    
-                    // Usamos el validador de rango con el flag de ScheduleCheck (true)
-                    if (timeIn && timeOut && !validateTimeRange(timeIn, timeOut, true)) {
-                         UI.showNotification(`⚠️ El turno del ${day} no es válido (máximo 16 horas)`, 'warning');
-                         validationError = true;
-                    }
-                    
-                    newSchedule[day] = { timeIn, timeOut };
-                }
-            });
-            
-            if (validationError) return;
-            // --- FIN LÓGICA DE RECOPILACIÓN DE HORARIOS ---
             
             const employeeData = {
                 id: editingEmployeeId || Date.now(),
@@ -3382,9 +3127,7 @@
                 position: position || 'Sin especificar',
                 status: 'Activo',
                 accessCode,
-                workingHours, // Horas totales por día
-                schedule: newSchedule, // Nuevo: Horario semanal específico
-                daysOff: newDaysOff, // Nuevo: Días libres
+                workingHours,
                 createdAt: editingEmployeeId ? employees.find(e => e.id === editingEmployeeId)?.createdAt : new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             };
@@ -3392,7 +3135,7 @@
             if (editingEmployeeId) {
                 const index = employees.findIndex(emp => emp.id === editingEmployeeId);
                 if (index !== -1) {
-                    employees[index] = { ...employees[index], ...employeeData };
+                    employees[index] = employeeData;
                     UI.showNotification('✅ Empleado actualizado correctamente', 'success');
                 }
             } else {
@@ -3410,10 +3153,9 @@
             console.log('Guardando registro manual');
             const employeeId = document.getElementById('manualRecordEmployee').value;
             const date = document.getElementById('manualRecordDate').value;
-            const endDate = document.getElementById('manualRecordEndDate').value; // Nuevo: Fecha de fin
             const timeIn = document.getElementById('manualRecordTimeIn').value;
             const timeOut = document.getElementById('manualRecordTimeOut').value;
-            const notes = document.getElementById('manualRecordNotes').value.trim() || 'Registro manual (Admin)';
+            const notes = document.getElementById('manualRecordNotes').value.trim();
             
             if (!employeeId || !date) {
                 UI.showNotification('⚠️ Complete los campos obligatorios', 'warning');
@@ -3425,77 +3167,52 @@
                 return;
             }
             
-            // Validar rango de tiempo (máximo 16 horas)
             if (timeIn && timeOut && !validateTimeRange(timeIn, timeOut)) {
                 UI.showNotification('⚠️ El rango de tiempo no es válido (máximo 16 horas)', 'warning');
                 return;
             }
             
-            const startDateObj = new Date(date);
-            // Si endDate está vacío, usamos startDate
-            const endDateObj = endDate ? new Date(endDate) : startDateObj;
+            const existingRecord = timeRecords.find(record => 
+                record.employeeId == employeeId && record.date === date
+            );
             
-            if (startDateObj > endDateObj) {
-                UI.showNotification('⚠️ La fecha de inicio no puede ser posterior a la fecha de fin', 'warning');
+            if (existingRecord) {
+                UI.showNotification('⚠️ Ya existe un registro para este empleado en esta fecha', 'warning');
                 return;
             }
-
+            
+            const selectedDate = new Date(date);
+            const today = new Date();
+            today.setHours(23, 59, 59, 999);
+            
+            if (selectedDate > today) {
+                UI.showNotification('⚠️ No se pueden crear registros para fechas futuras', 'warning');
+                return;
+            }
+            
             const employee = employees.find(emp => emp.id == employeeId);
             const totalHours = (timeIn && timeOut) ? calculateHours(timeIn, timeOut) : 0;
-            const today = new Date();
-            let recordsCreated = 0;
-            const recordsToSave = [];
-
-            // Iteración para el registro de múltiples días
-            // Clonar la fecha inicial para la iteración para evitar modificar la original
-            for (let d = new Date(startDateObj); d <= endDateObj; d.setDate(d.getDate() + 1)) {
-                const currentDate = formatDate(d);
-                const isFutureDate = d > today;
-
-                if (isFutureDate) {
-                    UI.showNotification(`⚠️ Se omitió el registro para fecha futura: ${currentDate}`, 'warning');
-                    continue;
-                }
-
-                const existingRecord = timeRecords.find(record => 
-                    record.employeeId == employeeId && record.date === currentDate
-                );
-                
-                if (existingRecord) {
-                    // Omitir si ya existe un registro para ese día
-                    continue; 
-                }
-
-                const newRecord = {
-                    id: Date.now() + recordsCreated, // Asegurar ID único
-                    employeeId: parseInt(employeeId),
-                    employeeName: employee.name + ' ' + employee.lastName,
-                    date: currentDate,
-                    timeIn: timeIn || null,
-                    timeOut: timeOut || null,
-                    totalHours,
-                    method: 'manual',
-                    notes: notes,
-                    // ESTANDARIZACIÓN: Si es manual (modo Admin/1010), se considera verificado.
-                    location: 'Ubicación verificada ✓ (Admin)', 
-                    createdAt: new Date().toISOString(),
-                    createdBy: currentUser.name || 'Admin'
-                };
-
-                recordsToSave.push(newRecord);
-                recordsCreated++;
-            }
-
-            if (recordsCreated > 0) {
-                timeRecords.push(...recordsToSave);
-                saveTimeRecords();
-                loadTimeRecords();
-                loadDashboard();
-                hideManualRecordModal();
-                UI.showNotification(`✅ ${recordsCreated} Registro(s) manual(es) creado(s) correctamente`, 'success');
-            } else {
-                UI.showNotification('⚠️ No se creó ningún registro (ya existían o hubo un error de fechas)', 'warning');
-            }
+            
+            const newRecord = {
+                id: Date.now(),
+                employeeId: parseInt(employeeId),
+                employeeName: employee.name + ' ' + employee.lastName,
+                date,
+                timeIn: timeIn || null,
+                timeOut: timeOut || null,
+                totalHours,
+                method: 'manual',
+                notes: notes || 'Registro manual',
+                createdAt: new Date().toISOString(),
+                createdBy: currentUser.name || 'Admin'
+            };
+            
+            timeRecords.push(newRecord);
+            saveTimeRecords();
+            loadTimeRecords();
+            loadDashboard();
+            hideManualRecordModal();
+            UI.showNotification('✅ Registro manual creado correctamente', 'success');
         }
 
         function saveEditRecord() {
@@ -3508,23 +3225,13 @@
             const date = document.getElementById('editRecordDate').value;
             const timeIn = document.getElementById('editRecordTimeIn').value;
             const timeOut = document.getElementById('editRecordTimeOut').value;
-            let notes = document.getElementById('editRecordNotes').value.trim();
-
-            if (!notes) {
-                 // Si el administrador edita sin notas, usa una nota estándar
-                notes = 'Registro editado por Admin';
-            }
+            const notes = document.getElementById('editRecordNotes').value.trim();
             
             record.date = date;
             record.timeIn = timeIn || null;
             record.timeOut = timeOut || null;
             record.totalHours = (timeIn && timeOut) ? calculateHours(timeIn, timeOut) : 0;
             record.notes = notes;
-            
-            // ESTANDARIZACIÓN: Si se edita en modo edición (código 1010), se considera verificado por Admin.
-            if (isEditModeActive) {
-                record.location = 'Ubicación verificada ✓ (Editado Admin)';
-            }
             
             saveTimeRecords();
             loadTimeRecords();
@@ -3618,7 +3325,6 @@
             document.getElementById('employeePosition').value = employee.position || '';
             document.getElementById('employeeAccessCode').value = employee.accessCode;
             
-            // --- Lógica de Horario ---
             const workingHours = employee.workingHours || 8;
             const workingHoursSelect = document.getElementById('employeeWorkingHours');
             const customHoursContainer = document.getElementById('customHoursContainer');
@@ -3633,12 +3339,6 @@
                 customHoursInput.value = workingHours;
                 customHoursContainer.classList.remove('hidden');
             }
-            
-            // Renderizar el horario específico del empleado
-            const employeeSchedule = employee.schedule || {};
-            const employeeDaysOff = employee.daysOff || [];
-            renderEmployeeSchedule(employeeSchedule, employeeDaysOff);
-            // --- Fin Lógica de Horario ---
             
             const modalTitle = document.querySelector('#employeeModal .gradient-bg h3');
             if (modalTitle) {
@@ -4036,7 +3736,7 @@
             const [outHour, outMinute] = timeOut.split(':').map(Number);
             
             const inMinutes = inHour * 60 + inMinute;
-            let outMinutes = outHour * 60 + outMinute;
+            const outMinutes = outHour * 60 + outMinute;
             
             let diffMinutes = outMinutes - inMinutes;
             if (diffMinutes < 0) diffMinutes += 24 * 60; 
@@ -4089,104 +3789,27 @@
                     `<option value="${emp.id}">${emp.name} ${emp.lastName}</option>`
                 ).join('');
         }
-        
-        // Función de Validación de Documentos Mejorada (DNI/NIE/Pasaporte)
-        function validateDNI_NIE_Passport(doc) {
-            doc = doc.toUpperCase().replace(/\s/g, ''); // Limpia espacios y convierte a mayúsculas
 
-            // 1. DNI (8 dígitos + 1 letra)
-            const dniRegex = /^(\d{8})([A-Z])$/;
-            const dniLetters = 'TRWAGMYFPDXBNJZSQVHLCKE';
-            if (dniRegex.test(doc)) {
-                const parts = doc.match(dniRegex);
-                const number = parseInt(parts[1]);
-                const letter = parts[2];
-                return letter === dniLetters[number % 23];
-            }
-
-            // 2. NIE (X/Y/Z + 7 dígitos + 1 letra)
-            const nieRegex = /^([XYZ])(\d{7})([A-Z])$/;
-            if (nieRegex.test(doc)) {
-                const parts = doc.match(nieRegex);
-                const prefix = parts[1];
-                const numberStr = parts[2];
-                const letter = parts[3];
-                const prefixMap = { 'X': '0', 'Y': '1', 'Z': '2' };
-                const number = parseInt(prefixMap[prefix] + numberStr);
-                return letter === dniLetters[number % 23];
+        function validateDNI(dni) {
+            const dniRegex = /^[0-9]{8}[TRWAGMYFPDXBNJZSQVHLCKE]$/;
+            const nieRegex = /^[XYZ][0-9]{7}[TRWAGMYFPDXBNJZSQVHLCKE]$/;
+            
+            if (!dniRegex.test(dni) && !nieRegex.test(dni)) {
+                return false;
             }
             
-            // 3. Validación de Pasaporte/ID Europeo (Más flexible para documentos que no son DNI/NIE)
-            // Acepta documentos alfanuméricos comunes de 6 a 12 caracteres.
-            const passportRegex = /^[A-Z0-9]{6,12}$/;
-            if (passportRegex.test(doc)) {
-                return true;
+            const letters = 'TRWAGMYFPDXBNJZSQVHLCKE';
+            let number;
+            
+            if (nieRegex.test(dni)) {
+                const nieMap = { 'X': '0', 'Y': '1', 'Z': '2' };
+                number = nieMap[dni[0]] + dni.substring(1, 8);
+            } else {
+                number = dni.substring(0, 8);
             }
-
-            return false;
-        }
-
-        // Renombrar la antigua función validateDNI para usar la nueva
-        function validateDNI(dni) { 
-            return validateDNI_NIE_Passport(dni); 
-        }
-
-        // Utility function to render schedule form fields
-        function renderEmployeeSchedule(schedule, daysOff) {
-            const container = document.getElementById('employeeScheduleContainer');
-            if (!container) return;
             
-            const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-            container.innerHTML = days.map(day => {
-                const dayKey = day;
-                const timeIn = schedule[dayKey]?.timeIn || '';
-                const timeOut = schedule[dayKey]?.timeOut || '';
-                const isDayOff = daysOff.includes(day);
-                
-                return `
-                    <div class="grid grid-cols-5 gap-3 items-center p-2 rounded-lg ${isDayOff ? 'bg-gray-100' : 'bg-white border'}">
-                        <div class="col-span-2 flex items-center space-x-2">
-                            <input type="checkbox" id="dayOff-${dayKey}" data-day="${dayKey}" onchange="toggleDayOff('${dayKey}')" ${isDayOff ? 'checked' : ''} class="rounded text-purple-600 focus:ring-purple-500">
-                            <label for="dayOff-${dayKey}" class="text-sm font-medium text-gray-700">${day}</label>
-                        </div>
-                        <input type="time" id="timeIn-${dayKey}" value="${timeIn}" data-day="${dayKey}" class="input-modern col-span-1 text-sm ${isDayOff ? 'bg-gray-200' : 'bg-white'}" ${isDayOff ? 'disabled' : ''}>
-                        <span class="text-center text-gray-500 text-sm">-</span>
-                        <input type="time" id="timeOut-${dayKey}" value="${timeOut}" data-day="${dayKey}" class="input-modern col-span-1 text-sm ${isDayOff ? 'bg-gray-200' : 'bg-white'}" ${isDayOff ? 'disabled' : ''}>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function toggleDayOff(dayKey) {
-            const isChecked = document.getElementById(`dayOff-${dayKey}`).checked;
-            document.getElementById(`timeIn-${dayKey}`).disabled = isChecked;
-            document.getElementById(`timeOut-${dayKey}`).disabled = isChecked;
-            
-            // Opcional: limpiar los valores si es día libre
-            if (isChecked) {
-                document.getElementById(`timeIn-${dayKey}`).value = '';
-                document.getElementById(`timeOut-${dayKey}`).value = '';
-            }
-        }
-        
-        function validateTimeRange(timeIn, timeOut, isScheduleCheck = false) {
-            if (!timeIn || !timeOut) return true;
-            
-            const [inHour, inMinute] = timeIn.split(':').map(Number);
-            const [outHour, outMinute] = timeOut.split(':').map(Number);
-            
-            const inMinutes = inHour * 60 + inMinute;
-            let outMinutes = outHour * 60 + outMinute;
-            
-            let diffMinutes = outMinutes - inMinutes;
-            
-            // Si el tiempo de salida es anterior al de entrada, asume que es un turno nocturno (pasa al día siguiente)
-            if (diffMinutes < 0) {
-                diffMinutes += 24 * 60; // Añadimos un día entero para calcular las horas correctamente.
-            }
-
-            // Máximo de 16 horas (960 minutos) por turno o registro
-            return diffMinutes <= 16 * 60;
+            const expectedLetter = letters[parseInt(number) % 23];
+            return dni[dni.length - 1] === expectedLetter;
         }
 
         function setupActivityMonitoring() {
@@ -4287,6 +3910,22 @@
                 pin = Math.floor(1000 + Math.random() * 9000).toString();
             } while (employees.some(emp => emp.accessCode === pin));
             return pin;
+        }
+
+        function validateTimeRange(timeIn, timeOut) {
+            if (!timeIn || !timeOut) return true;
+            
+            const [inHour, inMinute] = timeIn.split(':').map(Number);
+            const [outHour, outMinute] = timeOut.split(':').map(Number);
+            
+            const inMinutes = inHour * 60 + inMinute;
+            const outMinutes = outHour * 60 + outMinute;
+            
+            if (outMinutes < inMinutes) {
+                return (outMinutes + 24 * 60) - inMinutes <= 16 * 60;
+            }
+            
+            return outMinutes - inMinutes <= 16 * 60;
         }
     </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9907ba73137aec95',t:'MTc2MDc4NzI4NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
