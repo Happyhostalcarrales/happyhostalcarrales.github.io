@@ -574,7 +574,7 @@
                             </button>
                             <button type="button" id="employeeBtn" class="user-type-btn p-4 border-2 border-gray-200 rounded-xl text-center hover:border-purple-500 transition-all">
                                 <svg class="w-8 h-8 mx-auto mb-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 4 0 00-8 0v3h8v-3z"></path>
+                                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"></path>
                                 </svg>
                                 <div class="font-medium">Empleado</div>
                             </button>
@@ -1982,6 +1982,7 @@
             });
             
             document.querySelectorAll('.employee-only').forEach(element => {
+                // Aseguramos que los elementos específicos del empleado se vean
                 element.style.display = 'block';
             });
 
@@ -1992,10 +1993,20 @@
                 nameDisplay.classList.remove('hidden'); 
             }
 
-            // Lógica existente para el botón de refresco de ubicación
+            // LÓGICA DE VISIBILIDAD DEL BOTÓN DE UBICACIÓN
             const locationRefreshContainer = document.getElementById('locationRefreshContainer');
-            if (locationRefreshContainer && locationSettings.enabled) {
-                locationRefreshContainer.classList.remove('hidden');
+            const employeeLocationStatus = document.getElementById('employeeLocationStatus');
+            
+            if (locationRefreshContainer && locationSettings.enabled && currentUser.type === 'employee') {
+                locationRefreshContainer.classList.remove('hidden'); // Mostrar el botón
+                if (employeeLocationStatus) {
+                    employeeLocationStatus.classList.remove('hidden'); // Mostrar el indicador de estado
+                }
+            } else {
+                locationRefreshContainer.classList.add('hidden');
+                if (employeeLocationStatus) {
+                    employeeLocationStatus.classList.add('hidden');
+                }
             }
         }
 
@@ -2300,7 +2311,7 @@
         }
 
         async function testDistance() {
-            if (!locationSettings.enabled || !locationSettings.workLatitude || !locationSettings.workLongitude) {
+            if (!locationSettings.workLatitude || !locationSettings.workLongitude) {
                 UI.showNotification('⚠️ Configure primero la ubicación del trabajo', 'warning');
                 return;
             }
@@ -3349,6 +3360,7 @@
             }
             
             const startDateObj = new Date(date);
+            // Si endDate está vacío, usamos startDate
             const endDateObj = endDate ? new Date(endDate) : startDateObj;
             
             if (startDateObj > endDateObj) {
@@ -3363,7 +3375,8 @@
             const recordsToSave = [];
 
             // Iteración para el registro de múltiples días
-            for (let d = startDateObj; d <= endDateObj; d.setDate(d.getDate() + 1)) {
+            // Clonar la fecha inicial para la iteración para evitar modificar la original
+            for (let d = new Date(startDateObj); d <= endDateObj; d.setDate(d.getDate() + 1)) {
                 const currentDate = formatDate(d);
                 const isFutureDate = d > today;
 
