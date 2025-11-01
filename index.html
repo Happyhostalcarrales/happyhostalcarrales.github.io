@@ -628,7 +628,7 @@
                             <button id="addManualRecord" class="btn-primary text-white px-4 py-2 rounded-lg admin-only">
                                 ➕ Registro Manual
                             </button>
-                            <button id="exportRecords" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors admin-only">
+                            <button id="exportRecords" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg admin-only">
                                 📊 Exportar
                             </button>
                         </div>
@@ -1090,46 +1090,19 @@
                     <h4 class="font-bold text-gray-800 mb-3">🔧 Funciones Principales</h4>
                     <div class="space-y-2 text-sm text-gray-600">
                         <div class="flex items-start space-x-2">
-                            <span class="text-blue-500">•</span>
                             <span><strong>Fichaje:</strong> Los empleados pueden fichar entrada/salida con su PIN</span>
                         </div>
                         <div class="flex items-start space-x-2">
-                            <span class="text-green-500">•</span>
                             <span><strong>Control de ubicación:</strong> Verificación GPS opcional para empleados</span>
                         </div>
                         <div class="flex items-start space-x-2">
-                            <span class="text-purple-500">•</span>
                             <span><strong>Sincronización:</strong> Datos automáticamente sincronizados en la nube</span>
                         </div>
                         <div class="flex items-start space-x-2">
-                            <span class="text-orange-500">•</span>
                             <span><strong>Informes:</strong> Generación de reportes y estadísticas</span>
                         </div>
                         <div class="flex items-start space-x-2">
-                            <span class="text-red-500">•</span>
                             <span><strong>Seguridad:</strong> Auto-logout por inactividad (30 min)</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div>
-                    <h4 class="font-bold text-gray-800 mb-3">💡 Consejos</h4>
-                    <div class="space-y-2 text-sm text-gray-600">
-                        <div class="flex items-start space-x-2">
-                            <span class="text-yellow-500">💡</span>
-                            <span>Use el botón "Auto" para generar PINs únicos automáticamente</span>
-                        </div>
-                        <div class="flex items-start space-x-2">
-                            <span class="text-yellow-500">💡</span>
-                            <span>Los datos se guardan automáticamente cada 2 minutos</span>
-                        </div>
-                        <div class="flex items-start space-x-2">
-                            <span class="text-yellow-500">💡</span>
-                            <span>Puede acceder desde múltiples dispositivos con sincronización instantánea</span>
-                        </div>
-                        <div class="flex items-start space-x-2">
-                            <span class="text-yellow-500">💡</span>
-                            <span>Los turnos nocturnos son soportados (máximo 16 horas)</span>
                         </div>
                     </div>
                 </div>
@@ -1276,18 +1249,6 @@
         }
         function validateDNI(dni) { return validateDNI_NIE_Passport(dni); }
 
-        function showEmployeeModal() { document.getElementById('employeeModal')?.classList.remove('hidden'); }
-        function hideEmployeeModal() { document.getElementById('employeeModal')?.classList.add('hidden'); editingEmployeeId = null; }
-        function showManualRecordModal() { 
-            document.getElementById('manualRecordModal')?.classList.remove('hidden');
-            if (document.getElementById('manualRecordDate')) document.getElementById('manualRecordDate').value = formatDate(new Date());
-            populateManualRecordEmployees();
-        }
-        function hideManualRecordModal() { document.getElementById('manualRecordModal')?.classList.add('hidden'); }
-        function hideEditRecordModal() { document.getElementById('editRecordModal')?.classList.add('hidden'); editingRecordId = null; }
-        function showHelpModal() { document.getElementById('helpModal')?.classList.remove('hidden'); }
-        function hideHelpModal() { document.getElementById('helpModal')?.classList.add('hidden'); }
-        
         function showConfirmDialog(message) {
             const overlay = document.createElement('div');
             overlay.className = 'modal-overlay';
@@ -1327,7 +1288,7 @@
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
         }
-        
+
         // =========================================================================
         // 2. MÓDULOS DE DATOS Y ESTADO (Definiciones completas)
         // =========================================================================
@@ -1415,29 +1376,190 @@
         adminCredentials = DataManager.getAdminCredentials();
         
         // Funciones de control de flujo
-        function logout() {
-            currentUser = null; selectedUserType = null; isEditModeActive = false;
-            localStorage.removeItem('fichajemax_currentUser');
-            localStorage.removeItem('fichajemax_selectedUserType');
-            document.getElementById('mainApp')?.classList.add('hidden');
-            document.getElementById('loginScreen')?.classList.remove('hidden');
-            if (document.getElementById('adminPassword')) document.getElementById('adminPassword').value = '';
-            if (document.getElementById('employeeCode')) document.getElementById('employeeCode').value = '';
-            UI.showNotification('👋 Sesión cerrada y caché local limpiado.', 'success');
-            window.location.reload(true); 
+
+        function startRealtimeListeners() {
+            refEmpleados.on('value', (snapshot) => {
+                const firebaseEmployees = snapshot.val();
+                if (firebaseEmployees) {
+                    employees = firebaseEmployees;
+                    localStorage.setItem('fichajemax_employees', JSON.stringify(employees));
+                    if (currentUser) { loadEmployees(); populateSelects(); loadDashboard(); }
+                    document.getElementById('syncIndicator')?.textContent = '☁️ Sincronizado (Firebase)';
+                }
+            });
+            refRegistros.on('value', (snapshot) => {
+                const firebaseRecords = snapshot.val();
+                if (firebaseRecords) {
+                    timeRecords = firebaseRecords;
+                    localStorage.setItem('fichajemax_timeRecords', JSON.stringify(timeRecords));
+                    if (currentUser) { loadTimeRecords(); loadDashboard(); }
+                }
+            });
+            refConfig.on('value', (snapshot) => {
+                const config = snapshot.val();
+                if (config) {
+                    if (JSON.stringify(config.companySettings) !== JSON.stringify(companySettings)) {
+                        companySettings = config.companySettings || companySettings;
+                        localStorage.setItem('fichajemax_companySettings', JSON.stringify(companySettings));
+                        loadCompanySettings();
+                    }
+                    if (JSON.stringify(config.locationSettings) !== JSON.stringify(locationSettings)) {
+                        locationSettings = config.locationSettings || locationSettings;
+                        localStorage.setItem('fichajemax_locationSettings', JSON.stringify(locationSettings));
+                        loadLocationSettings();
+                    }
+                }
+            });
+        }
+        
+        function setupEventListeners() {
+            // Se añaden comprobaciones de existencia para evitar el ReferenceError
+            if (document.getElementById('adminBtn')) document.getElementById('adminBtn').addEventListener('click', () => selectUserType('admin'));
+            if (document.getElementById('employeeBtn')) document.getElementById('employeeBtn').addEventListener('click', () => selectUserType('employee'));
+            if (document.getElementById('loginButton')) document.getElementById('loginButton').addEventListener('click', handleLogin);
+            
+            if (document.getElementById('adminPassword')) document.getElementById('adminPassword').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleLogin(); });
+            if (document.getElementById('employeeCode')) document.getElementById('employeeCode').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleLogin(); });
+            
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+            });
+            
+            if (document.getElementById('clockInBtn')) document.getElementById('clockInBtn').addEventListener('click', () => clockAction('in'));
+            if (document.getElementById('clockOutBtn')) document.getElementById('clockOutBtn').addEventListener('click', () => clockAction('out'));
+            
+            if (document.getElementById('addEmployeeBtn')) document.getElementById('addEmployeeBtn').addEventListener('click', showEmployeeModal);
+            if (document.getElementById('saveEmployee')) document.getElementById('saveEmployee').addEventListener('click', saveEmployee);
+            if (document.getElementById('cancelEmployee')) document.getElementById('cancelEmployee').addEventListener('click', hideEmployeeModal);
+            
+            if (document.getElementById('addManualRecord')) document.getElementById('addManualRecord').addEventListener('click', showManualRecordModal);
+            if (document.getElementById('saveManualRecord')) document.getElementById('saveManualRecord').addEventListener('click', saveManualRecord);
+            if (document.getElementById('cancelManualRecord')) document.getElementById('cancelManualRecord').addEventListener('click', hideManualRecordModal);
+            
+            if (document.getElementById('saveEditRecord')) document.getElementById('saveEditRecord').addEventListener('click', saveEditRecord);
+            if (document.getElementById('cancelEditRecord')) document.getElementById('cancelEditRecord').addEventListener('click', hideEditRecordModal);
+            if (document.getElementById('deleteRecord')) document.getElementById('deleteRecord').addEventListener('click', deleteRecord);
+            
+            if (document.getElementById('generateReport')) document.getElementById('generateReport').addEventListener('click', generateReport);
+            
+            if (document.getElementById('applyFilters')) document.getElementById('applyFilters').addEventListener('click', applyFilters);
+            
+            if (document.getElementById('saveCompanySettings')) document.getElementById('saveCompanySettings').addEventListener('click', saveCompanySettingsForm);
+            if (document.getElementById('saveAdminCredentials')) document.getElementById('saveAdminCredentials').addEventListener('click', saveAdminCredentialsForm);
+            if (document.getElementById('saveLocationSettings')) document.getElementById('saveLocationSettings').addEventListener('click', saveLocationSettingsForm);
+            if (document.getElementById('testCloudConnection')) document.getElementById('testCloudConnection').addEventListener('click', testCloudConnection);
+            if (document.getElementById('syncNow')) document.getElementById('syncNow').addEventListener('click', syncNow);
+            
+            if (document.getElementById('getCurrentLocation')) document.getElementById('getCurrentLocation').addEventListener('click', getCurrentLocationForSetup);
+            if (document.getElementById('testDistance')) document.getElementById('testDistance').addEventListener('click', testDistance);
+            if (document.getElementById('refreshLocationBtn')) document.getElementById('refreshLocationBtn').addEventListener('click', refreshEmployeeLocation);
+            
+            if (document.getElementById('exportAllData')) document.getElementById('exportAllData').addEventListener('click', exportAllData);
+            if (document.getElementById('exportRecords')) document.getElementById('exportRecords').addEventListener('click', exportRecords);
+            
+            if (document.getElementById('importDataFile')) document.getElementById('importDataFile').addEventListener('change', handleImportFile);
+            if (document.getElementById('clearAllData')) document.getElementById('clearAllData').addEventListener('click', clearAllData);
+            
+            if (document.getElementById('helpBtn')) document.getElementById('helpBtn').addEventListener('click', showHelpModal);
+            if (document.getElementById('closeHelp')) document.getElementById('closeHelp').addEventListener('click', hideHelpModal);
+            if (document.getElementById('logoutBtn')) document.getElementById('logoutBtn').addEventListener('click', logout);
+            
+            if (document.getElementById('employeeWorkingHours')) document.getElementById('employeeWorkingHours').addEventListener('change', function() {
+                const customContainer = document.getElementById('customHoursContainer');
+                if (this.value === 'custom') {
+                    if (customContainer) customContainer.classList.remove('hidden');
+                    const customHoursInput = document.getElementById('employeeCustomHours');
+                    if (customHoursInput) customHoursInput.focus();
+                } else {
+                    if (customContainer) customContainer.classList.add('hidden');
+                }
+            });
+        }
+
+        // Authentication & Session Logic
+
+        function selectUserType(type) {
+            selectedUserType = type;
+            
+            document.querySelectorAll('.user-type-btn').forEach(btn => {
+                btn.classList.remove('border-purple-500', 'bg-purple-50');
+                btn.classList.add('border-gray-200');
+            });
+
+            if (type === 'admin') {
+                document.getElementById('adminBtn')?.classList.add('border-purple-500', 'bg-purple-50');
+                document.getElementById('adminLogin')?.classList.remove('hidden');
+                document.getElementById('employeeLogin')?.classList.add('hidden');
+                setTimeout(() => { document.getElementById('adminPassword')?.focus(); }, 100);
+            } else {
+                document.getElementById('employeeBtn')?.classList.add('border-purple-500', 'bg-purple-50');
+                document.getElementById('employeeLogin')?.classList.remove('hidden');
+                document.getElementById('adminLogin')?.classList.add('hidden');
+                setTimeout(() => { document.getElementById('employeeCode')?.focus(); }, 100);
+            }
+        }
+
+        function handleLogin() {
+            if (!selectedUserType) { UI.showNotification('⚠️ Seleccione un tipo de usuario', 'warning'); return; }
+            
+            if (selectedUserType === 'admin') {
+                const password = document.getElementById('adminPassword')?.value.trim();
+                
+                if (password === adminCredentials.password) {
+                    // CONTRASENA NORMAL (Octubre2012) -> MODO VISUALIZACIÓN/AUDITORÍA
+                    isEditModeActive = false;
+                    currentUser = { type: 'admin', name: adminCredentials.username };
+                    showMainApp();
+                    UI.showNotification(`✅ Bienvenido ${adminCredentials.username}`, 'success');
+                } else if (password === ADMIN_EDIT_PASSWORD) {
+                    // CONTRASENA SECRETA (1010) -> MODO EDICIÓN
+                    isEditModeActive = true;
+                    currentUser = { type: 'admin', name: adminCredentials.username + ' (Modo Edición)' };
+                    showMainApp();
+                    UI.showNotification(`✅ Bienvenido ${adminCredentials.username} (Modo Edición)`, 'warning');
+                } else {
+                    UI.showNotification('❌ Contraseña incorrecta', 'error');
+                }
+            } else if (selectedUserType === 'employee') {
+                const employeeCode = document.getElementById('employeeCode')?.value.trim();
+                
+                if (employeeCode) {
+                    const employee = employees.find(emp => emp.accessCode === employeeCode && emp.status === 'Activo');
+                    if (employee) {
+                        isEditModeActive = false; 
+                        currentUser = { type: 'employee', ...employee };
+                        showMainApp();
+                        UI.showNotification(`✅ Bienvenido/a ${employee.name}`, 'success');
+                    } else {
+                        UI.showNotification('❌ Código incorrecto o empleado inactivo', 'error');
+                        if (document.getElementById('employeeCode')) document.getElementById('employeeCode').value = '';
+                    }
+                } else {
+                    UI.showNotification('📱 Ingrese su código PIN', 'warning');
+                }
+            }
         }
 
         function showMainApp() {
+            // CORRECCIÓN CLAVE: Verificar si la sesión es válida al intentar mostrar la APP
             if (!currentUser || !currentUser.type) {
                 document.getElementById('loginScreen')?.classList.remove('hidden');
                 document.getElementById('mainApp')?.classList.add('hidden');
                 return;
             }
+            
             document.getElementById('loginScreen')?.classList.add('hidden');
             document.getElementById('mainApp')?.classList.remove('hidden');
             
             if (currentUser.type === 'employee') { setupEmployeeInterface(); } else { setupAdminInterface(); }
-            loadDashboard(); loadEmployees(); loadTimeRecords(); loadStatistics(); loadCompanySettings(); loadAdminCredentialsForm();
+            
+            loadDashboard();
+            loadEmployees();
+            loadTimeRecords();
+            loadStatistics();
+            loadCompanySettings();
+            loadAdminCredentialsForm();
+            updateDataStatistics();
         }
 
         function setupEmployeeInterface() {
@@ -1445,8 +1567,12 @@
             document.querySelectorAll('.employee-only').forEach(element => { element.style.display = 'block'; });
 
             const nameDisplay = document.getElementById('employeeNameDisplay');
-            if (nameDisplay && currentUser) { nameDisplay.textContent = `${currentUser.name} ${currentUser.lastName}`; nameDisplay.classList.remove('hidden'); }
+            if (nameDisplay && currentUser) {
+                nameDisplay.textContent = `${currentUser.name} ${currentUser.lastName}`;
+                nameDisplay.classList.remove('hidden'); 
+            }
 
+            // CORRECCIÓN: Asegura la visibilidad del botón de ubicación
             const locationRefreshContainer = document.getElementById('locationRefreshContainer');
             const employeeLocationStatus = document.getElementById('employeeLocationStatus');
             if (locationRefreshContainer && locationSettings.enabled && currentUser?.type === 'employee') {
@@ -1464,37 +1590,170 @@
             document.getElementById('employeeNameDisplay')?.classList.add('hidden');
         }
 
-        // Resto de funciones críticas que necesitan estar definidas
+        function logout() {
+            console.log('Cerrando sesión y eliminando caché de sesión.');
+            
+            currentUser = null;
+            selectedUserType = null;
+            isEditModeActive = false;
+            
+            // 2. Limpiar datos residuales de la sesión en LocalStorage
+            localStorage.removeItem('fichajemax_currentUser');
+            localStorage.removeItem('fichajemax_selectedUserType');
+            
+            // 3. Forzar el estado de la interfaz (ocultar mainApp, mostrar login)
+            document.getElementById('mainApp')?.classList.add('hidden');
+            document.getElementById('loginScreen')?.classList.remove('hidden');
+            
+            // 4. Limpiar campos y botones
+            if (document.getElementById('adminPassword')) document.getElementById('adminPassword').value = '';
+            if (document.getElementById('employeeCode')) document.getElementById('employeeCode').value = '';
+            document.getElementById('adminLogin')?.classList.add('hidden');
+            document.getElementById('employeeLogin')?.classList.add('hidden');
+            document.querySelectorAll('.user-type-btn').forEach(btn => {
+                btn.classList.remove('border-purple-500', 'bg-purple-50');
+                btn.classList.add('border-gray-200');
+            });
+            
+            UI.showNotification('👋 Sesión cerrada y caché local limpiado.', 'success');
+            
+            // **CRÍTICO**: Forzar la recarga total para asegurar que no se restaure el estado bloqueado
+            window.location.reload(true); 
+        }
 
-        function handleLogin() {
-            if (!selectedUserType) { UI.showNotification('⚠️ Seleccione un tipo de usuario', 'warning'); return; }
-            const password = document.getElementById('adminPassword')?.value.trim();
-
-            if (selectedUserType === 'admin') {
-                if (password === adminCredentials.password) {
-                    isEditModeActive = false; currentUser = { type: 'admin', name: adminCredentials.username }; showMainApp(); UI.showNotification(`✅ Bienvenido ${adminCredentials.username}`, 'success');
-                } else if (password === ADMIN_EDIT_PASSWORD) {
-                    isEditModeActive = true; currentUser = { type: 'admin', name: adminCredentials.username + ' (Modo Edición)' }; showMainApp(); UI.showNotification(`✅ Bienvenido ${adminCredentials.username} (Modo Edición)`, 'warning');
-                } else {
-                    UI.showNotification('❌ Contraseña incorrecta', 'error');
-                }
-            } else if (selectedUserType === 'employee') {
-                const employeeCode = document.getElementById('employeeCode')?.value.trim();
-                if (employeeCode) {
-                    const employee = employees.find(emp => emp.accessCode === employeeCode && emp.status === 'Activo');
-                    if (employee) {
-                        currentUser = { type: 'employee', ...employee }; showMainApp(); UI.showNotification(`✅ Bienvenido/a ${employee.name}`, 'success');
-                    } else {
-                        UI.showNotification('❌ Código incorrecto o empleado inactivo', 'error');
-                    }
-                }
+        function switchTab(tabName) {
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active');
+            
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}Tab`)?.classList.add('active');
+            
+            document.getElementById('exportReportBtn')?.classList.add('hidden');
+            
+            switch(tabName) {
+                case 'employees':
+                    loadEmployees();
+                    break;
+                case 'records':
+                    populateSelects(); 
+                    loadTimeRecords();
+                    break;
+                case 'reports':
+                    loadStatistics();
+                    break;
+                case 'settings':
+                    loadCompanySettings();
+                    loadAdminCredentialsForm();
+                    loadLocationSettings();
+                    loadCloudSettings();
+                    break;
             }
         }
-        
-        function loadEmployees() { /* ... */ } // Definición completa de carga
-        function loadTimeRecords() { /* ... */ } // Definición completa de carga
 
-        // Inicialización y carga final
+        function clockAction(type) {
+            let employeeId;
+            if (currentUser && currentUser.type === 'employee') {
+                employeeId = currentUser.id;
+            } else if (currentUser && currentUser.type === 'admin') {
+                employeeId = document.getElementById('clockEmployeeSelect')?.value;
+                if (!employeeId) {
+                    UI.showNotification('👤 Seleccione un empleado', 'warning');
+                    return;
+                }
+            } else {
+                 UI.showNotification('⚠️ Sesión de usuario no válida.', 'error');
+                 return;
+            }
+            performClockAction(employeeId, type);
+        }
+
+        async function performClockAction(employeeId, type) {
+            // ... (Lógica de fichaje)
+        }
+
+        async function checkLocationPermission() {
+            // ... (Lógica de ubicación)
+        }
+
+        function getCurrentPosition() {
+            // ... (Lógica de obtención de posición)
+        }
+
+        function loadEmployees() {
+            const gridElement = document.getElementById('employeesGrid');
+            if (!gridElement) return;
+            if (employees.length === 0) { gridElement.innerHTML = '<p class="text-gray-500 text-center py-8 col-span-full">No hay empleados registrados</p>'; return; }
+            
+            gridElement.innerHTML = employees.map(employee => {
+                const lastRecord = timeRecords.filter(r => r.employeeId === employee.id).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+                const todayRecord = timeRecords.find(r => r.employeeId === employee.id && r.date === formatDate(new Date()));
+                let statusBadge = '';
+                if (employee.status === 'Activo' && todayRecord && todayRecord.timeIn && !todayRecord.timeOut) { statusBadge = '<span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 animate-pulse">🟢 Trabajando</span>'; }
+                else if (employee.status === 'Activo' && todayRecord && todayRecord.timeOut) { statusBadge = '<span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">🔵 Completado</span>'; }
+                else if (employee.status === 'Activo') { statusBadge = '<span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">⚪ Sin fichar</span>'; }
+                else { statusBadge = '<span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">❌ Inactivo</span>'; }
+                
+                const buttons = `
+                    <button onclick="editEmployee(${employee.id})" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-2 rounded-lg text-xs transition-colors">✏️ Editar</button>
+                    <button onclick="toggleEmployeeStatus(${employee.id})" class="${employee.status === 'Activo' ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-500 hover:bg-green-600'} text-white px-2 py-2 rounded-lg text-xs transition-colors">${employee.status === 'Activo' ? '🚫 Desactivar' : '✅ Activar'}</button>
+                    <button onclick="deleteEmployee(${employee.id})" class="bg-red-500 hover:bg-red-600 text-white px-2 py-2 rounded-lg text-xs transition-colors">🗑️ Eliminar</button>
+                `;
+
+                return `
+                    <div class="employee-card p-6">
+                        <div class="flex items-center space-x-4 mb-4">
+                            <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold">${(employee.name[0] + employee.lastName[0]).toUpperCase()}</div>
+                            <div class="flex-1"><h4 class="font-bold text-gray-800">${employee.name} ${employee.lastName}</h4><p class="text-sm text-gray-600">${employee.position || 'Sin especificar'}</p></div>
+                            ${statusBadge}
+                        </div>
+                        <div class="space-y-2 text-sm text-gray-600 mb-4">
+                            <div class="flex justify-between"><span>🆔 DNI:</span><span class="font-mono">${employee.dni}</span></div>
+                            <div class="flex justify-between"><span>📱 PIN:</span><span class="font-mono">••••</span></div>
+                            <div class="flex justify-between"><span>⏰ Jornada:</span><span class="font-semibold">${employee.workingHours || 8}h/día</span></div>
+                            ${lastRecord ? `<div class="flex justify-between"><span>📅 Último:</span><span>${formatTimeAgo(lastRecord.date)}</span></div>` : ''}
+                            ${todayRecord ? `<div class="flex justify-between"><span>⏰ Hoy:</span><span class="${todayRecord.totalHours >= (employee.workingHours || 8) ? 'text-green-600 font-bold' : 'text-orange-600'}">${todayRecord.totalHours?.toFixed(1) || '0.0'}h</span></div>` : ''}
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">${buttons}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function loadTimeRecords() {
+            const tableElement = document.getElementById('timeRecordsTable');
+            if (!tableElement) return;
+
+            let recordsToShow = (currentUser?.type === 'admin') ? filterRecords(timeRecords) : timeRecords.filter(r => r.employeeId === currentUser?.id);
+            recordsToShow = recordsToShow.sort((a, b) => new Date(b.date) - new Date(a.date));
+            appState.lastRecordsData = recordsToShow;
+
+            if (recordsToShow.length === 0) { tableElement.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-500">No hay registros disponibles</td></tr>'; return; }
+            
+            tableElement.innerHTML = recordsToShow.map(record => {
+                const statusClass = record.timeOut ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
+                const totalHoursDisplay = record.totalHours ? formatHoursToHHMM(record.totalHours) : '00:00';
+                const editButtonVisibilityClass = isEditModeActive ? 'visible' : '';
+
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4">${record.employeeName}</td>
+                        <td class="px-6 py-4">${formatDateDisplay(record.date)}</td>
+                        <td class="px-6 py-4 font-mono">${record.timeIn || '--:--'}</td>
+                        <td class="px-6 py-4 font-mono">${record.timeOut || '--:--'}</td>
+                        <td class="px-6 py-4 font-bold">${totalHoursDisplay}</td>
+                        <td class="px-6 py-4"><span class="px-2 py-1 text-xs rounded-full ${statusClass}">${record.timeOut ? '✅ Completo' : '⏳ En curso'}</span></td>
+                        ${currentUser?.type === 'admin' ? `<td class="px-6 py-4"><button onclick="editRecord(${record.id})" class="text-blue-600 hover:text-blue-800 text-sm admin-edit-action ${editButtonVisibilityClass}">✏️ Editar</button></td>` : ''}
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Final Logic Execution
+
         function initializeData() {
             if (!localStorage.getItem('fichajemax_employees') || employees.length === 0) { DataManager.setEmployees(DataManager.getDefaultEmployees()); }
             if (!localStorage.getItem('fichajemax_companySettings')) { ConfigManager.setCompanySettings(companySettings); }
@@ -1504,37 +1763,20 @@
             // ... (resto de inicialización)
         }
         
-        function App() {
+        function App_initializer() {
             this.init = function() {
-                this.setupEventListeners();
+                // Llama a las funciones globales que ya están definidas
+                setupEventListeners();
                 initializeData();
-                this.setupRealtimeSync(); 
-                this.setupSecurity();
-            }
-            this.setupEventListeners = setupEventListeners;
-            this.initializeData = initializeData;
-            this.setupRealtimeSync = function() { /* ... */ };
-            this.setupSecurity = function() { /* ... */ };
+                startRealtimeListeners(); 
+                // El resto de funciones se llama dentro de la lógica de la app (loadDashboard, etc.)
+                showMainApp(); 
+            };
         }
-
 
         // CRÍTICO: Asegura que el punto de entrada principal se ejecute
         document.addEventListener('DOMContentLoaded', () => {
-             // Llamar a la función de inicialización de la aplicación
-            new (function() {
-                this.init = function() {
-                    this.setupEventListeners();
-                    initializeData();
-                    // Ejecutar el resto de la inicialización de la app
-                    // (Las funciones como setupDateTime, setupRealtimeSync, etc. se llaman aquí en una aplicación real)
-                    // Para simplificar y enfocarse en la corrección:
-                    startRealtimeListeners();
-                    // Si ya estamos logueados o no, showMainApp decidirá qué mostrar.
-                    showMainApp(); 
-                };
-                this.setupEventListeners = setupEventListeners;
-                this.initializeData = initializeData;
-            })();
+             new App_initializer().init();
         });
     </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9907ba73137aec95',t:'MTc2MDc4NzI4NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
