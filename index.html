@@ -1106,6 +1106,24 @@
                         </div>
                     </div>
                 </div>
+                
+                <div>
+                    <h4 class="font-bold text-gray-800 mb-3">💡 Consejos</h4>
+                    <div class="space-y-2 text-sm text-gray-600">
+                        <div class="flex items-start space-x-2">
+                            <span>Use el botón "Auto" para generar PINs únicos automáticamente</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <span>Los datos se guardan automáticamente cada 2 minutos</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <span>Puede acceder desde múltiples dispositivos con sincronización instantánea</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <span>Los turnos nocturnos son soportados (máximo 16 horas)</span>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="p-6 border-t flex justify-end">
                 <button id="closeHelp" class="btn-primary text-white px-6 py-2 rounded-lg">
@@ -1288,7 +1306,7 @@
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
         }
-
+        
         // =========================================================================
         // 2. MÓDULOS DE DATOS Y ESTADO (Definiciones completas)
         // =========================================================================
@@ -1672,15 +1690,67 @@
         }
 
         async function performClockAction(employeeId, type) {
-            // ... (Lógica de fichaje)
+            UI.updateSyncIndicator('syncing');
+            const employee = employees.find(emp => emp.id == employeeId);
+            if (!employee) { UI.showNotification('❌ Empleado no encontrado', 'error'); return; }
+
+            if (currentUser && currentUser.type === 'employee' && locationSettings.enabled) {
+                const locationCheck = await checkLocationPermission();
+                if (!locationCheck.allowed) { UI.showNotification(locationCheck.message, 'error'); return; }
+            }
+            
+            const now = new Date();
+            const today = formatDate(now);
+            const currentTime = now.toTimeString().slice(0, 5);
+            let existingRecord = timeRecords.find(record => record.employeeId == employeeId && record.date === today);
+
+            if (type === 'in') {
+                if (existingRecord && existingRecord.timeIn) { UI.showNotification('⚠️ Ya hay un registro de entrada para hoy', 'warning'); return; }
+                
+                if (!existingRecord) {
+                    existingRecord = { id: Date.now(), employeeId: parseInt(employeeId), employeeName: employee.name + ' ' + employee.lastName, date: today, timeIn: currentTime, timeOut: null, totalHours: 0, method: currentUser.type === 'employee' ? 'pin' : 'manual', notes: `Entrada registrada vía ${currentUser.type === 'employee' ? 'PIN' : 'manual'}`, location: currentUser.type === 'employee' && locationSettings.enabled ? 'Ubicación verificada ✓' : null };
+                    timeRecords.push(existingRecord);
+                } else {
+                    existingRecord.timeIn = currentTime;
+                    if (currentUser.type === 'employee' && locationSettings.enabled) { existingRecord.location = 'Ubicación verificada ✓'; }
+                }
+                UI.showNotification(`✅ Entrada registrada: ${currentTime}`, 'success');
+            } else {
+                if (!existingRecord || !existingRecord.timeIn) { UI.showNotification('⚠️ No hay registro de entrada para hoy', 'warning'); return; }
+                if (existingRecord.timeOut) { UI.showNotification('⚠️ Ya hay un registro de salida para hoy', 'warning'); return; }
+                
+                existingRecord.timeOut = currentTime;
+                existingRecord.totalHours = calculateHours(existingRecord.timeIn, currentTime);
+                UI.showNotification(`🏁 Salida registrada: ${currentTime}`, 'success');
+            }
+            saveTimeRecords();
+            loadDashboard();
+            loadTimeRecords();
         }
 
         async function checkLocationPermission() {
-            // ... (Lógica de ubicación)
+            if (!locationSettings.enabled) { return { allowed: true, message: '' }; }
+            try {
+                const position = await getCurrentPosition();
+                const distance = calculateDistance(position.coords.latitude, position.coords.longitude, locationSettings.workLatitude, locationSettings.workLongitude);
+                if (distance <= locationSettings.allowedRadius) {
+                    return { allowed: true, message: `Ubicación verificada (${Math.round(distance)}m del trabajo)`, distance: distance };
+                } else {
+                    return { allowed: false, message: `❌ Fuera del área de trabajo. Distancia: ${Math.round(distance)}m (máximo: ${locationSettings.allowedRadius}m)`, distance: distance };
+                }
+            } catch (error) {
+                let errorMessage = '❌ Error al obtener ubicación.';
+                if (error.code === 1) { errorMessage = '❌ Permisos de ubicación denegados.'; }
+                return { allowed: false, message: errorMessage };
+            }
         }
 
         function getCurrentPosition() {
-            // ... (Lógica de obtención de posición)
+            return new Promise((resolve, reject) => {
+                if (!navigator.geolocation) { reject({ code: 0, message: 'Geolocalización no soportada' }); return; }
+                const options = { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 };
+                navigator.geolocation.getCurrentPosition(resolve, reject, options);
+            });
         }
 
         function loadEmployees() {
@@ -1723,35 +1793,6 @@
             }).join('');
         }
 
-        function loadTimeRecords() {
-            const tableElement = document.getElementById('timeRecordsTable');
-            if (!tableElement) return;
-
-            let recordsToShow = (currentUser?.type === 'admin') ? filterRecords(timeRecords) : timeRecords.filter(r => r.employeeId === currentUser?.id);
-            recordsToShow = recordsToShow.sort((a, b) => new Date(b.date) - new Date(a.date));
-            appState.lastRecordsData = recordsToShow;
-
-            if (recordsToShow.length === 0) { tableElement.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-500">No hay registros disponibles</td></tr>'; return; }
-            
-            tableElement.innerHTML = recordsToShow.map(record => {
-                const statusClass = record.timeOut ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
-                const totalHoursDisplay = record.totalHours ? formatHoursToHHMM(record.totalHours) : '00:00';
-                const editButtonVisibilityClass = isEditModeActive ? 'visible' : '';
-
-                return `
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4">${record.employeeName}</td>
-                        <td class="px-6 py-4">${formatDateDisplay(record.date)}</td>
-                        <td class="px-6 py-4 font-mono">${record.timeIn || '--:--'}</td>
-                        <td class="px-6 py-4 font-mono">${record.timeOut || '--:--'}</td>
-                        <td class="px-6 py-4 font-bold">${totalHoursDisplay}</td>
-                        <td class="px-6 py-4"><span class="px-2 py-1 text-xs rounded-full ${statusClass}">${record.timeOut ? '✅ Completo' : '⏳ En curso'}</span></td>
-                        ${currentUser?.type === 'admin' ? `<td class="px-6 py-4"><button onclick="editRecord(${record.id})" class="text-blue-600 hover:text-blue-800 text-sm admin-edit-action ${editButtonVisibilityClass}">✏️ Editar</button></td>` : ''}
-                    </tr>
-                `;
-            }).join('');
-        }
-
         // Final Logic Execution
 
         function initializeData() {
@@ -1763,20 +1804,21 @@
             // ... (resto de inicialización)
         }
         
-        function App_initializer() {
-            this.init = function() {
-                // Llama a las funciones globales que ya están definidas
-                setupEventListeners();
-                initializeData();
-                startRealtimeListeners(); 
-                // El resto de funciones se llama dentro de la lógica de la app (loadDashboard, etc.)
-                showMainApp(); 
-            };
-        }
-
         // CRÍTICO: Asegura que el punto de entrada principal se ejecute
         document.addEventListener('DOMContentLoaded', () => {
-             new App_initializer().init();
+             (function() {
+                this.init = function() {
+                    // Inicialización de datos (ya manejada por las declaraciones globales)
+                    
+                    // Inicia el setup de eventos y servicios
+                    setupEventListeners();
+                    startRealtimeListeners(); 
+                    
+                    // Asegura que la pantalla correcta se muestre al final
+                    showMainApp(); 
+                };
+                this.init();
+            })();
         });
     </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9907ba73137aec95',t:'MTc2MDc4NzI4NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
